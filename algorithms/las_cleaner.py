@@ -42,7 +42,7 @@ def remove_duplicates(las_file):
 
 def classify_points(las_file):
         classify_file_input = las_file
-        print(classify_file_input)
+        print("Input file: ", classify_file_input)
         classify_file = File(classify_file_input, mode = "rw")
 
         X = classify_file.X

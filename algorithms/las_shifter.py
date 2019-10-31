@@ -11,7 +11,7 @@ def las_shifter(las_file):
     base_file = File(base_file_input, mode = "r")
 
     file_name = base_file_input.split('.')[0]
-    print(file_name)
+#     print(file_name)
 
     shifted_Z = base_file.Z + 1000
 

@@ -17,24 +17,31 @@ def depth_calculator(las_files):
 
         # points = np.array(base_file.points)
 
-        base_X = np.array(base_file.X)
+        base_classification = snow_file.raw_classification
+        print(base_classification)
+        base_indices = np.where(base_classification ==1)
+        
+        base_X = base_file.X[base_indices]
         # print("base_X ", len(base_X))
 
-        base_Y = np.array(base_file.Y)
+        base_Y = base_file.Y[base_indices]
         # print("base_Y ", len(base_Y))
 
-        base_Z = np.array(base_file.Z)
+        base_Z = base_file.Z[base_indices]
         # print("base_Z ", len(base_Z))
 
-        snow_X = np.array(snow_file.X)
+        snow_classification = snow_file.raw_classification
+        print(snow_classification)
+        snow_indices = np.where(snow_classification ==1)
+        
+        snow_X = snow_file.X[base_indices]
         # print("snow_X ", len(snow_X))
 
-        snow_Y = np.array(snow_file.Y)
+        snow_Y = snow_file.Y[base_indices]
         # print("snow_Y ", len(snow_Y))
 
-        snow_Z = np.array(snow_file.Z)
+        snow_Z = snow_file.Z[base_indices]
         # print("snow_Z ", len(snow_Z))
-
 
         base_XY = np.stack((base_X,base_Y), axis=-1)
         snow_XY = np.stack((snow_X,snow_Y), axis=-1)
@@ -47,6 +54,8 @@ def depth_calculator(las_files):
         kdTree = spatial.cKDTree(base_XY)
         end = time.time()
         print("KDTree Loading: " + str(end - start) + " seconds")
+
+        np.random.shuffle(snow_XY)
 
         print("Querying Tree with data of size ", len(snow_XY))
         start = time.time()
