@@ -16,9 +16,13 @@ class Point_Class():
 
 class Grid_cell():
     def __init__(self):
+        self.vegetation_flag = False
         self.mid_x = None
         self.mid_y = None
         self.point_array = []
+        self.max_z = -float("INF")
+        self.min_z = float("INF")
+        self.delta_z = 0
     
     # def __init__(self, mid_x, mid_y):
     #     self.mid_x = mid_x
@@ -40,9 +44,36 @@ class Grid_cell():
     # add points to kdTree
     def add_point(self, point):
         self.point_array.append(point)
+        #########################################
+        # ADD THIS IN?
+        # if point.z > self.max_z:
+        #     self.max_z = point.z
+        # if point.z < self.min_z:
+        #     self.min_z = point.z
+
+        # self.delta_z = abs(self.max_z - self.min_z)
+        # self.find_vegetation(100)
 
     def calculate_average(self):
         pass
+
+    def find_vegetation(self, height):
+        ##########################################
+        # find max and min z of the cell
+        # should I put this in the add_point function?
+        self.min_z = float("INF")
+        self.max_z = -float("INF")
+        for point in self.point_array:
+            if point.z < self.min_z:
+                self.min_z = point.z
+            if point.z > self.max_z:
+                self.max_z = point.z
+        print("delta z ", abs(self.max_z - self.min_z))
+        if abs(self.max_z - self.min_z) > height:
+            print("vegetation found")
+            self.vegetation_flag = True
+
+
 
 
 class Grid():
@@ -129,9 +160,15 @@ class Grid():
                 total += len(self.grid[i][j].point_array)
                 if len(self.grid[i][j].point_array) > max_points:
                     max_points = len(self.grid[i][j].point_array)
+                    max_i = i
+                    max_j = j
 
         print('max number of points ', max_points)
         print("Total points in grid cells", total)
+
+        self.grid[max_i][max_j].find_vegetation(100)
+        
+        """
         # x_pointer = min_x + grid_x_size/2
         # print("x pointer", x_pointer)
         # y_pointer = min_y + grid_y_size/2
@@ -162,6 +199,7 @@ class Grid():
         
 
         # print(self.mid_xy_array)
+        """
 
 
     def make_kd_tree(self):
