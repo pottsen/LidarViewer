@@ -11,7 +11,7 @@ def remove_duplicates(las_file):
         base_file = File(base_file_input, mode = "r")
 
         file_name = las_file.split('.')[0]
-        print(file_name)
+        print("file name", file_name)
 
         points = base_file.points
 
@@ -21,7 +21,7 @@ def remove_duplicates(las_file):
         Y = base_file.Y
         print("Y ", len(Y))
 
-        Z = base_file.Z
+        Z = base_file.Z 
         print("Z ", len(Z))
 
         XYZ = np.stack((X,Y,Z), axis=-1)
@@ -75,4 +75,4 @@ def classify_points(las_file):
 
 if __name__ == "__main__":
         clean_file_name = remove_duplicates(sys.argv[1])
-        classify_points(clean_file_name)
+        # classify_points(clean_file_name)

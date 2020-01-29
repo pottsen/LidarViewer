@@ -5,16 +5,37 @@ from scipy.spatial import *
 import time
 import sys
 import math
+from remove_duplicates import remove_duplicates
 
 class Point_Class():
-    def __init__(self, point):
-        self.point = point
+    def __init__(self, index, x, y, z):
+        self.index = index
+        self.x = x
+        self.y = y
+        self.z = z
+        # print(self.index, self.x, self.y, self.z)
 
 class Grid_cell():
-    def __init__(self, mid_x, mid_y):
-        self.mid_x = mid_x
-        self.mid_y = mid_y
+    def __init__(self):
+        self.vegetation_flag = False
+        self.mid_x = None
+        self.mid_y = None
         self.point_array = []
+        self.snow_array = []
+        self.max_z = -float("INF")
+        self.min_z = float("INF")
+        self.delta_z = 0
+    
+    # def __init__(self, mid_x, mid_y):
+    #     self.mid_x = mid_x
+    #     self.mid_y = mid_y
+    #     self.point_array = []
+    
+    def set_mid_x(self, mid_x):
+        self.mid_x = mid_x
+
+    def set_mid_y(self, mid_y):
+        self.mid_y = mid_y
     
     def get_mid_x(self):
         return self.mid_x
@@ -24,152 +45,239 @@ class Grid_cell():
 
     def add_point(self, point):
         self.point_array.append(point)
+        #########################################
+        # ADD THIS IN?
+        # if point.z > self.max_z:
+        #     self.max_z = point.z
+        # if point.z < self.min_z:
+        #     self.min_z = point.z
+
+        # self.delta_z = abs(self.max_z - self.min_z)
+        # self.find_vegetation(100)
+    
+    def add_snow_point(self, point):
+        self.snow_array.append(point)
 
     def calculate_average(self):
         pass
 
+    def find_vegetation(self, height):
+        ##########################################
+        # find max and min z of the cell
+        # should I put this in the add_point function?
+        self.min_z = float("INF")
+        self.max_z = -float("INF")
+        for point in self.point_array:
+            if point.z < self.min_z:
+                self.min_z = point.z
+            if point.z > self.max_z:
+                self.max_z = point.z
+        if abs(self.max_z - self.min_z) > height and abs(self.max_z - self.min_z) != float("INF"):
+            # print("delta z ", abs(self.max_z - self.min_z))
+            # print("vegetation found")
+            self.vegetation_flag = True
+
+
+
 
 class Grid():
-    def __init__(self, las_file, grid_size, number_of_cells):
+    def __init__(self, las_file, cell_size):
+        #do we want to call this here?
+        #will probably want to clean up once we get everything written
         self.las_file = las_file
-        self.grid_size = grid_size
-        self.number_of_cells = number_of_cells
+        self.cell_size = cell_size
         
         print(self.las_file)
         self.base_file = File(self.las_file, mode = "rw")
 
         self.file_name = las_file.split('.')[0]
         print(self.file_name)
-        self.grid = self.make_grid_by_cell(self.number_of_cells)
-        self.make_kd_tree()
+        self.make_grid_by_cell(self.cell_size)
+        # self.make_kd_tree()
         
-def make_grid_by_cell(self, size_of_cells):
-        base_x = self.base_file.X
-        max_x = np.max(base_x)
-        print("max x ", max_x)
-        min_x = np.min(base_x)
-        print("min x ", min_x)
+    def make_grid_by_cell(self, size_of_cells):
+        
+        # Find out what the point format looks like.
+        # print("point format")
+        # pointformat = self.base_file.point_format
+        # for spec in pointformat:
+        #     print(spec.name)
 
-        base_y = self.base_file.Y
-        max_y = np.max(base_y)
-        print("max y ", max_y)
-        min_y = np.min(base_y)
-        print("min y ", min_y)
+        # # #Like XML or etree objects instead?
+        # # a_mess_of_xml = pointformat.xml()
+        # # an_etree_object = pointformat.etree()
 
-        #calculate full x and y length of scan
-        delta_x = abs(max_x - min_x)
-        delta_y = abs(max_y - min_y)
+        # # #It looks like we have color data in this file, so we can grab:
+        # # blue = inFile.blue
+        # print("\nheader format")
+        # #Lets take a look at the header also.
+        # headerformat = self.base_file.header.header_format
+        # for spec in headerformat:
+        #     print(spec.name)
 
-        print("abs x", delta_x)
-        print("abs y", delta_y)
+        # print(self.base_file.header.max)
+        # print(self.base_file.header.min)
+        
+        #################################################
+        #pull in the base x array and base y array -- max. deltas, and then assigning points to grid cells
+        #### USE LOWER CASE x, y, z on self.base_file
+        base_x = self.base_file.x
+        self.max_x = np.max(base_x)
+        self.min_x = np.min(base_x)
 
+        if round(self.max_x,2) != round(self.base_file.header.max[0], 2):
+            print("x max coordinate mismatch")
+            print("max x of points ", round(self.max_x,2))
+            print("max x ", round(self.base_file.header.max[0], 2))
+    
+        if round(self.min_x,2) != round(self.base_file.header.min[0], 2):
+            print("x min coordinate mismatch")
+            print("min x of points ", round(self.min_x,2))
+            print("min x ", round(self.base_file.header.min[0], 2))
+
+        base_y = self.base_file.y
+        self.max_y = np.max(base_y)
+        self.min_y = np.min(base_y)
+
+        if round(self.max_y,2) != round(self.base_file.header.max[1], 2):
+            print("y max coordinate mismatch")
+            print("max y of points ", round(self.max_y,2))
+            print("max y ", round(self.base_file.header.max[1], 2))
+        
+        if round(self.min_y,2) != round(self.base_file.header.min[1], 2):
+            print("y min coordinate mismatch")
+            print("min y of points ", round(self.min_y,2))
+            print("min y ", round(self.base_file.header.min[1], 2))
+
+        base_z = self.base_file.z
+        self.max_z = np.max(base_z)
+        self.min_z = np.min(base_z)
+
+        if round(self.max_z,2) != round(self.base_file.header.max[2], 2):
+            print("z max coordinate mismatch")
+            print("max z of points ", round(self.max_z,2))
+            print("max z ", round(self.base_file.header.max[2], 2))
+
+        if round(self.min_z,2) != round(self.base_file.header.min[2], 2):
+            print("z min coordinate mismatch")
+            print("min z of points ", round(self.min_z,2))
+            print("min z ", round(self.base_file.header.min[2], 2))
+
+        
+        ################################################
+        # calculate x and y length of scan to be used in determing grid spots
+        delta_x = abs(self.max_x - self.min_x)
+        delta_y = abs(self.max_y - self.min_y)
         area = float(delta_x)*float(delta_y)
-        print("area", area)
 
-        # number of cells for gridding
+        print("delta x", round(delta_x, 2))
+        print("delta y", round(delta_y, 2)) 
+        print("area", round(area, 0))
+
+        #################################################
+        # number of cells for gridding = delta / size_of_cell
+        # cieling used so that we dont cut off the end of the grid/scan
+        print("Size of cells ", size_of_cells, " by ", size_of_cells)
+
         number_of_cells_x = math.ceil(delta_x/size_of_cells)
+        # print("# x cells", number_of_cells_x)
+
         number_of_cells_y = math.ceil(delta_y/size_of_cells)
+        # print("# y cells", number_of_cells_y)
 
-        # self.grid = 
+        print("Total number of grid cells: ", number_of_cells_x*number_of_cells_y)
 
 
-        x_pointer = min_x + grid_x_size/2
-        print("x pointer", x_pointer)
-        y_pointer = min_y + grid_y_size/2
-        print("y pointer", y_pointer)
-        mid_x = x_pointer
-        self.grid_cells = []
-        for i in range(int(number_of_cells)):
-            mid_y = y_pointer
-            for j in range(int(number_of_cells)):
-                self.grid_cells.append(Grid_cell(mid_x, mid_y))
-                print("grid cell ", len(self.grid_cells), " ", self.grid_cells[-1].mid_x)
-                print("grid cell ", len(self.grid_cells), " ", self.grid_cells[-1].mid_y)
-                mid_y += grid_y_size
-            mid_x += grid_x_size
+        #################################################
+        # make grid
+        self.grid = [[Grid_cell() for i in range(number_of_cells_y)] for j in range(number_of_cells_x)]
+        print("Grid complete")
 
+        #################################################
+        # add points to grid cells
+        for i in range(len(self.base_file.points)):
+            if (i % 1000000) == 0:
+                print(i, " of ", len(self.base_file.points), " points added to grid")
+
+
+            grid_x = math.floor((base_x[i]-self.min_x)/self.cell_size)
+            grid_y = math.floor((base_y[i]-self.min_y)/self.cell_size)
+            try:
+                point = Point_Class(i, base_x[i], base_y[i], base_z[i])
+                self.grid[grid_x][grid_y].add_point(point)
+                # print("point added to grid cell", grid_x, grid_y)
+            except:
+                print("exception adding point to grid cell", grid_x, grid_y, i)
+
+        print("All points added to grid cells.")
+
+        max_points = 0
+        total = 0
+        count = 0
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                # print("# points ", len(self.grid[i][j].point_array))
+                total += len(self.grid[i][j].point_array)
+                self.grid[i][j].find_vegetation(10)
+                if self.grid[i][j].vegetation_flag == True:
+                    count += 1
+                    # print("i ", i, " j ", j, )
+                    # print(count, " of ", number_of_cells_y*number_of_cells_x)
+                
+                if len(self.grid[i][j].point_array) > max_points:
+                    max_points = len(self.grid[i][j].point_array)
+                    # max_i = i
+                    # max_j = j
+
+        print('max number of points ', max_points)
+        print("Total points in grid cells", total)
+        print(count, " cells with vegetation out of ", number_of_cells_y*number_of_cells_x)
+
+    def add_snow_points(self, snow_file):
+        self.snow_las_file = snow_file
+    
+        self.snow_file = File(self.snow_las_file, mode = "rw")
+
+        self.snow_file_name = snow_file.split('.')[0]
+        print(self.file_name)
         
-        self.grid_cells = np.asarray(self.grid_cells)
+        snow_x = self.snow_file.x
+        snow_y = self.snow_file.y
+        snow_z = self.snow_file.z
 
-        mid_x_vec = np.vectorize(Grid_cell.get_mid_x, otypes=[object])
-        mid_y_vec = np.vectorize(Grid_cell.get_mid_y, otypes=[object])
-        
-        mid_x_array = mid_x_vec(self.grid_cells)
-        mid_y_array = mid_y_vec(self.grid_cells)
+        #add points to coresponding grid cells
+        for i in range(len(self.base_file.points)):
+            if snow_x[i] > self.max_x or snow_x[i] < self.min_x or snow_y[i] > self.max_y or snow_y[i] < self.min_y:
+                print("Snow point out of grid range")
+            else:
+                if (i % 1000000) == 0:
+                    print(i, " of ", len(self.base_file.points), " snow points added to grid")
 
-        mid_x_array = np.vstack(mid_x_array)
-        mid_y_array = np.vstack(mid_y_array)
-        self.mid_xy_array = [mid_x_array, mid_y_array]
-        
+                grid_x = math.floor((snow_x[i]-self.min_x)/self.cell_size)
+                grid_y = math.floor((snow_y[i]-self.min_y)/self.cell_size)
+                try:
+                    point = Point_Class(i, snow_x[i], snow_y[i], snow_z[i])
+                    self.grid[grid_x][grid_y].add_snow_point(point)
+                    # print("point added to grid cell", grid_x, grid_y)
+                except:
+                    print("exception adding snow point to grid cell", grid_x, grid_y, i)
 
-        print(self.mid_xy_array)
-
-
-    # def make_grid_by_cell(self, number_of_cells):
-    #     base_x = self.base_file.X
-    #     max_x = np.max(base_x)
-    #     print("max x ", max_x)
-    #     min_x = np.min(base_x)
-    #     print("min x ", min_x)
-
-    #     base_y = self.base_file.Y
-    #     max_y = np.max(base_y)
-    #     print("max y ", max_y)
-    #     min_y = np.min(base_y)
-    #     print("min y ", min_y)
-
-    #     #calculate full x and y length of scan
-    #     delta_x = abs(max_x - min_x)
-    #     delta_y = abs(max_y - min_y)
-
-    #     print("abs x", delta_x)
-    #     print("abs y", delta_y)
-
-    #     area = float(delta_x)*float(delta_y)
-    #     print("area", area)
-
-    #     #calculate grid cell size
-    #     grid_x_size = float(delta_x/(number_of_cells))
-    #     grid_y_size = float(delta_y/(number_of_cells))
-
-    #     x_pointer = min_x + grid_x_size/2
-    #     print("x pointer", x_pointer)
-    #     y_pointer = min_y + grid_y_size/2
-    #     print("y pointer", y_pointer)
-    #     mid_x = x_pointer
-    #     self.grid_cells = []
-    #     for i in range(int(number_of_cells)):
-    #         mid_y = y_pointer
-    #         for j in range(int(number_of_cells)):
-    #             self.grid_cells.append(Grid_cell(mid_x, mid_y))
-    #             print("grid cell ", len(self.grid_cells), " ", self.grid_cells[-1].mid_x)
-    #             print("grid cell ", len(self.grid_cells), " ", self.grid_cells[-1].mid_y)
-    #             mid_y += grid_y_size
-    #         mid_x += grid_x_size
-
-        
-    #     self.grid_cells = np.asarray(self.grid_cells)
-
-    #     mid_x_vec = np.vectorize(Grid_cell.get_mid_x, otypes=[object])
-    #     mid_y_vec = np.vectorize(Grid_cell.get_mid_y, otypes=[object])
-        
-    #     mid_x_array = mid_x_vec(self.grid_cells)
-    #     mid_y_array = mid_y_vec(self.grid_cells)
-
-    #     mid_x_array = np.vstack(mid_x_array)
-    #     mid_y_array = np.vstack(mid_y_array)
-    #     self.mid_xy_array = [mid_x_array, mid_y_array]
+        print("All snow points added to grid cells.")
         
 
-    #     print(self.mid_xy_array)
-
-    def make_kd_tree(self):
-        self.grid_cell_tree = spatial.cKDTree(self.mid_x_array)
 
 
         
+###################################################
+# # Ubuntu
+# grid = Grid("../../las_data/points_clean.las", 500)
 
-grid = Grid("../../las_data/points_clean.las", 0, 2)
+###################################################
+# # Windows
+# grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
+clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
+grid = Grid(clean_file, 1)
+grid.add_snow_points(clean_file)
 
 
 
