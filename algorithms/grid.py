@@ -7,6 +7,9 @@ import sys
 import math
 from remove_duplicates import remove_duplicates
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
 class Point_Class():
     def __init__(self, index, x, y, z):
         self.index = index
@@ -25,6 +28,10 @@ class Grid_cell():
         self.max_z = -float("INF")
         self.min_z = float("INF")
         self.delta_z = 0
+        self.base_total_z = 0
+        self.snow_total_z = 0
+        self.depth = 0
+
     
     # def __init__(self, mid_x, mid_y):
     #     self.mid_x = mid_x
@@ -45,6 +52,7 @@ class Grid_cell():
 
     def add_point(self, point):
         self.point_array.append(point)
+        self.base_total_z +=point.z
         #########################################
         # ADD THIS IN?
         # if point.z > self.max_z:
@@ -57,9 +65,21 @@ class Grid_cell():
     
     def add_snow_point(self, point):
         self.snow_array.append(point)
+        self.snow_total_z += point.z
 
-    def calculate_average(self):
-        pass
+    def calculate_average_base_z(self):
+        if len(self.point_array) > 0:
+            self.base_average_z = self.base_total_z/len(self.point_array)
+        else:
+            # print("No base points in grid cell")
+            pass
+
+    def calculate_average_snow_z(self):
+        if len(self.snow_array) > 0:
+            self.snow_average_z = self.snow_total_z/len(self.snow_array)
+        else:
+            # print("No snow points in grid cell")
+            pass
 
     def find_vegetation(self, height):
         ##########################################
@@ -239,7 +259,7 @@ class Grid():
         self.snow_file = File(self.snow_las_file, mode = "rw")
 
         self.snow_file_name = snow_file.split('.')[0]
-        print(self.file_name)
+        print(self.snow_file_name)
         
         snow_x = self.snow_file.x
         snow_y = self.snow_file.y
@@ -264,8 +284,33 @@ class Grid():
 
         print("All snow points added to grid cells.")
         
+    def calculate_snow_depth(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j].vegetation_flag:
+                    print("vegetation encountered")
+                
+                else:
+                    self.grid[i][j].calculate_average_base_z()
+                    self.grid[i][j].calculate_average_snow_z()
+                    if (len(self.grid[i][j].snow_array) > 0 and len(self.grid[i][j].point_array) > 0):
+                        self.grid[i][j].depth = self.grid[i][j].snow_average_z -  self.grid[i][j].base_average_z
+                        print(self.grid[i][j].depth)
+                    else:
+                        # print("no snow or base points")
+                        pass
+                    
+                    ## POINT BY POINT COMPARISON
+                    # for snow_point in self.grid[i][j].snow_array:
+                    #     closest_distance = float("INF")
+                    #     for base_point in self.grid[i][j].point_array:
+                    #         distance = (snow_point.x - base_point.x)**2 + (snow_point.y - base_point.y)**2
+                    #         if distance < closest_distance:
+                    #             closest_distance = distance
+                    #             depth = snow_point.z - base_point.z
+                    #     print("distance", closest_distance, "depth", depth)
 
-
+    def plot_p
 
         
 ###################################################
@@ -277,7 +322,8 @@ class Grid():
 # grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
 clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
 grid = Grid(clean_file, 1)
-grid.add_snow_points(clean_file)
+grid.add_snow_points("C:/Users/peter/OneDrive/Documents/LiftDeck2_shifted.las")
+grid.calculate_snow_depth()
 
 
 

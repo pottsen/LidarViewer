@@ -16,19 +16,19 @@ def remove_duplicates(las_file):
         points = base_file.points
 
         X = base_file.X
-        print("X ", len(X))
+        # print("X ", len(X))
 
         Y = base_file.Y
-        print("Y ", len(Y))
+        # print("Y ", len(Y))
 
         Z = base_file.Z
-        print("Z ", len(Z))
+        # print("Z ", len(Z))
 
         XYZ = np.stack((X,Y,Z), axis=-1)
 
         unique_XYZ, unique_indices = np.unique(XYZ, return_index=True, axis=0)
-        print(unique_XYZ)
-        print(XYZ)
+        # print(unique_XYZ)
+        # print(XYZ)
         print("unique_XYZ", len(unique_XYZ))
         print("unique_indices",len(unique_indices))
 

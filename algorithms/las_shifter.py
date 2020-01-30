@@ -13,12 +13,12 @@ def las_shifter(las_file):
     file_name = base_file_input.split('.')[0]
 #     print(file_name)
 
-    shifted_Z = base_file.Z + 1000
+    shifted_z = base_file.z + 10
 
-    shift_file = File(file_name+'_shifted.las', mode = "w", header = base_file.header)
-
+    shift_file_name = file_name+'_shifted.las'
+    shift_file = File(shift_file_name, mode = "w", header = base_file.header)
     shift_file.points = base_file.points
-    shift_file.Z = shifted_Z
+    shift_file.z = shifted_z
     shift_file.close()
 
 if __name__ == "__main__":
