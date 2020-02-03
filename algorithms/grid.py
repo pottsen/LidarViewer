@@ -7,8 +7,8 @@ import sys
 import math
 from remove_duplicates import remove_duplicates
 
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
+import vispy.scene
+from vispy.scene import visuals
 
 class Point_Class():
     def __init__(self, index, x, y, z):
@@ -117,12 +117,13 @@ class Grid():
         
     def make_grid_by_cell(self, size_of_cells):
         
-        # Find out what the point format looks like.
+        # # Find out what the point format looks like.
         # print("point format")
         # pointformat = self.base_file.point_format
         # for spec in pointformat:
         #     print(spec.name)
 
+        # print(max(self.base_file.blue/65535))
         # # #Like XML or etree objects instead?
         # # a_mess_of_xml = pointformat.xml()
         # # an_etree_object = pointformat.etree()
@@ -288,14 +289,15 @@ class Grid():
         for i in range(len(self.grid)):
             for j in range(len(self.grid[0])):
                 if self.grid[i][j].vegetation_flag:
-                    print("vegetation encountered")
+                    pass
+                    # print("vegetation encountered")
                 
                 else:
                     self.grid[i][j].calculate_average_base_z()
                     self.grid[i][j].calculate_average_snow_z()
                     if (len(self.grid[i][j].snow_array) > 0 and len(self.grid[i][j].point_array) > 0):
                         self.grid[i][j].depth = self.grid[i][j].snow_average_z -  self.grid[i][j].base_average_z
-                        print(self.grid[i][j].depth)
+                        # print(self.grid[i][j].depth)
                     else:
                         # print("no snow or base points")
                         pass
@@ -310,9 +312,32 @@ class Grid():
                     #             depth = snow_point.z - base_point.z
                     #     print("distance", closest_distance, "depth", depth)
 
-    def plot_p
+    def plot_points(self):
+        base_xyz = np.stack((self.base_file.x, self.base_file.y, self.base_file.z))
+        base_xyz = np.transpose(base_xyz)
+        # print(base_xyz)
+        snow_xyz = np.stack((self.snow_file.x, self.snow_file.y, self.snow_file.z))
+        snow_xyz = np.transpose(snow_xyz)
+        base_rgb = np.stack((self.base_file.red/max(self.base_file.red), self.base_file.green/max(self.base_file.green), self.base_file.blue/max(self.base_file.blue)))
+        # print(base_rgb)
+        base_rgb = np.transpose(base_rgb)
+        # print(base_rgb)
+        snow_rgb = np.stack((self.snow_file.red/max(self.snow_file.red), self.snow_file.green/max(self.snow_file.green), self.snow_file.blue/max(self.snow_file.blue)))
+        snow_rgb = np.transpose(snow_rgb)
+        canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        view = canvas.central_widget.add_view()
+        scatter = visuals.Markers()
+        scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 3)
+        scatter2 = visuals.Markers()
+        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 5)
+        view.add(scatter)
+        # view.add(scatter2)
+        view.camera = 'arcball' #'turntable'  # or try 'arcball'
+        # add a colored 3D axis for orientation
+        axis = visuals.XYZAxis(parent=view.scene)
+        vispy.app.run()
 
-        
+     
 ###################################################
 # # Ubuntu
 # grid = Grid("../../las_data/points_clean.las", 500)
@@ -320,12 +345,19 @@ class Grid():
 ###################################################
 # # Windows
 # grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
+start = time.time()
+
 clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
 grid = Grid(clean_file, 1)
 grid.add_snow_points("C:/Users/peter/OneDrive/Documents/LiftDeck2_shifted.las")
+print("Calculating snow depth...")
 grid.calculate_snow_depth()
 
+end = time.time()
+print("Computation Time: " + str((end - start)/60) + " minutes")
 
+print("Plotting...")
+grid.plot_points()
 
     # def make_grid(grid_size):
     #     pass
