@@ -11,12 +11,14 @@ import vispy.scene
 from vispy.scene import visuals
 
 class Point_Class():
-    def __init__(self, index, x, y, z):
+    def __init__(self, index, x, y, z, red, green, blue):
         self.index = index
         self.x = x
         self.y = y
         self.z = z
-        # print(self.index, self.x, self.y, self.z)
+        self.r = red
+        self.g = green
+        self.b = blue
 
 class Grid_cell():
     def __init__(self):
@@ -184,6 +186,13 @@ class Grid():
             print("min z of points ", round(self.min_z,2))
             print("min z ", round(self.base_file.header.min[2], 2))
 
+        base_red = self.base_file.red
+        base_green = self.base_file.green
+        base_blue = self.base_file.blue
+        max_red = max(base_red)
+        max_green = max(base_green)
+        max_blue = max(base_blue)
+
         
         ################################################
         # calculate x and y length of scan to be used in determing grid spots
@@ -224,7 +233,7 @@ class Grid():
             grid_x = math.floor((base_x[i]-self.min_x)/self.cell_size)
             grid_y = math.floor((base_y[i]-self.min_y)/self.cell_size)
             try:
-                point = Point_Class(i, base_x[i], base_y[i], base_z[i])
+                point = Point_Class(i, base_x[i], base_y[i], base_z[i], base_red[i]/max_red, base_green[i]/max_green, base_blue[i]/max_blue)
                 self.grid[grid_x][grid_y].add_point(point)
                 # print("point added to grid cell", grid_x, grid_y)
             except:
@@ -266,6 +275,13 @@ class Grid():
         snow_y = self.snow_file.y
         snow_z = self.snow_file.z
 
+        snow_red = self.base_file.red
+        snow_green = self.base_file.green
+        snow_blue = self.base_file.blue
+        max_red = max(snow_red)
+        max_green = max(snow_green)
+        max_blue = max(snow_blue)
+
         #add points to coresponding grid cells
         for i in range(len(self.base_file.points)):
             if snow_x[i] > self.max_x or snow_x[i] < self.min_x or snow_y[i] > self.max_y or snow_y[i] < self.min_y:
@@ -277,7 +293,7 @@ class Grid():
                 grid_x = math.floor((snow_x[i]-self.min_x)/self.cell_size)
                 grid_y = math.floor((snow_y[i]-self.min_y)/self.cell_size)
                 try:
-                    point = Point_Class(i, snow_x[i], snow_y[i], snow_z[i])
+                    point = Point_Class(i, snow_x[i], snow_y[i], snow_z[i], snow_red[i]/max_red, snow_green[i]/max_green, snow_blue[i]/max_blue)
                     self.grid[grid_x][grid_y].add_snow_point(point)
                     # print("point added to grid cell", grid_x, grid_y)
                 except:
@@ -312,7 +328,46 @@ class Grid():
                     #             depth = snow_point.z - base_point.z
                     #     print("distance", closest_distance, "depth", depth)
 
+    def color_points(self):
+        for i in range(len(self.grid)):
+            for j in range(len(self.grid[0])):
+                if self.grid[i][j].vegetation_flag:
+                    # print("Coloring red")
+                    for k in range(len(self.grid[i][j].snow_array)):
+                        self.snow_file.red[self.grid[i][j].snow_array[k].index] = 65535
+                        # print("index ", self.grid[i][j].snow_array[k].index, self.base_file.red[self.grid[i][j].snow_array[k].index])
+                        self.snow_file.green[self.grid[i][j].snow_array[k].index] = 0
+                        self.snow_file.blue[self.grid[i][j].snow_array[k].index] = 0
+                ### ADD COLORING BY SNOW DEPTH?
+
+
     def plot_points(self):
+        # snow_x = np.empty(0)
+        # snow_y = np.empty(0)
+        # snow_z = np.empty(0)
+        # snow_r = np.empty(0)
+        # snow_g = np.empty(0)
+        # snow_b = np.empty(0)
+
+        # for i in range(len(self.grid)):
+        #     for j in range(len(self.grid[0])):
+        #         for k in range(len(self.grid[i][j].snow_array)):
+        #             snow_x = np.append(snow_x, self.grid[i][j].snow_array[k].x)
+        #             snow_y = np.append(snow_y, self.grid[i][j].snow_array[k].y)
+        #             snow_z = np.append(snow_z, self.grid[i][j].snow_array[k].z)
+
+        #             snow_r = np.append(snow_r, self.grid[i][j].snow_array[k].r)
+        #             snow_g = np.append(snow_g, self.grid[i][j].snow_array[k].g)
+        #             snow_b = np.append(snow_b, self.grid[i][j].snow_array[k].b)
+        
+        # snow_xyz = np.stack((snow_x, snow_y, snow_z))
+        # snow_xyz = np.transpose(snow_xyz)
+        # snow_rgb = np.stack((snow_r/max(snow_r), snow_g/max(snow_g), snow_b/max(snow_b)))
+        # snow_rgb = np.transpose(snow_rgb)
+
+
+
+
         base_xyz = np.stack((self.base_file.x, self.base_file.y, self.base_file.z))
         base_xyz = np.transpose(base_xyz)
         # print(base_xyz)
@@ -327,11 +382,11 @@ class Grid():
         canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
         view = canvas.central_widget.add_view()
         scatter = visuals.Markers()
-        scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 3)
+        # scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 3)
         scatter2 = visuals.Markers()
-        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 5)
-        view.add(scatter)
-        # view.add(scatter2)
+        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 2)
+        # view.add(scatter)
+        view.add(scatter2)
         view.camera = 'arcball' #'turntable'  # or try 'arcball'
         # add a colored 3D axis for orientation
         axis = visuals.XYZAxis(parent=view.scene)
@@ -355,6 +410,9 @@ grid.calculate_snow_depth()
 
 end = time.time()
 print("Computation Time: " + str((end - start)/60) + " minutes")
+
+print("Coloring points")
+grid.color_points()
 
 print("Plotting...")
 grid.plot_points()
