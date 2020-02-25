@@ -6,6 +6,7 @@ import time
 import sys
 import math
 from remove_duplicates import remove_duplicates
+from las_shifter import las_shifter
 
 import vispy.scene
 from vispy.scene import visuals
@@ -248,7 +249,9 @@ class Grid():
             for j in range(len(self.grid[0])):
                 # print("# points ", len(self.grid[i][j].point_array))
                 total += len(self.grid[i][j].point_array)
-                self.grid[i][j].find_vegetation(10)
+                # setting this to size_of_cells implies that you have something sticking up at 90deg
+                # which may be too strong for the top of the ridge
+                self.grid[i][j].find_vegetation(size_of_cells)
                 if self.grid[i][j].vegetation_flag == True:
                     count += 1
                     # print("i ", i, " j ", j, )
@@ -283,7 +286,7 @@ class Grid():
         max_blue = max(snow_blue)
 
         #add points to coresponding grid cells
-        for i in range(len(self.base_file.points)):
+        for i in range(len(self.snow_file.points)):
             if snow_x[i] > self.max_x or snow_x[i] < self.min_x or snow_y[i] > self.max_y or snow_y[i] < self.min_y:
                 print("Snow point out of grid range")
             else:
@@ -383,9 +386,10 @@ class Grid():
         view = canvas.central_widget.add_view()
         scatter = visuals.Markers()
         # scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 3)
+        scatter.set_data(base_xyz, edge_color = None, face_color = "blue", size = 1)
         scatter2 = visuals.Markers()
-        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 2)
-        # view.add(scatter)
+        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 4)
+        view.add(scatter)
         view.add(scatter2)
         view.camera = 'arcball' #'turntable'  # or try 'arcball'
         # add a colored 3D axis for orientation
@@ -402,9 +406,14 @@ class Grid():
 # grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
 start = time.time()
 
-clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
+# clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
+clean_file = remove_duplicates("C:/Users/peter/Downloads/pointclouds_nz/Scan_3.las")
 grid = Grid(clean_file, 1)
-grid.add_snow_points("C:/Users/peter/OneDrive/Documents/LiftDeck2_shifted.las")
+# snow_file = las_shifter(clean_file)
+# grid.add_snow_points(snow_file)
+
+# grid.add_snow_points("C:/Users/peter/OneDrive/Documents/LiftDeck2_shifted.las")
+grid.add_snow_points("C:/Users/peter/Downloads/pointclouds_nz/Scan_8.las")
 print("Calculating snow depth...")
 grid.calculate_snow_depth()
 

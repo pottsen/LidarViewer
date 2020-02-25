@@ -20,6 +20,8 @@ def las_shifter(las_file):
     shift_file.points = base_file.points
     shift_file.z = shifted_z
     shift_file.close()
+    
+    return shift_file_name
 
 if __name__ == "__main__":
         las_shifter(sys.argv[1])
