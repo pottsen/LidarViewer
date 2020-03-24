@@ -109,6 +109,10 @@ class Grid():
         #will probably want to clean up once we get everything written
         self.las_file = las_file
         self.cell_size = cell_size
+
+        self.max_snow_depth = -float("INF")
+        self.min_snow_depth = float("INF")
+        self.average_snow_depth = 0
         
         print(self.las_file)
         self.base_file = File(self.las_file, mode = "rw")
@@ -117,6 +121,7 @@ class Grid():
         print(self.file_name)
         self.make_grid_by_cell(self.cell_size)
         # self.make_kd_tree()
+
         
     def make_grid_by_cell(self, size_of_cells):
         
@@ -251,7 +256,7 @@ class Grid():
                 total += len(self.grid[i][j].point_array)
                 # setting this to size_of_cells implies that you have something sticking up at 90deg
                 # which may be too strong for the top of the ridge
-                self.grid[i][j].find_vegetation(size_of_cells)
+                self.grid[i][j].find_vegetation(math.tan(math.pi/3)*size_of_cells)
                 if self.grid[i][j].vegetation_flag == True:
                     count += 1
                     # print("i ", i, " j ", j, )
@@ -317,9 +322,25 @@ class Grid():
                     if (len(self.grid[i][j].snow_array) > 0 and len(self.grid[i][j].point_array) > 0):
                         self.grid[i][j].depth = self.grid[i][j].snow_average_z -  self.grid[i][j].base_average_z
                         # print(self.grid[i][j].depth)
+                    
+                    
+                        self.average_snow_depth += self.grid[i][j].depth
+                        
+                        ## store max and min depths for coloring
+                        if self.grid[i][j].depth > self.max_snow_depth:
+                            self.max_snow_depth = self.grid[i][j].depth
+
+                        if self.grid[i][j].depth < self.min_snow_depth:
+                            self.min_snow_depth = self.grid[i][j].depth
                     else:
                         # print("no snow or base points")
                         pass
+
+        self.average_snow_depth = self.average_snow_depth/(len(self.grid)*len(self.grid[0]))
+
+        print("Max Depth: ", self.max_snow_depth)
+        print("Min Depth: ", self.min_snow_depth)
+        print("Average Depth: ", self.average_snow_depth)
                     
                     ## POINT BY POINT COMPARISON
                     # for snow_point in self.grid[i][j].snow_array:
@@ -334,15 +355,21 @@ class Grid():
     def color_points(self):
         for i in range(len(self.grid)):
             for j in range(len(self.grid[0])):
-                if self.grid[i][j].vegetation_flag:
-                    # print("Coloring red")
+                if self.grid[i][j].vegetation_flag or self.grid[i][j].depth < 0:
+                    for k in range(len(self.grid[i][j].snow_array)):
+                        self.snow_file.red[self.grid[i][j].snow_array[k].index] = 0
+                        # print("index ", self.grid[i][j].snow_array[k].index, self.base_file.red[self.grid[i][j].snow_array[k].index])
+                        self.snow_file.green[self.grid[i][j].snow_array[k].index] = 65535
+                        self.snow_file.blue[self.grid[i][j].snow_array[k].index] = 0
+                ### ADD COLORING BY SNOW DEPTH?
+                else:
                     for k in range(len(self.grid[i][j].snow_array)):
                         self.snow_file.red[self.grid[i][j].snow_array[k].index] = 65535
                         # print("index ", self.grid[i][j].snow_array[k].index, self.base_file.red[self.grid[i][j].snow_array[k].index])
-                        self.snow_file.green[self.grid[i][j].snow_array[k].index] = 0
-                        self.snow_file.blue[self.grid[i][j].snow_array[k].index] = 0
-                ### ADD COLORING BY SNOW DEPTH?
-
+                        # self.snow_file.green[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth-self.min_snow_depth)/(self.max_snow_depth - self.min_snow_depth)*65535 )
+                        self.snow_file.green[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth)/(self.max_snow_depth)*65535 )
+                        # self.snow_file.blue[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth-self.min_snow_depth)/(self.max_snow_depth - self.min_snow_depth)*65535 )
+                        self.snow_file.blue[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth)/(self.max_snow_depth)*65535 )
 
     def plot_points(self):
         # snow_x = np.empty(0)
@@ -369,7 +396,7 @@ class Grid():
         # snow_rgb = np.transpose(snow_rgb)
 
 
-
+        
 
         base_xyz = np.stack((self.base_file.x, self.base_file.y, self.base_file.z))
         base_xyz = np.transpose(base_xyz)
@@ -384,12 +411,12 @@ class Grid():
         snow_rgb = np.transpose(snow_rgb)
         canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
         view = canvas.central_widget.add_view()
-        scatter = visuals.Markers()
+        # scatter = visuals.Markers()
         # scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 3)
-        scatter.set_data(base_xyz, edge_color = None, face_color = "blue", size = 1)
+        # scatter.set_data(base_xyz, edge_color = None, face_color = "blue", size = 1)
         scatter2 = visuals.Markers()
-        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 4)
-        view.add(scatter)
+        scatter2.set_data(snow_xyz, edge_color = None, face_color = snow_rgb, size = 6)
+        # view.add(scatter)
         view.add(scatter2)
         view.camera = 'arcball' #'turntable'  # or try 'arcball'
         # add a colored 3D axis for orientation
@@ -405,6 +432,9 @@ class Grid():
 # # Windows
 # grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
 start = time.time()
+
+#test ICP here
+
 
 # clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
 clean_file = remove_duplicates("C:/Users/peter/Downloads/pointclouds_nz/Scan_3.las")
