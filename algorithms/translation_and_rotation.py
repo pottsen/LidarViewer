@@ -21,7 +21,10 @@ pyramid1 = [[1, 1, 0], [1.5, 1, 0], [1, 2, 0], [1.25, 1.5, 1]]
 print(pyramid1[0])
 
 pyramid2 = copy.deepcopy(pyramid1)
+# rotation_x = np.array(([1, 0, 0], [0, math.cos(math.pi/2), -math.sin(math.pi/2)], [0, math.sin(math.pi/2), math.cos(math.pi/2)]))
 rotation_x = np.array(([1, 0, 0], [0, math.cos(math.pi/6), -math.sin(math.pi/6)], [0, math.sin(math.pi/6), math.cos(math.pi/6)]))
+# rotation_x = np.array(([1, 0, 0], [0, math.cos(math.pi/12), -math.sin(math.pi/12)], [0, math.sin(math.pi/12), math.cos(math.pi/12)]))
+
 # print(rotation_x)
 
 for i in range(len(pyramid2)):

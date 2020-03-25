@@ -30,6 +30,8 @@ def icp_algorithm(base_points, snow_points):
         # print("base map", base_points[base_map_indices])
         # print("snow points", snow_points)
         error = calculate_error(base_points[base_map_indices], snow_points)
+
+
         ###### 3. FIND ALIGNMENT
         ### Y = ROT*(SNOW_POINTS) + TRANSLATION
 
@@ -52,7 +54,8 @@ def icp_algorithm(base_points, snow_points):
         print("old snow points\n", snow_points)
         for i in range(len(snow_points)):
             # print(snow_points[i])
-            snow_points[i] = np.matmul(np.transpose(rotation_matrix), snow_points[i]) + translation
+            # snow_points[i] = np.matmul(np.transpose(rotation_matrix), snow_points[i]) + translation
+            snow_points[i] = np.matmul(rotation_matrix, snow_points[i]) + translation
             # print("temp\n", snow_points[i])
 
         print("new snow points\n", snow_points)
@@ -62,12 +65,17 @@ def icp_algorithm(base_points, snow_points):
         iteration += 1
         error = calculate_error(base_points[base_map_indices], snow_points)
         print("\n", "\n")
+
+    print("iteration", iteration)
     return snow_points
 
 def point_correspondence(kdTree, snow_points):
     ###### 2. FIND POINT CORRESPONDENCE
     # SEARCH FOR CLOSEST POINT FROM SNOW SCENE TO BASE
     # USE EUCLIDEAN DISTANCE or KD-Tree
+
+    ## need to find a better method to assign points. Optimization of point assignments? using error minimization for conflicts? what makes most sense?
+     
     indices = kdTree.query(snow_points)[1]
     print("indices\n", indices, "\n", snow_points )
     return indices
@@ -195,9 +203,9 @@ def calculate_rotation(base_map_points, snow_points, base_points):
 
     ### TODO: FIND WHICH MULTIPLICATION IS CORRECT
     rotation_matrix = np.matmul(np.transpose(Qbar), Q)
-    # rotation_matrix = np.multiply(Qbar, Q)
     
-    rotation_matrix = rotation_matrix[1:,1:]
+    # rotation_matrix = rotation_matrix[1:,1:]
+    rotation_matrix = np.transpose(rotation_matrix[1:,1:])
     # print("rotation matrix \n", rotation_matrix)
 
     base_point_centroid = find_centroid(base_points)
@@ -221,9 +229,15 @@ def calculate_translation(base_centroid, snow_centroid, rotation_matrix):
     # CALCULATE TRANSLATION
     # CALCULATE Q^-T AND Q FROM q
     # T = CENTROID_base - (Q^-T * Q) * CENTROID_snow
+    #### Use transpose like we used on the snow points individually
+    # rotated_snow = np.transpose(np.matmul(np.transpose(rotation_matrix), np.transpose(snow_centroid)))
     rotated_snow = np.transpose(np.matmul(rotation_matrix, np.transpose(snow_centroid)))
     # print("rotated snow\n", rotated_snow)
+
+    ### Swapped to just the snow centroid. The centroid shouldn't change with rotating the points about it so why would you subject the centroid to a rotation? not rotating centroid gives better results?
+    ### UPDATE: Using transpose of rotation matrix makes the rotated snow better!!
     translation = base_centroid - rotated_snow
+    # translation = base_centroid - snow_centroid
     # print("translation\n", translation)
     return translation
 
