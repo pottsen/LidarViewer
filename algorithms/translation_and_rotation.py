@@ -19,21 +19,25 @@ from icp_rotation import *
 # pyramid1 = [[0, 1, 0], [0, 2, 0], [0, 1.5, 1]]
 # pyramid1 = [[1, 1, 0], [1.5, 1, 0], [1, 2, 0], [1.25, 1.5, 1]]
 # pyramid1 = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1]]
+start = time.time()
+cloud_x = 1000
+cloud_y = 1000
+cloud_size = int(cloud_x*cloud_y)
 print('Creating point cloud')
-pyramid1 = []
-for i in range(100):
-    for j in range(100):
-        pyramid1.append([float(i), float(j), float(0)])
+base_cloud = []
+for i in range(cloud_x):
+    for j in range(cloud_y):
+        base_cloud.append([float(i), float(j), float(0)])
 
 # print(pyramid1[0])
-pyramid1 = np.array(pyramid1)
+base_cloud = np.array(base_cloud)
 
 ### TEST CASES
 # RANDOM POINT SHIFT
 for i in range(5000):
     j = random.randint(1, 9999)
     height = random.randint(1,5)
-    pyramid1[j] += [0, 0, height]
+    base_cloud[j] += [0, 0, height]
 
 # RECTANGLE
 # pyramid1[15] += [0, 0, 1]
@@ -56,9 +60,9 @@ for i in range(5000):
 # pyramid1[46] += [0, 0, 1]
 
 # print(pyramid1)
-pyramid1 = np.array(pyramid1)
-pyramid2 = copy.deepcopy(pyramid1)
-pyramid2 += [0.25, 0.3, 0.5]
+base_cloud = np.array(base_cloud)
+snow_cloud = copy.deepcopy(base_cloud)
+# pyramid2 += [0.25, 0.3, 0.5]
 # pyramid2 += [0.25, 0.3, -0.5]
 # for i in range(len(pyramid2)):
 #     pyramid2[i] += [0.25, 0.3, 0]
@@ -72,42 +76,42 @@ rotation_z = np.array(([math.cos(math.pi/24), -math.sin(math.pi/24), 0],[math.si
 
 # print(rotation_x)
 print('rotating second cloud')
-for i in range(len(pyramid2)):
-    # print("c2[i]", pyramid2[i])
-    coordinates = np.transpose(pyramid2[i])
+for i in range(len(snow_cloud)):
+    # print("c2[i]", snow_cloud[i])
+    coordinates = np.transpose(snow_cloud[i])
     coordinates = np.matmul(rotation_x, coordinates)
     coordinates = np.matmul(rotation_z, coordinates)
     # print("New Coordinates", coordinates)
-    pyramid2[i] = coordinates
+    snow_cloud[i] = coordinates
     # cube2[i] = np.matmul(rotation_x, np.transpose(cube2[i]))
-    # print("New c2[i] ", pyramid2[i])
+    # print("New c2[i] ", snow_cloud[i])
     # print(' ')
 
 
 
-pyramid1_arr = np.array(pyramid1)
-pyramid2_arr = np.array(pyramid2)
-pyramid3_arr = copy.deepcopy(pyramid2_arr)
-# print("P2", pyramid2_arr)
-pyramid3_arr = icp_algorithm(pyramid1_arr, pyramid3_arr)
+base_cloud_arr = np.array(base_cloud)
+snow_cloud_arr = np.array(snow_cloud)
+match_cloud_arr = copy.deepcopy(snow_cloud_arr)
+# print("P2", snow_cloud_arr)
+match_cloud_arr = icp_algorithm(base_cloud_arr, match_cloud_arr)
+end = time.time()
+print("Time", end-start)
+# pyramid3_arr = icp_rotation(base_cloud_arr, pyramid3_arr)
 
 
-# pyramid3_arr = icp_rotation(pyramid1_arr, pyramid3_arr)
-
-
-# print("P2", pyramid2_arr)
+# print("P2", snow_cloud_arr)
 # print("P3", pyramid3_arr)
 
 canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
 view = canvas.central_widget.add_view()
 scatter = visuals.Markers()
-scatter.set_data(pyramid1_arr, edge_color = None, face_color = "red", size = 10)
+scatter.set_data(base_cloud_arr, edge_color = None, face_color = "red", size = 10)
 view.add(scatter)
 scatter2 = visuals.Markers()
-scatter2.set_data(pyramid2_arr, edge_color = None, face_color = "blue", size = 10)
+scatter2.set_data(snow_cloud_arr, edge_color = None, face_color = "blue", size = 10)
 view.add(scatter2)
 scatter3 = visuals.Markers()
-scatter3.set_data(pyramid3_arr, edge_color = None, face_color = "green", size = 10)
+scatter3.set_data(match_cloud_arr, edge_color = None, face_color = "green", size = 10)
 view.add(scatter3)
 view.camera = 'arcball' #'turntable'  # or try 'arcball'
 # add a colored 3D axis for orientation

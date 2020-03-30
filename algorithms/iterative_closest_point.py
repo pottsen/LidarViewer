@@ -67,6 +67,7 @@ def icp_algorithm(base_points, snow_points):
         error = calculate_error(base_points[base_map_indices], snow_points)
         print("\n", "\n")
 
+        print("iteration", iteration)
     print("iteration", iteration)
     return snow_points
 
@@ -76,7 +77,9 @@ def point_correspondence(kdTree, snow_points):
     # USE EUCLIDEAN DISTANCE or KD-Tree
 
     ## need to find a better method to assign points. Optimization of point assignments? using error minimization for conflicts? what makes most sense?
-    print("mapping points\n", snow_points)
+    
+    print("mapping points\n")
+    # print("mapping points\n", snow_points)
     indices = kdTree.query(snow_points)[1]
     
     # print("indices\n", indices, "\n", snow_points )
