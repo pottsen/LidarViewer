@@ -29,7 +29,7 @@ def icp_algorithm(base_points, snow_points):
         base_map_indices = point_correspondence(base_tree, snow_points)
         # print("base map", base_points[base_map_indices])
         # print("snow points", snow_points)
-        error = calculate_error(base_points[base_map_indices], snow_points)
+        # error = calculate_error(base_points[base_map_indices], snow_points)
 
 
         ###### 3. FIND ALIGNMENT
@@ -58,18 +58,24 @@ def icp_algorithm(base_points, snow_points):
             snow_points[i] = np.matmul(rotation_matrix, snow_points[i]) + translation
             # print("temp\n", snow_points[i])
 
-        print("new snow points\n")
+        # print("new snow points\n")
         # print("new snow points\n", snow_points)
         
         
         ###### 5. UPDATE ERROR
         iteration += 1
-        error = calculate_error(base_points[base_map_indices], snow_points)
-        print("\n", "\n")
+        error_old = round(error, 9)
+        error= round(calculate_error(base_points[base_map_indices], snow_points), 9)
+        if (error == error_old):
+            print("Error not improving")
+            break
+        # print("\n", "\n")
 
-        print("iteration", iteration)
-    print("iteration", iteration)
-    return snow_points
+        # print("iteration", iteration)
+        # print("error", error)
+    # error = calculate_error(base_points[base_map_indices], snow_points)
+    # print("iteration", iteration)
+    return snow_points, iteration, error
 
 def point_correspondence(kdTree, snow_points):
     ###### 2. FIND POINT CORRESPONDENCE
@@ -78,7 +84,7 @@ def point_correspondence(kdTree, snow_points):
 
     ## need to find a better method to assign points. Optimization of point assignments? using error minimization for conflicts? what makes most sense?
     
-    print("mapping points\n")
+    # print("mapping points\n")
     # print("mapping points\n", snow_points)
     indices = kdTree.query(snow_points)[1]
     
@@ -90,7 +96,7 @@ def calculate_rotation(base_map_points, snow_points, base_points):
     ###### 3. FIND ALIGNMENT
     ### Y = ROT*(SNOW_POINTS) + TRANSLATION
     # FIND ROTATION
-    print('Finding rotation')
+    # print('Finding rotation')
 
     # print("base points\n", base_map_points)
     # print("snow points\n", snow_points)
@@ -217,7 +223,7 @@ def calculate_rotation(base_map_points, snow_points, base_points):
     # print("rotation matrix \n", rotation_matrix)
 
     base_point_centroid = find_centroid(base_points)
-    print('Calculating translation')
+    # print('Calculating translation')
     translation = calculate_translation(base_point_centroid, snow_centroid, rotation_matrix)
 
     return rotation_matrix, translation
@@ -257,5 +263,5 @@ def calculate_error(base_map_points, snow_points):
             error += (base_map_points[i,j]-snow_points[i,j])**2
 
     error = error/len(snow_points)
-    print("Error", error)
+    # print("Error", error)
     return error
