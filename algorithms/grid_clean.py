@@ -13,6 +13,9 @@ from iterative_closest_point_clean import *
 import vispy.scene
 from vispy.scene import visuals
 
+
+#### TEST
+
 class Point_Class():
     def __init__(self, index, x, y, z, red, green, blue):
         self.index = index
