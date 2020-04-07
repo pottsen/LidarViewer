@@ -16,50 +16,27 @@ from scipy.spatial import *
 
 def icp_algorithm(base_points, snow_points):
     
-    ###### 1. Initializations
+    ###### Initializations
     iteration = 0
     error = float("INF")
     #MAKE KD_TREE
     base_tree = spatial.cKDTree(base_points)
-    while error > 0.01 and iteration < 1000:
+    while error > 0.01 and iteration < 10:
         
-        ###### 2. FIND POINT CORRESPONDENCE
+        ###### FIND POINT CORRESPONDENCE
         # SEARCH FOR CLOSEST POINT FROM SNOW SCENE TO BASE
         # USE EUCLIDEAN DISTANCE or KD-Tree
         base_map_indices = point_correspondence(base_tree, snow_points)
-        # print("base map", base_points[base_map_indices])
-        # print("snow points", snow_points)
-        # error = calculate_error(base_points[base_map_indices], snow_points)
-
-
-        ###### 3. FIND ALIGNMENT
+        
+        ###### FIND ALIGNMENT
         ### Y = ROT*(SNOW_POINTS) + TRANSLATION
-
-        # FIND TRANSLATION USING CENTROIDS
-        # CENTROID_i = 1/#POINTS_i * SUM(POINTS_i)
-        # POINTS_i' = POINTS_i - CENTROID_i
-        # AFTER TRANSFORM: 1/#POINTS_i * SUM(POINTS_i') = 0
-        # TRANSLATION WILL THEN BE THE DIFFERENCE IN THE SNOW AND BASE CENTROIDS
-
-        # FIND ROTATION
-        rotation_matrix, translation = calculate_rotation(base_points[base_map_indices], snow_points, base_points)
-
-        # CALCULATE TRANSLATION
-        # CALCULATE Q^-T AND Q FROM q
-        # T = CENTROID_base - (Q^-T * Q) * CENTROID_snow
-
+        # FIND ROTATION AND TRANSLATION
+        rotation_matrix, translation = calculate_rotation_translation(base_points[base_map_indices], snow_points, base_points)
 
         ###### 4. APPLY ALIGNMENT
         # NEW_SNOW = ROT*(SNOW_POINTS) + TRANSLATION
-        # print("old snow points\n", snow_points)
         for i in range(len(snow_points)):
-            # print(snow_points[i])
-            # snow_points[i] = np.matmul(np.transpose(rotation_matrix), snow_points[i]) + translation
             snow_points[i] = np.matmul(rotation_matrix, snow_points[i]) + translation
-            # print("temp\n", snow_points[i])
-
-        # print("new snow points\n")
-        # print("new snow points\n", snow_points)
         
         
         ###### 5. UPDATE ERROR
@@ -71,7 +48,7 @@ def icp_algorithm(base_points, snow_points):
             break
         # print("\n", "\n")
 
-        print("iteration", iteration)
+        print("\niteration", iteration)
         print("error", error)
     # error = calculate_error(base_points[base_map_indices], snow_points)
     # print("iteration", iteration)
@@ -81,35 +58,22 @@ def point_correspondence(kdTree, snow_points):
     ###### 2. FIND POINT CORRESPONDENCE
     # SEARCH FOR CLOSEST POINT FROM SNOW SCENE TO BASE
     # USE EUCLIDEAN DISTANCE or KD-Tree
-
     ## need to find a better method to assign points. Optimization of point assignments? using error minimization for conflicts? what makes most sense?
-    
-    # print("mapping points\n")
-    # print("mapping points\n", snow_points)
+
     indices = kdTree.query(snow_points)[1]
     
-    # print("indices\n", indices, "\n", snow_points )
     return indices
     
 
-def calculate_rotation(base_map_points, snow_points, base_points):
-    ###### 3. FIND ALIGNMENT
-    ### Y = ROT*(SNOW_POINTS) + TRANSLATION
+def calculate_rotation_translation(base_map_points, snow_points, base_points):
     # FIND ROTATION
-    # print('Finding rotation')
-
-    # print("base points\n", base_map_points)
-    # print("snow points\n", snow_points)
     # COMPUTE CENTROID
     base_centroid = find_centroid(base_map_points)
     snow_centroid = find_centroid(snow_points)
-    # print("base centroid", base_centroid)
-    # print("snow centroid", snow_centroid)
+
     # COMPUTE POINT COORDINATE RELATIVE TO CENTROID
     base_map_relative = base_map_points - base_centroid
     snow_points_relative = snow_points - snow_centroid
-    # print("base_relative\n", base_map_relative)
-    # print("snow_relative\n", snow_points_relative)
 
     # COMPUTE: S_xx = SUM(BASE_xi' * SNOW_xi'), S_xy, S_xz, S_yx, S_yy, ETC...
     # COMPUTE SYMMETRIC MATRIX N BY COMBINING TERMS ABOVE AS FOLLOWS
@@ -224,6 +188,8 @@ def calculate_rotation(base_map_points, snow_points, base_points):
 
     base_point_centroid = find_centroid(base_points)
     # print('Calculating translation')
+    # translation = calculate_translation(base_point_centroid, snow_centroid, rotation_matrix)
+
     translation = calculate_translation(base_point_centroid, snow_centroid, rotation_matrix)
 
     return rotation_matrix, translation
