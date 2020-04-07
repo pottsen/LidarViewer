@@ -423,27 +423,50 @@ class Grid():
         axis = visuals.XYZAxis(parent=view.scene)
         vispy.app.run()
 
+    def export_cliffs(self):
+        base_indices = []
+        snow_indices = []
+        ### store indices of points from grid cells
+        for i in self.grid:
+            if i.vegetation_flag:
+                for j in range(len(i.point_array)):
+                    base_indices.append(i.point_array[j])
+                for k in range(len(i.snow_array)):
+                    snow_indices.append(i.snow_array[j])
+
      
 ###################################################
 # # Ubuntu
 # grid = Grid("../../las_data/points_clean.las", 500)
+start = time.time()
+clean_file = remove_duplicates("../../las_data/nz_base.las")
+grid = Grid(clean_file, 1)
+
+grid.add_snow_points("../../las_data/nz_snow.las")
 
 ###################################################
 # # Windows
 # grid = Grid("../../../Documents/YC_LiftDeck_10Dec19.las", 100)
-start = time.time()
+## start = time.time()
 
 #test ICP here
 
 
 # clean_file = remove_duplicates("C:/Users/peter/OneDrive/Documents/LiftDeck2.las")
-clean_file = remove_duplicates("C:/Users/peter/Downloads/pointclouds_nz/Scan_3.las")
-grid = Grid(clean_file, 1)
+## clean_file = remove_duplicates("C:/Users/peter/Downloads/pointclouds_nz/Scan_3.las")
+## grid = Grid(clean_file, 1)
 # snow_file = las_shifter(clean_file)
 # grid.add_snow_points(snow_file)
 
 # grid.add_snow_points("C:/Users/peter/OneDrive/Documents/LiftDeck2_shifted.las")
-grid.add_snow_points("C:/Users/peter/Downloads/pointclouds_nz/Scan_8.las")
+## grid.add_snow_points("C:/Users/peter/Downloads/pointclouds_nz/Scan_8.las")
+
+
+
+
+#######################################################
+# # Run Algorithms
+
 print("Calculating snow depth...")
 grid.calculate_snow_depth()
 

@@ -10,8 +10,10 @@ def remove_duplicates(las_file):
         print(base_file_input)
         base_file = File(base_file_input, mode = "r")
 
-        file_name = las_file.split('.')[0]
-        print("file name", file_name)
+        file_name = las_file.split('/')[-1]
+        print("file name1 ", file_name)
+        file_name = file_name.split('.')[0]
+        print("file name2 ", file_name)
 
         points = base_file.points
 

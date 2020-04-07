@@ -71,8 +71,8 @@ def icp_algorithm(base_points, snow_points):
             break
         # print("\n", "\n")
 
-        # print("iteration", iteration)
-        # print("error", error)
+        print("iteration", iteration)
+        print("error", error)
     # error = calculate_error(base_points[base_map_indices], snow_points)
     # print("iteration", iteration)
     return snow_points, iteration, error

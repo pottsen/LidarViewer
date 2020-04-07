@@ -1,3 +1,4 @@
+from laspy.file import File
 import numpy as np
 from scipy import spatial
 from scipy.spatial import *
@@ -12,6 +13,8 @@ from vispy.scene import visuals
 from iterative_closest_point import *
 from icp_rotation import *
 
+"""
+# TESTING OF MANUALLY CREATED POINT CLOUD
 cloud_x = 100
 cloud_y = 100
 
@@ -102,21 +105,52 @@ while test_case <= 10:
     cloud_y += 100
 
 results_file.close()
-    
+
+"""  
+
+# TESTING OF ACTUAL CLIFFS
+base_file_name = "./nz_base_clean_cliffs.las"
+snow_file_name = "./nz_snow_clean_cliffs.las"
+
+base_file = File(base_file_name, mode = "rw")
+snow_file = File(snow_file_name, mode = "rw")
+
+base_file_name = base_file_name.split('.')[0]
+snow_file_name = snow_file_name.split('.')[0]
+
+base_x = base_file.x
+snow_x = snow_file.x
+base_y = base_file.y
+snow_y = snow_file.y
+base_z = base_file.z
+snow_z = snow_file.z
+
+base_xyz = np.stack((base_x, base_y, base_z))
+base_xyz = np.transpose(base_xyz)
+# print(base_xyz)
+# print("\n", base_xyz[0])
+
+snow_xyz = np.stack((snow_x, snow_y, snow_z))
+snow_xyz = np.transpose(snow_xyz)
+snow_original = copy.deepcopy(snow_xyz)
+print("Calculating match....")
+snow_match, iteration, error = icp_algorithm(base_xyz, snow_xyz)
+
 
 canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
 view = canvas.central_widget.add_view()
 scatter = visuals.Markers()
-scatter.set_data(base_cloud_arr, edge_color = None, face_color = "red", size = 10)
+scatter.set_data(base_xyz, edge_color = None, face_color = "red", size = 5)
 view.add(scatter)
 scatter2 = visuals.Markers()
-scatter2.set_data(snow_cloud_arr, edge_color = None, face_color = "blue", size = 10)
+scatter2.set_data(snow_match, edge_color = None, face_color = "blue", size = 5)
 view.add(scatter2)
 scatter3 = visuals.Markers()
-scatter3.set_data(match_cloud_arr, edge_color = None, face_color = "green", size = 10)
+scatter3.set_data(snow_original, edge_color = None, face_color = "green", size = 5)
 view.add(scatter3)
 view.camera = 'arcball' #'turntable'  # or try 'arcball'
 # add a colored 3D axis for orientation
 # Axes are x=red, y=green, z=blue
 axis = visuals.XYZAxis(parent=view.scene)
 vispy.app.run()
+
