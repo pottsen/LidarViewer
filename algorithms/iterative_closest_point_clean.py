@@ -231,3 +231,81 @@ def calculate_error(base_map_points, snow_points):
     error = error/len(snow_points)
     # print("Error", error)
     return error
+
+
+def initial_alignment(base_points, snow_points):
+    base_centroid = find_centroid(base_points)
+    snow_centroid = find_centroid(snow_points)
+
+    B_rx = base_centroid[:,0]
+    B_ry = base_centroid[:,1]
+    B_rz = base_centroid[:,2]
+
+    S_rx = snow_centroid[:,0]
+    S_ry = snow_centroid[:,1]
+    S_rz = snow_centroid[:,2]
+
+    S_xx = np.sum(np.multiply(B_rx,S_rx))
+    S_xy = np.sum(np.multiply(B_rx,S_ry))
+    S_xz = np.sum(np.multiply(B_rx,S_rz))
+    S_yx = np.sum(np.multiply(B_ry,S_rx))
+    S_yy = np.sum(np.multiply(B_ry,S_ry))
+    S_yz = np.sum(np.multiply(B_ry,S_rz))
+    S_zx = np.sum(np.multiply(B_rz,S_rx))
+    S_zy = np.sum(np.multiply(B_rz,S_ry))
+    S_zz = np.sum(np.multiply(B_rz,S_rz))
+
+    N= [ [S_xx + S_yy + S_zz,   S_yz - S_zy,         -S_xz + S_zx,         S_xy - S_yx],
+        [-S_zy + S_yz,          S_xx - S_zz - S_yy,   S_xy+S_yx,          S_xz + S_zx],
+        [S_zx - S_xz,           S_yx + S_xy,          S_yy - S_zz - S_xx, S_yz + S_zy],
+        [-S_yx + S_xy,           S_zx + S_xz,          S_zy + S_yz,        S_zz-S_yy-S_xx]]
+
+    ## FIND THE EIGENVALUES AND EIGENVECTORS OF N. 
+    # THE QUARTERNION q REPRESENTING THE ROTATION IS THE EIGENVECTOR OF LARGEST EIGENVALUE
+    # USE NUMPY np.linalg.eig() function to get eigenvalues/eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eig(N)
+    max_index = np.argmax(eigenvalues)
+    # print("max_index", max_index)
+    eigen_value = eigenvalues[max_index]
+    eigen_vector = eigenvectors[:, max_index]
+    # print("eigenvalues\n", eigenvalues)
+    # print("eigenvectors\n", eigenvectors)
+    # print("Eigen value and vector\n", eigen_value, eigen_vector)
+
+    q0 = eigen_vector[0]
+    q1 = eigen_vector[1]
+    q2 = eigen_vector[2]
+    q3 = eigen_vector[3]
+
+    Qbar = [[q0, -q1, -q2, -q3],
+            [q1,  q0,  q3, -q2],
+            [q2, -q3,  q0,  q1],
+            [q3,  q2, -q1,  q0]]
+
+    # print("Qbar\n", Qbar)
+
+    Q = [[q0, -q1,  -q2,  -q3],
+         [q1,   q0,  -q3,   q2],
+         [q2,   q3,   q0,  -q1],
+         [q3,  -q2,   q1,   q0]]
+
+    # print("Q\n", Q)
+
+    ### TODO: FIND WHICH MULTIPLICATION IS CORRECT
+    rotation_matrix = np.matmul(np.transpose(Qbar), Q)
+    
+    # rotation_matrix = rotation_matrix[1:,1:]
+    ##### TRANSPOSE LIKELY COMES FROM SWAPPING MODEL AND SCENE IN DETERMINING ROTATION MATRIX. MODEL ROTATED TO SCENE vs. SCENE ROTATED TO MODEL
+    rotation_matrix = np.transpose(rotation_matrix[1:,1:])
+    # print("rotation matrix \n", rotation_matrix)
+
+    base_point_centroid = find_centroid(base_points)
+    # print('Calculating translation')
+    # translation = calculate_translation(base_point_centroid, snow_centroid, rotation_matrix)
+
+    translation = calculate_translation(base_centroid, snow_centroid, rotation_matrix)
+
+    return rotation_matrix, translation
+
+
+
