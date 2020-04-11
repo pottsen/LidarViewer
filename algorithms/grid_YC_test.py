@@ -127,6 +127,7 @@ class Grid():
         self.base_file_name = self.base_file_name.split('.')[0]
         print("base file name ", self.base_file_name)
         self.base_x = self.base_file.x
+        print("number of base points", len(self.base_x))
         self.base_y = self.base_file.y
         self.base_z = self.base_file.z 
         self.base_xyz = np.stack((self.base_x, self.base_y, self.base_z))
@@ -141,27 +142,37 @@ class Grid():
         self.snow_file_name = snow_file.split('/')[-1]
         self.snow_file_name = self.snow_file_name.split('.')[0]
         print("snow file name ", self.snow_file_name)
-        self.snow_x = -self.snow_file.x
-        self.snow_y = -self.snow_file.y
+        self.snow_x = self.snow_file.x
+        print("number of snow points", len(self.snow_x))
+        self.snow_y = self.snow_file.y
         self.snow_z = self.snow_file.z 
         self.snow_xyz = np.stack((self.snow_x, self.snow_y, self.snow_z))
         self.snow_xyz = np.transpose(self.snow_xyz)
         self.snow_red = copy.deepcopy(self.snow_file.red)
         self.snow_green = copy.deepcopy(self.snow_file.green)
         self.snow_blue = copy.deepcopy(self.snow_file.blue)
+
+
+        self.plot_points()
         
         # self.make_grid_by_cell(self.cell_size)
         
         
         # self.make_kd_tree()
 
-        
+
+
+
+
+
+
     def make_grid_by_cell(self, size_of_cells):
         
         #################################################
         #pull in the base x array and base y array -- max. deltas, and then assigning points to grid cells
         #### USE LOWER CASE x, y, z on self.base_file
-        base_x = self.base_file.x
+
+        # base_x = self.base_file.x
         self.base_max_x = np.max(self.base_xyz[:,0])
         self.base_min_x = np.min(self.base_xyz[:,0])
         print("\nmax x", self.base_max_x, "\nmin x", self.base_min_x)
@@ -176,7 +187,7 @@ class Grid():
             print("min x of points ", round(self.base_min_x,2))
             print("min x ", round(self.base_file.header.min[0], 2))
 
-        base_y = self.base_file.y
+        # base_y = self.base_file.y
         self.base_max_y = np.max(self.base_xyz[:,1])
         self.base_min_y = np.min(self.base_xyz[:,1])
         print("\nmax y", self.base_max_y, "\nmin y", self.base_min_y)
@@ -191,7 +202,7 @@ class Grid():
             print("min y of points ", round(self.base_min_y,2))
             print("min y ", round(self.base_file.header.min[1], 2))
 
-        base_z = self.base_file.z
+        # base_z = self.base_file.z
         self.base_max_z = np.max(self.base_xyz[:,2])
         self.base_min_z = np.min(self.base_xyz[:,2])
         print("\nmax z", self.base_max_z, "\nmin z", self.base_min_z)
@@ -208,7 +219,8 @@ class Grid():
 
         #### SNOW Data
         print("\nsnow data")
-        snow_x = -self.snow_file.x
+
+        # snow_x = -self.snow_file.x
         self.snow_max_x = np.max(self.snow_xyz[:,0])
         self.snow_min_x = np.min(self.snow_xyz[:,0])
         print("\nmax x", self.snow_max_x, "\nmin x", self.snow_min_x)
@@ -223,7 +235,7 @@ class Grid():
             print("min x of points ", round(self.snow_min_x,2))
             print("min x ", round(self.snow_file.header.min[0], 2))
 
-        snow_y = -self.snow_file.y
+        # snow_y = -self.snow_file.y
         self.snow_max_y = np.max(self.snow_xyz[:,1])
         self.snow_min_y = np.min(self.snow_xyz[:,1])
         print("\nmax y", self.snow_max_y, "\nmin y", self.snow_min_y)
@@ -238,7 +250,7 @@ class Grid():
             print("min y of points ", round(self.snow_min_y,2))
             print("min y ", round(self.snow_file.header.min[1], 2))
 
-        snow_z = self.snow_file.z
+        # snow_z = self.snow_file.z
         self.snow_max_z = np.max(self.snow_xyz[:,2])
         self.snow_min_z = np.min(self.snow_xyz[:,2])
         print("\nmax z", self.snow_max_z, "\nmin z", self.snow_min_z)
@@ -264,10 +276,16 @@ class Grid():
         ################################################
         # calculate x and y length of scan to be used in determing grid spots
         self.max_x = max(self.base_max_x, self.snow_max_x)
-        self.min_x = max(self.base_min_x, self.snow_min_x)
+        self.min_x = min(self.base_min_x, self.snow_min_x)
 
         self.max_y = max(self.base_max_y, self.snow_max_y)
-        self.min_y = max(self.base_min_y, self.snow_min_y)
+        self.min_y = min(self.base_min_y, self.snow_min_y)
+
+        # self.max_x = self.base_max_x
+        # self.min_x = self.base_min_x
+
+        # self.max_y = self.base_max_y
+        # self.min_y = self.base_min_y
 
         delta_x = abs(self.max_x - self.min_x)
         delta_y = abs(self.max_y - self.min_y)
@@ -352,7 +370,7 @@ class Grid():
                     print("Snow point out of grid range")
                 else:
                     if (i % 1000000) == 0:
-                        print(i, " of ", len(self.base_file.points), " snow points added to grid")
+                        print(i, " of ", len(self.snow_file.points), " snow points added to grid")
                     grid_x = math.floor((self.snow_x[i]-self.min_x)/self.cell_size)
                     grid_y = math.floor((self.snow_y[i]-self.min_y)/self.cell_size)
                     # try:
@@ -487,13 +505,23 @@ class Grid():
     def color_points(self):
         for i in range(len(self.grid)):
             for j in range(len(self.grid[0])):
-                if self.grid[i][j].vegetation_flag or self.grid[i][j].depth < 0:
+                if self.grid[i][j].snow_vegetation_flag or self.grid[i][j].depth < 0:
                     for k in range(len(self.grid[i][j].snow_array)):
+
                         self.snow_red[self.grid[i][j].snow_array[k].index] = 0
                         # print("index ", self.grid[i][j].snow_array[k].index, self.base_file.red[self.grid[i][j].snow_array[k].index])
                         self.snow_green[self.grid[i][j].snow_array[k].index] = 65535
                         self.snow_blue[self.grid[i][j].snow_array[k].index] = 0
+                
+                elif self.grid[i][j].base_vegetation_flag or self.grid[i][j].depth < 0:
+                    for k in range(len(self.grid[i][j].base_array)):
+                        self.base_red[self.grid[i][j].base_array[k].index] = 65535
+                        # print("index ", self.grid[i][j].snow_array[k].index, self.base_file.red[self.grid[i][j].snow_array[k].index])
+                        self.base_green[self.grid[i][j].base_array[k].index] = 0
+                        self.base_blue[self.grid[i][j].base_array[k].index] = 0
+                
                 ### ADD COLORING BY SNOW DEPTH?
+                """
                 else:
                     for k in range(len(self.grid[i][j].snow_array)):
                         self.snow_red[self.grid[i][j].snow_array[k].index] = 65535
@@ -502,6 +530,7 @@ class Grid():
                         self.snow_green[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth)/(self.max_snow_depth)*65535 )
 
                         self.snow_blue[self.grid[i][j].snow_array[k].index] = int( (self.grid[i][j].depth)/(self.max_snow_depth)*65535 )
+                """
 
     def plot_points(self):   
 
@@ -519,13 +548,13 @@ class Grid():
         canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
         view = canvas.central_widget.add_view()
         scatter = visuals.Markers()
-        # scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 2)
-        scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 3)
+        scatter.set_data(self.base_xyz, edge_color = None, face_color = base_rgb, size = 4)
+        # scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 3)
         view.add(scatter)
         
         scatter2 = visuals.Markers()
-        scatter2.set_data(self.snow_xyz, edge_color = None, face_color = "green", size = 3)
-        # scatter2.set_data(self.snow_xyz, edge_color = None, face_color = snow_rgb, size = 2)
+        # scatter2.set_data(self.snow_xyz, edge_color = None, face_color = "green", size = 3)
+        scatter2.set_data(self.snow_xyz, edge_color = None, face_color = snow_rgb, size = 4)
         view.add(scatter2)
 
         # scatter3 = visuals.Markers()
@@ -585,13 +614,15 @@ class Grid():
 
         rotation, translation = calculate_rotation_translation(snow_cliff_match, snow_original_cliff_xyz, snow_cliff_match)
 
-        # print("rotation", rotation, "\ntranslation", translation)
+        print("rotation", rotation, "\ntranslation", translation)
 
         # for i in range(len(snow_original_xyz)):
         #     snow_original_xyz[i] = np.matmul(rotation, snow_original_xyz[i]) + translation
+
         self.snow_matched_xyz = []
         self.snow_matched_xyz = copy.deepcopy(self.snow_xyz)
         # print(self.matched_snow_xyz)
+
         for i in range(len(self.snow_matched_xyz)):
             self.snow_matched_xyz[i] = np.matmul(rotation, self.snow_matched_xyz[i]) + translation
 
@@ -600,22 +631,25 @@ class Grid():
         print("\nError", error)
 
 
-        # canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        # view = canvas.central_widget.add_view()
-        # scatter = visuals.Markers()
-        # scatter.set_data(base_xyz, edge_color = None, face_color = "red", size = 5)
-        # view.add(scatter)
-        # scatter2 = visuals.Markers()
-        # scatter2.set_data(snow_match, edge_color = None, face_color = "blue", size = 5)
-        # view.add(scatter2)
-        # scatter3 = visuals.Markers()
-        # scatter3.set_data(snow_original_xyz, edge_color = None, face_color = "green", size = 5)
-        # view.add(scatter3)
-        # view.camera = 'arcball' #'turntable'  # or try 'arcball'
-        # # add a colored 3D axis for orientation
-        # # Axes are x=red, y=green, z=blue
-        # axis = visuals.XYZAxis(parent=view.scene)
-        # vispy.app.run()
+        canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        view = canvas.central_widget.add_view()
+        scatter = visuals.Markers()
+        scatter.set_data(base_cliff_xyz, edge_color = None, face_color = "red", size = 3)
+        # scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 5)
+        view.add(scatter)
+        scatter2 = visuals.Markers()
+        scatter2.set_data(snow_cliff_match, edge_color = None, face_color = "blue", size = 3)
+        # scatter2.set_data(self.snow_matched_xyz, edge_color = None, face_color = "blue", size = 5)
+        view.add(scatter2)
+        scatter3 = visuals.Markers()
+        scatter3.set_data(snow_original_cliff_xyz, edge_color = None, face_color = "green", size = 3)
+        # scatter3.set_data(self.snow_xyz, edge_color = None, face_color = "green", size = 5)
+        view.add(scatter3)
+        view.camera = 'arcball' #'turntable'  # or try 'arcball'
+        # add a colored 3D axis for orientation
+        # Axes are x=red, y=green, z=blue
+        axis = visuals.XYZAxis(parent=view.scene)
+        vispy.app.run()
 
 
 
@@ -704,10 +738,12 @@ class Grid():
 # grid = Grid("../../las_data/points_clean.las", 500)
 start = time.time()
 # clean_base_file = remove_duplicates("../../las_data/nz_base.las")
-clean_base_file = remove_duplicates("../../las_data/On_Snow_LiftShack.las")
+# clean_base_file = remove_duplicates("../../las_data/On_Snow_LiftShack.las")
+clean_base_file = remove_duplicates("../../las_data/OnSnow_cliffs.las")
 
 # clean_snow_file = remove_duplicates("../../las_data/nz_snow.las")
-clean_snow_file = remove_duplicates("../../las_data/LiftBalcony_LiftShack.las")
+# clean_snow_file = remove_duplicates("../../las_data/LiftBalcony_LiftShack.las")
+clean_snow_file = remove_duplicates("../../las_data/LiftBalcony_cliffs.las")
 
 grid = Grid(clean_base_file, clean_snow_file, 1)
 
@@ -735,6 +771,8 @@ grid = Grid(clean_base_file, clean_snow_file, 1)
 #######################################################
 # # Run Algorithms
 grid.initialize_alignment()
+grid.plot_points()
+
 grid.make_grid_by_cell(1)
 
 grid.add_points_to_grid("base")
@@ -766,8 +804,8 @@ grid.export_cliffs()
 end = time.time()
 print("\nComputation Time: " + str((end - start)/60) + " minutes")
 
-print("Plotting...")
-grid.plot_points()
+# print("Plotting...")
+# grid.plot_points()
 
 
     # def make_grid(grid_size):

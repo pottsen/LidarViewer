@@ -446,16 +446,16 @@ class Grid():
         view = canvas.central_widget.add_view()
         scatter = visuals.Markers()
         # scatter.set_data(base_xyz, edge_color = None, face_color = base_rgb, size = 2)
-        scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 1)
+        scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 3)
         view.add(scatter)
         
         scatter2 = visuals.Markers()
-        scatter2.set_data(self.snow_xyz, edge_color = None, face_color = "green", size = 2)
+        scatter2.set_data(self.snow_xyz, edge_color = None, face_color = "green", size = 3)
         # scatter2.set_data(self.snow_xyz, edge_color = None, face_color = snow_rgb, size = 2)
         view.add(scatter2)
 
         scatter3 = visuals.Markers()
-        scatter3.set_data(self.snow_matched_xyz, edge_color = None, face_color = "blue", size = 2)
+        scatter3.set_data(self.snow_matched_xyz, edge_color = None, face_color = "blue", size = 3)
         # scatter3.set_data(self.snow_matched_xyz, edge_color = None, face_color = snow_rgb, size = 2)
         view.add(scatter3)
         
