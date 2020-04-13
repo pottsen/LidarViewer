@@ -142,9 +142,9 @@ class Grid():
         self.snow_file_name = snow_file.split('/')[-1]
         self.snow_file_name = self.snow_file_name.split('.')[0]
         print("snow file name ", self.snow_file_name)
-        self.snow_x = self.snow_file.x
+        self.snow_x = -self.snow_file.x
         print("number of snow points", len(self.snow_x))
-        self.snow_y = self.snow_file.y
+        self.snow_y = -self.snow_file.y
         self.snow_z = self.snow_file.z 
         self.snow_xyz = np.stack((self.snow_x, self.snow_y, self.snow_z))
         self.snow_xyz = np.transpose(self.snow_xyz)
@@ -394,7 +394,9 @@ class Grid():
                     total += len(self.grid[i][j].base_array)
                     # setting this to size_of_cells implies that you have something sticking up at 90deg
                     # which may be too strong for the top of the ridge
-                    self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, flag)
+                    # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, flag)
+                    # self.grid[i][j].find_vegetation(2.75*self.cell_size, flag)
+                    self.grid[i][j].find_vegetation(4*self.cell_size, flag)
                     if self.grid[i][j].base_vegetation_flag == True:
                         count += 1
                         # print("i ", i, " j ", j, )
@@ -413,7 +415,9 @@ class Grid():
                     total += len(self.grid[i][j].snow_array)
                     # setting this to size_of_cells implies that you have something sticking up at 90deg
                     # which may be too strong for the top of the ridge
-                    self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, flag)
+                    # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, flag)
+                    # self.grid[i][j].find_vegetation(2.75*self.cell_size, flag)
+                    self.grid[i][j].find_vegetation(4*self.cell_size, flag)
                     if self.grid[i][j].snow_vegetation_flag == True:
                         count += 1
                         # print("i ", i, " j ", j, )
@@ -585,17 +589,17 @@ class Grid():
         # print("Base\n", base_indices)
         # print("Snow\n", snow_indices)
 
-        base_cliff_points = self.base_file.points[base_cliff_indices]
-        snow_cliff_points = self.snow_file.points[snow_cliff_indices]
+        # base_cliff_points = self.base_file.points[base_cliff_indices]
+        # snow_cliff_points = self.snow_file.points[snow_cliff_indices]
         # snow_match_points = self.snow_file.points[snow_cliff_indices]
 
-        base_cliff_x = self.base_file.x[base_cliff_indices]
-        base_cliff_y = self.base_file.y[base_cliff_indices]
-        base_cliff_z = self.base_file.z[base_cliff_indices]
+        base_cliff_x = self.base_x[base_cliff_indices]
+        base_cliff_y = self.base_y[base_cliff_indices]
+        base_cliff_z = self.base_z[base_cliff_indices]
         
-        snow_cliff_x = self.snow_file.x[snow_cliff_indices]
-        snow_cliff_y = self.snow_file.y[snow_cliff_indices]
-        snow_cliff_z = self.snow_file.z[snow_cliff_indices]
+        snow_cliff_x = self.snow_x[snow_cliff_indices]
+        snow_cliff_y = self.snow_y[snow_cliff_indices]
+        snow_cliff_z = self.snow_z[snow_cliff_indices]
 
         # match_x = snow_match_points.x
         # match_y = snow_match_points.y
@@ -770,10 +774,10 @@ grid = Grid(clean_base_file, clean_snow_file, 1)
 
 #######################################################
 # # Run Algorithms
-grid.initialize_alignment()
-grid.plot_points()
+# grid.initialize_alignment()
+# grid.plot_points()
 
-grid.make_grid_by_cell(1)
+grid.make_grid_by_cell(0.25)
 
 grid.add_points_to_grid("base")
 grid.add_points_to_grid("snow")
