@@ -21,7 +21,7 @@ def icp_algorithm(base_points, snow_points):
     error = float("INF")
     #MAKE KD_TREE
     base_tree = spatial.cKDTree(base_points)
-    while error > 0.01 and iteration < 100:
+    while error > 0.0000000001 and iteration < 200:
         
         ###### FIND POINT CORRESPONDENCE
         # SEARCH FOR CLOSEST POINT FROM SNOW SCENE TO BASE
@@ -41,8 +41,8 @@ def icp_algorithm(base_points, snow_points):
         
         ###### 5. UPDATE ERROR
         iteration += 1
-        error_old = round(error, 2)
-        error= round(calculate_error(base_points[base_map_indices], snow_points), 2)
+        error_old = round(error, 9)
+        error= round(calculate_error(base_points[base_map_indices], snow_points), 9)
         if (error == error_old):
             print("Error not improving")
             break
