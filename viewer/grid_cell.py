@@ -61,8 +61,7 @@ class Grid_Cell():
 
     def find_vegetation(self, height, flag):
         ##########################################
-        # find max and min z of the cell
-        # should I put this in the add_point function?
+        # find max and min z of the cell and check the difference
         if flag == "base":
             self.base_min_z = float("INF")
             self.base_max_z = -float("INF")
@@ -72,8 +71,6 @@ class Grid_Cell():
                 if point.z > self.base_max_z:
                     self.base_max_z = point.z
             if abs(self.base_max_z - self.base_min_z) > height and abs(self.base_max_z - self.base_min_z) != float("INF"):
-                # print("delta z ", abs(self.max_z - self.min_z))
-                # print("vegetation found")
                 self.base_vegetation_flag = True
 
         elif flag == "snow":
@@ -85,6 +82,4 @@ class Grid_Cell():
                 if point.z > self.snow_max_z:
                     self.snow_max_z = point.z
             if abs(self.snow_max_z - self.snow_min_z) > height and abs(self.snow_max_z - self.snow_min_z) != float("INF"):
-                # print("delta z ", abs(self.max_z - self.min_z))
-                # print("vegetation found")
                 self.snow_vegetation_flag = True

@@ -1,4 +1,4 @@
-from canvas_and_window_dock import Window, Canvas
+from canvas_and_window import Window, Canvas
 import vispy.app
 
 def main():
