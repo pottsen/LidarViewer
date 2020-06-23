@@ -29,15 +29,16 @@ class Window(QMainWindow):
         self.main_panel()
 
     def left_dock(self):
-        self.left_widget_layout = QVBoxLayout()
-        self.left_top_widget_layout = QVBoxLayout()
-        self.left_bottom_widget_layout = QVBoxLayout()
+        self.left_dock_widget_layout = QVBoxLayout()
+        self.data_widget_layout = QVBoxLayout()
 
-        ### Left top widget. Buttons to load in data and run algorithms
-
+        """
+        Left data widget. Button to load in data and check boxes for files
+        """
+        self.plot_widget_layout = QVBoxLayout()
         self.load_file_button = QPushButton("Load Data")
         self.load_file_button.clicked.connect(self.click_load_file_button)
-        self.left_top_widget_layout.addWidget(self.load_file_button)
+        self.data_widget_layout.addWidget(self.load_file_button)
 
         self.file_box = QWidget()
         self.file_layout = QVBoxLayout()
@@ -46,29 +47,43 @@ class Window(QMainWindow):
             self.file_layout.addWidget(self.manager.file_list[i])
         
         self.file_box.setLayout(self.file_layout)
-        self.left_top_widget_layout.addWidget(self.file_box)
+        self.data_widget_layout.addWidget(self.file_box)
 
-        ### Left bottom widget with radio buttons and file paths
-        # self.test_radio_button = QRadioButton("Test")
+        self.data_widget = QWidget()
+        self.data_widget.setLayout(self.data_widget_layout)
+        self.left_dock_widget_layout.addWidget(self.data_widget)
+
+        """
+        Left algorithm widget. Buttons to flag vegetation and calculate snowdepth
+        """
+        self.alg_widget_layout = QVBoxLayout()
+        self.vegetation_button = QPushButton("Find Vegetation and Cliffs")
+        self.calculate_snowdepth_button = QPushButton("Calculate Snow Depth")
+
+        self.data_widget_layout.addWidget(self.vegetation_button)
+        self.data_widget_layout.addWidget(self.calculate_snowdepth_button)
+
+        self.alg_widget = QWidget()
+        self.alg_widget.setLayout(self.alg_widget_layout)
+        self.left_dock_widget_layout.addWidget(self.alg_widget)
+
+        """
+        Left plot widget. Has all the plotting options in it.
+        """
         self.plot_snowdepth_button = QPushButton("Plot Snow Depth")
         self.plot_snowdepth_button.clicked.connect(self.click_plot_snowdepth_button)
-        self.left_bottom_widget_layout.addWidget(self.plot_snowdepth_button)
+        self.plot_widget_layout.addWidget(self.plot_snowdepth_button)
 
-        ### Add left panel widgets to left layout
+        self.plot_widget = QWidget()
+        self.plot_widget.setLayout(self.plot_widget_layout)
+        self.left_dock_widget_layout.addWidget(self.plot_widget)
 
-        # Make left widget and add the left layout
-        self.left_widget = QWidget()
-
-        self.left_top_widget = QWidget()
-        self.left_top_widget.setLayout(self.left_top_widget_layout)
-        self.left_widget_layout.addWidget(self.left_top_widget)
-
-        self.left_bottom_widget = QWidget()
-        self.left_bottom_widget.setLayout(self.left_bottom_widget_layout)
-        self.left_widget_layout.addWidget(self.left_bottom_widget)
-
-        self.left_widget.setLayout(self.left_widget_layout)
-        self.leftDock.setWidget(self.left_widget)
+        """
+        Make left dock widget.
+        """
+        self.left_dock_widget = QWidget()
+        self.left_dock_widget.setLayout(self.left_dock_widget_layout)
+        self.leftDock.setWidget(self.left_dock_widget)
         
     def bottom_dock(self):
         ##### BOTTOM TEXT DOCK AND WIDGET
@@ -87,17 +102,9 @@ class Window(QMainWindow):
     def click_load_file_button(self):
         file_path = get_file()
         self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
-        self.manager.add_file(file_path[0]) 
+        self.manager.add_file(str(file_path[0])) 
         self.message_window.append(" ")
         self.left_dock()
-        
-
-    # def click_snow_file_button(self):
-    #     self.snow_file_path = get_file()
-    #     self.message_window.append("Cleaning and loading snow file: " + str(self.snow_file_path[0]))
-    #     self.grid.load_snow_file(self.snow_file_path[0])
-    #     self.message_window.append(" ")
-
 
     # def click_plot_initial_button(self):
     #     self.message_window.append("Plotting scans...")
@@ -128,10 +135,8 @@ class Window(QMainWindow):
 
     def click_plot_snowdepth_button(self):
         self.message_window.append("Coloring and plotting.... ")
-        self.grid.color_points()
-        self.plot_view = self.grid.plot_points()
-        self.plot_widgets.addTab(self.plot_view.native, "Snow Depth Plot")
-        self.message_window.append(" ")
+        self.manager.check_flags()
+
 
 class Canvas(vispy.app.Canvas):
     # resize = pyqtSignal()
