@@ -14,17 +14,48 @@ from grid_cell import Grid_Cell
 
 import vispy.scene
 from vispy.scene import visuals
+from grid_file import Grid_File
 
 class Grid():
     def __init__(self):
         # TODO: Have user input cell size?
         # self.cell_size = cell_size
-        self.max_snow_depth = -float("INF")
-        self.min_snow_depth = float("INF")
+        self.summer_max_snow_depth = -float("INF")
+        self.summer_min_snow_depth = float("INF")
+        self.base_max_snow_depth = -float("INF")
+        self.base_min_snow_depth = float("INF")
         self.average_snow_depth = 0
+        self.files = {}
+        # self.manager = manager
 
-    def set_grid_to_canvas(self):
-        return self
+    # def set_grid_to_manager(self):
+    #     return self
+
+    # def load_files(self, file_dict):
+    #     for key in file_dict:
+    #         self.files[str(key)] = Grid_File(key, file_dict[key])
+        
+
+    def load_summer_files(self, summer_file_path):
+        cleaned_summer_file = remove_duplicates(str(summer_file_path))
+        self.summer_file = File(cleaned_summer_file, mode = "r")
+        self.summer_file_name = summer_file_path.split('/')[-1]
+        self.summer_file_name = self.summer_file_name.split('.')[0]
+        self.summer_x = self.summer_file.x
+        self.summer_y = self.summer_file.y
+        self.summer_z = self.summer_file.z 
+        self.summer_xyz = np.stack((self.summer_x, self.summer_y, self.summer_z))
+        self.summer_xyz = np.transpose(self.summer_xyz)
+        try:
+            self.summer_red = copy.deepcopy(self.summer_file.red)
+            self.summer_green = copy.deepcopy(self.summer_file.green)
+            self.summer_blue = copy.deepcopy(self.summer_file.blue)
+        except:
+            self.summer_red = np.ones(len(self.summer_file.points)) * 65535
+            self.summer_green = np.ones(len(self.summer_file.points)) * 65535
+            self.summer_blue = np.ones(len(self.summer_file.points)) * 65535
+        
+        self.summer_intensity = copy.deepcopy(self.summer_file.intensity)
 
     def load_base_file(self, base_file_path):
         cleaned_base_file = remove_duplicates(str(base_file_path))
@@ -70,6 +101,48 @@ class Grid():
 
     def make_grid_by_cell(self, cell_size=1):
         self.cell_size = cell_size
+
+        ## SUMMER FILE
+        self.summer_max_x = np.max(self.summer_xyz[:,0])
+        self.summer_min_x = np.min(self.summer_xyz[:,0])
+
+        if round(self.summer_max_x,2) != round(self.summer_file.header.max[0], 2):
+            print("x max coordinate mismatch")
+            print("max x of points ", round(self.summer_max_x,2))
+            print("max x ", round(self.summer_file.header.max[0], 2))
+    
+        if round(self.summer_min_x,2) != round(self.summer_file.header.min[0], 2):
+            print("x min coordinate mismatch")
+            print("min x of points ", round(self.summer_min_x,2))
+            print("min x ", round(self.summer_file.header.min[0], 2))
+
+        self.summer_max_y = np.max(self.summer_xyz[:,1])
+        self.summer_min_y = np.min(self.summer_xyz[:,1])
+
+        if round(self.summer_max_y,2) != round(self.summer_file.header.max[1], 2):
+            print("y max coordinate mismatch")
+            print("max y of points ", round(self.summer_max_y,2))
+            print("max y ", round(self.summer_file.header.max[1], 2))
+        
+        if round(self.summer_min_y,2) != round(self.summer_file.header.min[1], 2):
+            print("y min coordinate mismatch")
+            print("min y of points ", round(self.summer_min_y,2))
+            print("min y ", round(self.summer_file.header.min[1], 2))
+
+        self.summer_max_z = np.max(self.summer_xyz[:,2])
+        self.summer_min_z = np.min(self.summer_xyz[:,2])
+
+        if round(self.summer_max_z,2) != round(self.summer_file.header.max[2], 2):
+            print("z max coordinate mismatch")
+            print("max z of points ", round(self.summer_max_z,2))
+            print("max z ", round(self.summer_file.header.max[2], 2))
+
+        if round(self.summer_min_z,2) != round(self.summer_file.header.min[2], 2):
+            print("z min coordinate mismatch")
+            print("min z of points ", round(self.summer_min_z,2))
+            print("min z ", round(self.summer_file.header.min[2], 2))
+
+        ## BASE FILE
         self.base_max_x = np.max(self.base_xyz[:,0])
         self.base_min_x = np.min(self.base_xyz[:,0])
 
@@ -151,11 +224,11 @@ class Grid():
         
         ################################################
         # calculate x and y length of scan to be used in determing grid spots
-        self.max_x = max(self.base_max_x, self.snow_max_x)
-        self.min_x = min(self.base_min_x, self.snow_min_x)
+        self.max_x = max([self.summer_max_x, self.base_max_x, self.snow_max_x])
+        self.min_x = min([self.summer_min_x, self.base_min_x, self.snow_min_x])
 
-        self.max_y = max(self.base_max_y, self.snow_max_y)
-        self.min_y = min(self.base_min_y, self.snow_min_y)
+        self.max_y = max([self.summer_max_y, self.base_max_y, self.snow_max_y])
+        self.min_y = min([self.summer_min_y, self.base_min_y, self.snow_min_y])
 
         delta_x = abs(self.max_x - self.min_x)
         delta_y = abs(self.max_y - self.min_y)
@@ -171,6 +244,7 @@ class Grid():
         #################################################
         # make grid
         self.grid = [[Grid_Cell() for i in range(self.number_of_cells_y)] for j in range(self.number_of_cells_x)]
+        self.add
         self.add_points_to_grid("base")
         self.add_points_to_grid("snow")
 
@@ -375,6 +449,13 @@ class Grid():
         return self.plot_canvas
         
 
+# file_dict = {
+#     'summer': 'summer',
+#     'base': 'base'
+# }
+
+# grid = Grid()
+# grid.load_files(file_dict)
 
 
     

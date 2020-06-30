@@ -19,11 +19,14 @@ class Window(QMainWindow):
         self.setWindowTitle("Lidar Snow Depth Calculator")
         
         self.leftDock = QDockWidget('Data Options', self)
+        self.leftDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+
         self.leftDock.setAcceptDrops(False)
         self.left_dock()
 
         self.bottomDock = QDockWidget('Output', self)
         self.bottomDock.setAcceptDrops(False)
+        self.bottomDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.bottom_dock()
 
         self.main_panel()
