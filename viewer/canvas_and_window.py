@@ -10,8 +10,7 @@ class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
         # self.setWindowTitle("Lidar Snow Depth Calculator")
-        self.grid = Grid()
-        self.manager = Manager()
+        self.manager = Manager(self)
         self.initInterface()
 
 
@@ -61,7 +60,9 @@ class Window(QMainWindow):
         """
         self.alg_widget_layout = QVBoxLayout()
         self.vegetation_button = QPushButton("Find Vegetation and Cliffs")
+        self.vegetation_button.clicked.connect(self.click_vegetation_button)
         self.calculate_snowdepth_button = QPushButton("Calculate Snow Depth")
+        self.calculate_snowdepth_button.clicked.connect(self.click_snowdepth_button)
 
         self.data_widget_layout.addWidget(self.vegetation_button)
         self.data_widget_layout.addWidget(self.calculate_snowdepth_button)
@@ -104,10 +105,12 @@ class Window(QMainWindow):
 
     def click_load_file_button(self):
         file_path = get_file()
-        self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
-        self.manager.add_file(str(file_path[0])) 
-        self.message_window.append(" ")
-        self.left_dock()
+        print(file_path)
+        if 'las' in str(file_path[0]).lower():
+            self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
+            self.manager.add_file(str(file_path[0])) 
+            self.message_window.append(" ")
+            self.left_dock()
 
     # def click_plot_initial_button(self):
     #     self.message_window.append("Plotting scans...")
@@ -119,22 +122,18 @@ class Window(QMainWindow):
     #     print("Calculate the depth")
     #     self.message_window.append(" ")
 
-    # def click_flag_vegetation_button(self):
-    #     self.message_window.append("Creating grid and adding points.")
-    #     self.grid.make_grid_by_cell()
-    #     self.message_window.append("Complete!")
-    #     self.message_window.append("Flagging cells...")
-    #     count, num_cells = self.grid.flag_vegetation('snow')
-    #     self.message_window.append(str(count) + " out of " + str(num_cells) + " cells with vegetation and/or cliffs.")
-    #     self.message_window.append(" ")
+    def click_vegetation_button(self):
+        self.manager.make_grid()
+        self.manager.flag_vegetation()
 
-    # def click_snow_depth_button(self):
-    #     self.message_window.append("Calculating snow depth...")
-    #     average, maximum, minimum = self.grid.calculate_snow_depth()
-    #     self.message_window.append("Average Depth: " + str(average))
-    #     self.message_window.append("Max Depth: " + str(maximum))
-    #     self.message_window.append("Minimum Depth: " + str(minimum))
-    #     self.message_window.append(" ")
+    def click_snowdepth_button(self):
+        self.manager.calculate_snow_depth()
+        # self.message_window.append("Calculating snow depth...")
+        # average, maximum, minimum = self.grid.calculate_snow_depth()
+        # self.message_window.append("Average Depth: " + str(average))
+        # self.message_window.append("Max Depth: " + str(maximum))
+        # self.message_window.append("Minimum Depth: " + str(minimum))
+        # self.message_window.append(" ")
 
     def click_plot_snowdepth_button(self):
         self.message_window.append("Coloring and plotting.... ")
