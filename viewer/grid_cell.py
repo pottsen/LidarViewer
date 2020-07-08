@@ -4,25 +4,19 @@ import copy
 
 class Grid_Cell():
     def __init__(self):
-        self.base_vegetation_flag = False
-        self.snow_vegetation_flag = False
-        self.base_intensity_flag = False
-        self.snow_intensity_flag = False
-        self.base_cliff_flag = False
-        self.snow_cliff_flag = False
+        self.vegetation_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
+        self.intensity_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
+        self.cliff_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
         self.mid_x = None
         self.mid_y = None
-        self.base_array = []
-        self.snow_array = []
-        self.base_max_z = -float("INF")
-        self.base_min_z = float("INF")
+        self.point_arrays = {'Ground':[], 'Inter. Snow':[], 'New Snow':[]}
+        self.total_z_dict = {'Ground':0, 'Inter. Snow':0, 'New Snow':0}
+        self.max_z_dict = {'Ground':-float("INF"), 'Inter. Snow':-float("INF"), 'New Snow':-float("INF")}
+        self.min_z_dict = {'Ground':float("INF"), 'Inter. Snow':float("INF"), 'New Snow':float("INF")}
+        self.average_z_dict = {'Ground':0, 'Inter. Snow':0, 'New Snow':0}
         self.base_delta_z = 0
-        self.base_total_z = 0
-        self.snow_max_z = -float("INF")
-        self.snow_min_z = float("INF")
         self.snow_delta_z = 0
-        self.snow_total_z = 0
-        self.depth = 0
+        self.depth_dict = {'Ground':0, 'Inter. Snow':0}
 
     
     def set_mid_x(self, mid_x):
@@ -37,49 +31,21 @@ class Grid_Cell():
     def get_mid_y(self):
         return self.mid_y
 
-    def add_base_point(self, point):
-        self.base_array.append(point)
-        self.base_total_z +=point.z
-    
-    def add_snow_point(self, point):
-        self.snow_array.append(point)
-        self.snow_total_z += point.z
+    def add_point(self, key, point):
+        self.point_arrays[key].append(point)
+        self.total_z_dict[key] +=point.z
 
-    def calculate_average_base_z(self):
-        if len(self.base_array) > 0:
-            self.base_average_z = self.base_total_z/len(self.base_array)
-        else:
-            # print("No base points in grid cell")
-            pass
+    def calculate_average_z(self, key):
+        if len(self.point_arrays[key]) > 0:
+            self.average_z_dict[key] = self.total_z_dict[key]/len(self.point_arrays[key])
 
-    def calculate_average_snow_z(self):
-        if len(self.snow_array) > 0:
-            self.snow_average_z = self.snow_total_z/len(self.snow_array)
-        else:
-            # print("No snow points in grid cell")
-            pass
-
-    def find_vegetation(self, height, flag):
+    def find_vegetation(self, height, key):
         ##########################################
         # find max and min z of the cell and check the difference
-        if flag == "base":
-            self.base_min_z = float("INF")
-            self.base_max_z = -float("INF")
-            for point in self.base_array:
-                if point.z < self.base_min_z:
-                    self.base_min_z = point.z
-                if point.z > self.base_max_z:
-                    self.base_max_z = point.z
-            if abs(self.base_max_z - self.base_min_z) > height and abs(self.base_max_z - self.base_min_z) != float("INF"):
-                self.base_vegetation_flag = True
-
-        elif flag == "snow":
-            self.snow_min_z = float("INF")
-            self.snow_max_z = -float("INF")
-            for point in self.snow_array:
-                if point.z < self.snow_min_z:
-                    self.snow_min_z = point.z
-                if point.z > self.snow_max_z:
-                    self.snow_max_z = point.z
-            if abs(self.snow_max_z - self.snow_min_z) > height and abs(self.snow_max_z - self.snow_min_z) != float("INF"):
-                self.snow_vegetation_flag = True
+        for point in self.point_arrays[key]:
+            if point.z < self.min_z_dict[key]:
+                self.min_z_dict[key] = point.z
+            if point.z > self.max_z_dict[key]:
+                self.max_z_dict[key] = point.z
+        if abs(self.max_z_dict[key] - self.min_z_dict[key]) > height and abs(self.max_z_dict[key] - self.min_z_dict[key]) != float("INF"):
+            self.vegetation_flag_dict[key] = True
