@@ -14,6 +14,10 @@ class Grid_File:
         self.y = self.file.y
         self.z = self.file.z 
         self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
+        self.plot_red = []
+        self.plot_blue = []
+        self.plot_green = []
+
         try:
             self.red = copy.deepcopy(self.file.red)
             self.green = copy.deepcopy(self.file.green)

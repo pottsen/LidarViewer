@@ -136,8 +136,10 @@ class Window(QMainWindow):
         # self.message_window.append(" ")
 
     def click_plot_snowdepth_button(self):
-        self.message_window.append("Coloring and plotting.... ")
-        self.manager.check_flags()
+        self.manager.color_points('Ground')
+        self.view = self.manager.plot_points()
+        self.plot_widgets.clear()
+        self.plot_widgets.addTab(self.view.native, "Plot")
 
 
 class Canvas(vispy.app.Canvas):
