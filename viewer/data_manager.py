@@ -122,7 +122,14 @@ class Manager:
         for key in average_depths:
             self.window.message_window.append("New snow scan has a depth of " + str(average_depths[key]) + " to " + str(key) + " scan.")
 
-
+    def color_points(self, key):
+        self.window.message_window.append("Coloring points...")
+        self.grid.color_points(key)
+        self.window.message_window.append("Points colored!")
+    
+    def plot_points(self):
+        plot = self.grid.plot_points()
+        return plot
 
     def set_ground_flags(self, path):
         self.file_dict['Ground'] = path
