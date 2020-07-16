@@ -202,19 +202,19 @@ class Grid():
                             self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = vegetation_color[2]
 
                     elif self.grid[i][j].depth_dict[self.snow_depth_key] < 0:
-                        if self.grid[i][j].depth_dict[self.snow_depth_key] < lower_bound:
+                        if self.grid[i][j].depth_dict[self.snow_depth_key] <= lower_bound:
                             for k in range(len(self.grid[i][j].point_arrays[key])):
                                 self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[0]
                                 self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[1]
                                 self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[2]
                         else: 
                             for k in range(len(self.grid[i][j].point_arrays[key])):
-                                self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = int(abs(self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound)*65535 )
-                                self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs(self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound)*65535 )
+                                self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound))*65535 )
+                                self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound))*65535 )
                                 self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = 65535
 
                     else:
-                        if self.grid[i][j].depth_dict[self.snow_depth_key] > upper_bound:
+                        if self.grid[i][j].depth_dict[self.snow_depth_key] >= upper_bound:
                             for k in range(len(self.grid[i][j].point_arrays[key])):
                                 self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = positive_depth_color[0]
                                 self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = positive_depth_color[1]
@@ -222,8 +222,8 @@ class Grid():
                         else: 
                             for k in range(len(self.grid[i][j].point_arrays[key])):
                                 self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = 65535
-                                self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs(self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound)*65535 )
-                                self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = int(abs(self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound)*65535 )
+                                self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound))*65535 )
+                                self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound))*65535 )
 
                 
                 # elif self.grid[i][j].depth == 0:
