@@ -64,8 +64,8 @@ class Window(QMainWindow):
         self.calculate_snowdepth_button = QPushButton("Calculate Snow Depth")
         self.calculate_snowdepth_button.clicked.connect(self.click_snowdepth_button)
 
-        self.data_widget_layout.addWidget(self.vegetation_button)
-        self.data_widget_layout.addWidget(self.calculate_snowdepth_button)
+        self.alg_widget_layout.addWidget(self.vegetation_button)
+        self.alg_widget_layout.addWidget(self.calculate_snowdepth_button)
 
         self.alg_widget = QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
@@ -74,9 +74,47 @@ class Window(QMainWindow):
         """
         Left plot widget. Has all the plotting options in it.
         """
-        self.plot_snowdepth_button = QPushButton("Plot Snow Depth")
-        self.plot_snowdepth_button.clicked.connect(self.click_plot_snowdepth_button)
-        self.plot_widget_layout.addWidget(self.plot_snowdepth_button)
+        self.plot_button = QPushButton("Plot")
+        self.plot_button.clicked.connect(self.click_plot_button)
+        self.plot_widget_layout.addWidget(self.plot_button)
+
+        self.upper_labels_layout = QHBoxLayout()
+        self.upper_labels_low = QLabel('Lower')
+        self.upper_labels_high = QLabel('Upper')
+        self.upper_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.upper_labels_layout.addWidget(self.upper_labels_low)
+        self.upper_labels_layout.addWidget(self.upper_labels_high)
+
+        self.upper_slider = QSlider(QtCore.Qt.Horizontal)
+        self.upper_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.upper_slider.setTickPosition(QSlider.TicksBothSides)
+        self.upper_slider.setTickInterval(10)
+        self.upper_slider.setSingleStep(1)
+
+        self.upper_labels_widget = QWidget()
+        self.upper_labels_widget.setLayout(self.upper_labels_layout)
+
+        self.plot_widget_layout.addWidget(self.upper_labels_widget)
+        self.plot_widget_layout.addWidget(self.upper_slider)
+
+        self.lower_labels_layout = QHBoxLayout()
+        self.lower_labels_low = QLabel('Lower')
+        self.lower_labels_high = QLabel('Upper')
+        self.lower_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.lower_labels_layout.addWidget(self.lower_labels_low)
+        self.lower_labels_layout.addWidget(self.lower_labels_high)
+
+        self.lower_slider = QSlider(QtCore.Qt.Horizontal)
+        self.lower_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # self.lower_slider.setTickPosition(QSlider.TicksBothSides)
+        self.lower_slider.setTickInterval(10)
+        self.lower_slider.setSingleStep(1)
+
+        self.lower_labels_widget = QWidget()
+        self.lower_labels_widget.setLayout(self.lower_labels_layout)
+
+        self.plot_widget_layout.addWidget(self.lower_labels_widget)
+        self.plot_widget_layout.addWidget(self.lower_slider)
 
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_widget_layout)
@@ -110,7 +148,9 @@ class Window(QMainWindow):
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
             self.manager.add_file(str(file_path[0])) 
             self.message_window.append(" ")
+            self.manager.clear_flags()
             self.left_dock()
+
 
     # def click_plot_initial_button(self):
     #     self.message_window.append("Plotting scans...")
@@ -128,14 +168,9 @@ class Window(QMainWindow):
 
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()
-        # self.message_window.append("Calculating snow depth...")
-        # average, maximum, minimum = self.grid.calculate_snow_depth()
-        # self.message_window.append("Average Depth: " + str(average))
-        # self.message_window.append("Max Depth: " + str(maximum))
-        # self.message_window.append("Minimum Depth: " + str(minimum))
-        # self.message_window.append(" ")
 
-    def click_plot_snowdepth_button(self):
+
+    def click_plot_button(self):
         self.manager.color_points('Ground')
         self.view = self.manager.plot_points()
         self.plot_widgets.clear()
