@@ -117,15 +117,18 @@ class Manager:
                 self.window.message_window.append(str(key) + " scan has " + str(counts[key]) + " cells with vegetation")
 
     def calculate_snow_depth(self):
-        self.window.message_window.append("Calculating snow depth...")
-        average_depths = self.grid.calculate_snow_depth()
-        for key in average_depths:
-            self.window.message_window.append("New snow scan has a depth of " + str(average_depths[key]) + " to " + str(key) + " scan.")
+        if len(self.file_list) > 2:
+            self.window.message_window.append("Calculating snow depth...")
+            average_depths = self.grid.calculate_snow_depth()
+            for key in average_depths:
+                self.window.message_window.append("New snow scan has a depth of " + str(average_depths[key]) + " to " + str(key) + " scan.")
+        else:
+            self.window.message_window.append("Please select files.")
 
     def color_points(self, key):
         self.window.message_window.append("Coloring points...")
-        self.grid.color_points(key)
-        self.window.message_window.append("Points colored!")
+        message = self.grid.color_points(key)
+        self.window.message_window.append(message)
     
     def plot_points(self):
         plot = self.grid.plot_points()
@@ -176,5 +179,17 @@ class Manager:
         for i in self.file_list:
             if not i.ground_checkbox.isChecked() and not i.intSnow_checkbox.isChecked():
                 i.newSnow_checkbox.setEnabled(True)
+
+    def clear_flags(self):
+        self.file_dict['Ground'] = None
+        self.file_dict['Inter. Snow'] = None
+        self.file_dict['New Snow'] = None
+        for i in self.file_list:
+            i.ground_checkbox.setChecked(False)
+            i.intSnow_checkbox.setChecked(False)
+            i.newSnow_checkbox.setChecked(False)
+            i.ground_checkbox.setEnabled(True)
+            i.intSnow_checkbox.setEnabled(True)
+            i.newSnow_checkbox.setEnabled(True)
 
 
