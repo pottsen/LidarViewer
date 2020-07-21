@@ -29,6 +29,7 @@ class Grid():
         self.snow_depth_array_dict = {'Ground':[], 'Inter. Snow':[]}
         self.files = {'Ground': None, 'Inter. Snow': None, 'New Snow': None}
         self.manager = manager
+        self.snow_depth_key = None
 
     # def set_grid_to_manager(self):
     #     return self
@@ -167,7 +168,23 @@ class Grid():
 
             return self.average_scan_depth_dict #, self.max_snow_depth, self.min_snow_depth
 
-    def color_points(self, key):
+    def get_max_and_min_depth(self):
+        if self.snow_depth_array_dict[self.snow_depth_key] != []:
+            stdev = np.std(self.snow_depth_array_dict[self.snow_depth_key])
+            if (self.average_scan_depth_dict[self.snow_depth_key]-2*stdev) < 0:
+                self.min_bound = self.average_scan_depth_dict[self.snow_depth_key] - 2*stdev
+            else:
+                self.min_bound = 0
+            if (self.average_scan_depth_dict[self.snow_depth_key]+2*stdev) > 0:
+                self.max_bound = self.average_scan_depth_dict[self.snow_depth_key] + 2*stdev
+            else:
+                self.max_bound = 0
+            return round(self.max_bound, 2), round(self.min_bound, 2)
+        else:
+            return '-', '-'
+
+
+    def color_points(self):
         # TODO: Write shading according to the std of the depths make the max 2 stdevs away
         # TODO: Add toggle button for plotting. Color all points each time regardless?
         # TODO: When coloring and calculating snowdepth, if we are basing vegetation off of snow, should the min z value for depth be used in the ground and intermediate scans?
@@ -176,7 +193,6 @@ class Grid():
         vegetation_color = [0, 65535, 0]
         negative_depth_color = [0, 0, 65535]
         positive_depth_color = [65535, 0, 0]
-        self.snow_depth_key = 'Ground'
         if self.files[self.snow_depth_key] == None:
             self.files['New Snow'].plot_red =  self.files['New Snow'].red
             self.files['New Snow'].plot_green =  self.files['New Snow'].green

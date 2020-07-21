@@ -74,51 +74,72 @@ class Window(QMainWindow):
         """
         Left plot widget. Has all the plotting options in it.
         """
-        self.plot_button = QPushButton("Plot")
-        self.plot_button.clicked.connect(self.click_plot_button)
-        self.plot_widget_layout.addWidget(self.plot_button)
+        
+        self.depth_checkbox_layout = QHBoxLayout()
+        self.depth_basis_label = QLabel('Depth Basis:')
+        self.ground_basis_checkbox = QCheckBox('Ground')
+        self.ground_basis_checkbox.stateChanged.connect(lambda:self.get_ground_basis_info())
+        self.intSnow_basis_checkbox = QCheckBox('Inter. Snow')
+        self.intSnow_basis_checkbox.stateChanged.connect(lambda:self.get_intSnow_basis_info())
+        self.depth_checkbox_layout.addWidget(self.depth_basis_label)
+        self.depth_checkbox_layout.addWidget(self.ground_basis_checkbox)
+        self.depth_checkbox_layout.addWidget(self.intSnow_basis_checkbox)
 
-        self.upper_labels_layout = QHBoxLayout()
-        self.upper_labels_low = QLabel('Lower')
-        self.upper_labels_high = QLabel('Upper')
-        self.upper_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.upper_labels_layout.addWidget(self.upper_labels_low)
-        self.upper_labels_layout.addWidget(self.upper_labels_high)
+        self.depth_checkbox_widget = QWidget()
+        self.depth_checkbox_widget.setLayout(self.depth_checkbox_layout)
+        self.plot_widget_layout.addWidget(self.depth_checkbox_widget)
 
-        self.upper_slider = QSlider(QtCore.Qt.Horizontal)
-        self.upper_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.upper_slider.setTickPosition(QSlider.TicksBothSides)
-        self.upper_slider.setTickInterval(10)
-        self.upper_slider.setSingleStep(1)
 
-        self.upper_labels_widget = QWidget()
-        self.upper_labels_widget.setLayout(self.upper_labels_layout)
+        self.maxdepth_label_layout = QHBoxLayout()
+        self.maxdepth_label_name = QLabel('Max Depth:')
+        self.maxdepth_label_value = QLabel('-')
+        self.maxdepth_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.maxdepth_label_layout.addWidget(self.maxdepth_label_name)
+        self.maxdepth_label_layout.addWidget(self.maxdepth_label_value)
 
-        self.plot_widget_layout.addWidget(self.upper_labels_widget)
-        self.plot_widget_layout.addWidget(self.upper_slider)
+        self.maxdepth_label_widget = QWidget()
+        self.maxdepth_label_widget.setLayout(self.maxdepth_label_layout)
 
-        self.lower_labels_layout = QHBoxLayout()
-        self.lower_labels_low = QLabel('Lower')
-        self.lower_labels_high = QLabel('Upper')
-        self.lower_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.lower_labels_layout.addWidget(self.lower_labels_low)
-        self.lower_labels_layout.addWidget(self.lower_labels_high)
+        self.upperbound_label_layout = QHBoxLayout()
+        self.upperbound_label_name = QLabel('Upper Bound:')
+        self.upperbound_text_slot = QLineEdit()
+        self.upperbound_label_layout.addWidget(self.upperbound_label_name)
+        self.upperbound_label_layout.addWidget(self.upperbound_text_slot)
 
-        self.lower_slider = QSlider(QtCore.Qt.Horizontal)
-        self.lower_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
-        # self.lower_slider.setTickPosition(QSlider.TicksBothSides)
-        self.lower_slider.setTickInterval(10)
-        self.lower_slider.setSingleStep(1)
+        self.upperbound_label_widget = QWidget()
+        self.upperbound_label_widget.setLayout(self.upperbound_label_layout)
 
-        self.lower_labels_widget = QWidget()
-        self.lower_labels_widget.setLayout(self.lower_labels_layout)
+        self.lowerbound_label_layout = QHBoxLayout()
+        self.lowerbound_label_name = QLabel('Lower Bound:')
+        self.lowerbound_text_slot = QLineEdit()
+        self.lowerbound_label_layout.addWidget(self.lowerbound_label_name)
+        self.lowerbound_label_layout.addWidget(self.lowerbound_text_slot)
 
-        self.plot_widget_layout.addWidget(self.lower_labels_widget)
-        self.plot_widget_layout.addWidget(self.lower_slider)
+        self.lowerbound_label_widget = QWidget()
+        self.lowerbound_label_widget.setLayout(self.lowerbound_label_layout)
+
+        self.mindepth_label_layout = QHBoxLayout()
+        self.mindepth_label_name = QLabel('Min Depth:')
+        self.mindepth_label_value = QLabel('-')
+        self.mindepth_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.mindepth_label_layout.addWidget(self.mindepth_label_name)
+        self.mindepth_label_layout.addWidget(self.mindepth_label_value)
+
+        self.mindepth_label_widget = QWidget()
+        self.mindepth_label_widget.setLayout(self.mindepth_label_layout)
+
+        self.plot_widget_layout.addWidget(self.maxdepth_label_widget)
+        self.plot_widget_layout.addWidget(self.upperbound_label_widget)
+        self.plot_widget_layout.addWidget(self.lowerbound_label_widget)
+        self.plot_widget_layout.addWidget(self.mindepth_label_widget)
 
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_widget_layout)
         self.left_dock_widget_layout.addWidget(self.plot_widget)
+
+        self.plot_button = QPushButton("Plot")
+        self.plot_button.clicked.connect(self.click_plot_button)
+        self.plot_widget_layout.addWidget(self.plot_button)
 
         """
         Make left dock widget.
@@ -140,6 +161,38 @@ class Window(QMainWindow):
         self.setCentralWidget(self.plot_widgets)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.leftDock)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.bottomDock)
+
+    def get_ground_basis_info(self):
+        print("Getting Ground basis info...")
+        if self.ground_basis_checkbox.isChecked():
+            self.intSnow_basis_checkbox.setEnabled(False)
+            max_bound, min_bound = self.manager.get_ground_basis_info()
+            self.maxdepth_label_value.setText(str(max_bound))
+            self.mindepth_label_value.setText(str(min_bound))
+            
+        if not self.ground_basis_checkbox.isChecked():
+            ## Reset info
+            max_bound, min_bound = self.manager.reset_basis_info()
+            self.maxdepth_label_value.setText(str(max_bound))
+            self.mindepth_label_value.setText(str(min_bound))
+            self.intSnow_basis_checkbox.setEnabled(True)
+           
+
+    def get_intSnow_basis_info(self):
+        print("Getting intSnow basis info...")
+        if self.intSnow_basis_checkbox.isChecked():
+            self.ground_basis_checkbox.setEnabled(False)
+            max_bound, min_bound = self.manager.get_ground_basis_info()
+            self.maxdepth_label_value.setText(str(max_bound))
+            self.mindepth_label_value.setText(str(min_bound))
+            
+        if not self.intSnow_basis_checkbox.isChecked():
+            ## Reset info
+            max_bound, min_bound = self.manager.reset_basis_info()
+            self.maxdepth_label_value.setText(str(max_bound))
+            self.mindepth_label_value.setText(str(min_bound))
+            # self.reset_basis()
+            self.ground_basis_checkbox.setEnabled(True)
 
     def click_load_file_button(self):
         file_path = get_file()
@@ -171,7 +224,7 @@ class Window(QMainWindow):
 
 
     def click_plot_button(self):
-        self.manager.color_points('Ground')
+        self.manager.color_points()
         self.view = self.manager.plot_points()
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.view.native, "Plot")
