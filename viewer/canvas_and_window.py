@@ -78,44 +78,6 @@ class Window(QMainWindow):
         self.plot_button.clicked.connect(self.click_plot_button)
         self.plot_widget_layout.addWidget(self.plot_button)
 
-        self.upper_labels_layout = QHBoxLayout()
-        self.upper_labels_low = QLabel('Lower')
-        self.upper_labels_high = QLabel('Upper')
-        self.upper_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.upper_labels_layout.addWidget(self.upper_labels_low)
-        self.upper_labels_layout.addWidget(self.upper_labels_high)
-
-        self.upper_slider = QSlider(QtCore.Qt.Horizontal)
-        self.upper_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.upper_slider.setTickPosition(QSlider.TicksBothSides)
-        self.upper_slider.setTickInterval(10)
-        self.upper_slider.setSingleStep(1)
-
-        self.upper_labels_widget = QWidget()
-        self.upper_labels_widget.setLayout(self.upper_labels_layout)
-
-        self.plot_widget_layout.addWidget(self.upper_labels_widget)
-        self.plot_widget_layout.addWidget(self.upper_slider)
-
-        self.lower_labels_layout = QHBoxLayout()
-        self.lower_labels_low = QLabel('Lower')
-        self.lower_labels_high = QLabel('Upper')
-        self.lower_labels_high.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.lower_labels_layout.addWidget(self.lower_labels_low)
-        self.lower_labels_layout.addWidget(self.lower_labels_high)
-
-        self.lower_slider = QSlider(QtCore.Qt.Horizontal)
-        self.lower_slider.setFocusPolicy(QtCore.Qt.StrongFocus)
-        # self.lower_slider.setTickPosition(QSlider.TicksBothSides)
-        self.lower_slider.setTickInterval(10)
-        self.lower_slider.setSingleStep(1)
-
-        self.lower_labels_widget = QWidget()
-        self.lower_labels_widget.setLayout(self.lower_labels_layout)
-
-        self.plot_widget_layout.addWidget(self.lower_labels_widget)
-        self.plot_widget_layout.addWidget(self.lower_slider)
-
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_widget_layout)
         self.left_dock_widget_layout.addWidget(self.plot_widget)

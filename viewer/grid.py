@@ -41,6 +41,7 @@ class Grid():
         print('Loaded Files')
 
     def make_grid(self, cell_size=1):
+        self.grid = None
         max_x = -float("INF")
         min_x = float("INF")
         max_y = -float("INF")
