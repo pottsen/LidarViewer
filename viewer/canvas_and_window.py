@@ -132,6 +132,9 @@ class Window(QMainWindow):
         self.plot_widget_layout.addWidget(self.upperbound_label_widget)
         self.plot_widget_layout.addWidget(self.lowerbound_label_widget)
         self.plot_widget_layout.addWidget(self.mindepth_label_widget)
+        self.plot_button = QPushButton("Plot")
+        self.plot_button.clicked.connect(self.click_plot_button)
+        self.plot_widget_layout.addWidget(self.plot_button)
 
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_widget_layout)

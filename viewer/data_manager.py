@@ -100,6 +100,8 @@ class Manager:
 
     def make_grid(self):
         if len(self.file_list) > 0:
+            if len(self.file_list) == 1:
+                self.file_dict['New Snow'] = self.file_list[0].file_path
             self.window.message_window.append("Creating grid and adding points.")
             self.grid.load_files(self.file_dict)
             num_cells = self.grid.make_grid()
@@ -121,7 +123,7 @@ class Manager:
             self.window.message_window.append("Calculating snow depth...")
             average_depths = self.grid.calculate_snow_depth()
             for key in average_depths:
-                self.window.message_window.append("New snow scan has a depth of " + str(average_depths[key]) + " to " + str(key) + " scan.")
+                self.window.message_window.append("New snow scan has a depth of " + str(round(average_depths[key]*3.28, 3)) + " feet to " + str(key) + " scan.")
         else:
             self.window.message_window.append("Please select files.")
 
