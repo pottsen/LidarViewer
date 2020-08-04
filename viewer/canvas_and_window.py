@@ -139,10 +139,7 @@ class Window(QMainWindow):
         self.plot_widget = QWidget()
         self.plot_widget.setLayout(self.plot_widget_layout)
         self.left_dock_widget_layout.addWidget(self.plot_widget)
-
-        self.plot_button = QPushButton("Plot")
-        self.plot_button.clicked.connect(self.click_plot_button)
-        self.plot_widget_layout.addWidget(self.plot_button)
+    
 
         """
         Make left dock widget.
@@ -182,10 +179,10 @@ class Window(QMainWindow):
            
 
     def get_intSnow_basis_info(self):
-        print("Getting intSnow basis info...")
         if self.intSnow_basis_checkbox.isChecked():
+            print("Getting intSnow basis info...")
             self.ground_basis_checkbox.setEnabled(False)
-            max_bound, min_bound = self.manager.get_ground_basis_info()
+            max_bound, min_bound = self.manager.get_intSnow_basis_info()
             self.maxdepth_label_value.setText(str(max_bound))
             self.mindepth_label_value.setText(str(min_bound))
             

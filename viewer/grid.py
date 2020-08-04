@@ -131,6 +131,9 @@ class Grid():
 
     def calculate_snow_depth(self):
         for key in self.snow_depth_array_dict:
+            self.snow_depth_array_dict[key] = []
+            print('Calculating snow depth')
+            print(key, self.files[key])
             for i in range(len(self.grid)):
                 for j in range(len(self.grid[0])):
                     if self.grid[i][j].vegetation_flag_dict['New Snow'] or self.grid[i][j].vegetation_flag_dict[key]:
@@ -167,7 +170,7 @@ class Grid():
             # print("Min Depth: ", self.min_snow_depth)
             # print("Average Depth: ", self.average_snow_depth)
 
-            return self.average_scan_depth_dict #, self.max_snow_depth, self.min_snow_depth
+        return self.average_scan_depth_dict #, self.max_snow_depth, self.min_snow_depth
 
     def get_max_and_min_depth(self):
         if self.snow_depth_array_dict[self.snow_depth_key] != []:

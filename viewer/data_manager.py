@@ -98,8 +98,16 @@ class Manager:
         self.file_list.append(file_object(self, file_path))
         print('Length of list', len(self.file_list))
 
+    def count_checked_files(self):
+        count = 0
+        for key, value in self.file_dict.items():
+            if value != None:
+                count += 1
+        print('file count', count)
+        return count
+
     def make_grid(self):
-        if len(self.file_list) > 0:
+        if self.count_checked_files() > 0:
             if len(self.file_list) == 1:
                 self.file_dict['New Snow'] = self.file_list[0].file_path
             self.window.message_window.append("Creating grid and adding points.")
@@ -112,14 +120,14 @@ class Manager:
             self.window.message_window.append("Please select files.")
 
     def flag_vegetation(self):
-        if len(self.file_list) > 0:
+        if self.count_checked_files() > 0:
             self.window.message_window.append("Flagging vegetation.")
             counts = self.grid.flag_vegetation()
             for key in counts:
                 self.window.message_window.append(str(key) + " scan has " + str(counts[key]) + " cells with vegetation")
 
     def calculate_snow_depth(self):
-        if len(self.file_list) > 1:
+        if self.count_checked_files() > 1:
             self.window.message_window.append("Calculating snow depth...")
             average_depths = self.grid.calculate_snow_depth()
             for key in average_depths:
@@ -133,7 +141,7 @@ class Manager:
         self.window.message_window.append(message)
     
     def plot_points(self):
-        if len(self.file_list) > 0:
+        if self.count_checked_files() > 0:
             plot = self.grid.plot_points()
             return plot
 
@@ -144,6 +152,7 @@ class Manager:
 
     def get_intSnow_basis_info(self):
         self.grid.snow_depth_key = 'Inter. Snow'
+        print(self.grid.snow_depth_key)
         max_bound, min_bound = self.grid.get_max_and_min_depth()
         return max_bound, min_bound
 
@@ -167,7 +176,6 @@ class Manager:
         for i in self.file_list:
             if not i.intSnow_checkbox.isChecked() and not i.newSnow_checkbox.isChecked():
                 i.ground_checkbox.setEnabled(True)
-
 
     def set_intSnow_flags(self, path):
         self.file_dict['Inter. Snow'] = path
