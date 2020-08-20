@@ -12,6 +12,7 @@ from remove_duplicates import remove_duplicates
 from grid_cell import Grid_Cell
 import matplotlib.pyplot as plt
 # from iterative_closest_point_clean import *
+from scene import Scene
 
 import vispy.scene
 from vispy.scene import visuals
@@ -286,22 +287,24 @@ class Grid():
         snow_rgb = np.stack((self.files['New Snow'].plot_red/max(self.files['New Snow'].plot_red), self.files['New Snow'].plot_green/max(self.files['New Snow'].plot_green), self.files['New Snow'].plot_blue/max(self.files['New Snow'].plot_blue)))
         snow_rgb = np.transpose(snow_rgb)
 
-        self.plot_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        view = self.plot_canvas.central_widget.add_view()
+        self.scene = Scene(self, self.files['New Snow'].xyz, snow_rgb)
 
-        # scatter = visuals.Markers()
-        # scatter.set_data(self.files[self.snow_depth_key].xyz, edge_color = None, face_color = base_rgb, size = 2)
-        # view.add(scatter)
-        
-        scatter2 = visuals.Markers()
-        scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = snow_rgb, size = 2)
-        view.add(scatter2)
-        
-        view.camera = 'arcball' #'turntable'  # or try 'arcball'
-        axis = visuals.XYZAxis(parent=view.scene)
-        view.add(axis)
+        # self.plot_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        # view = self.plot_canvas.central_widget.add_view()
 
-        return self.plot_canvas
+        # # scatter = visuals.Markers()
+        # # scatter.set_data(self.files[self.snow_depth_key].xyz, edge_color = None, face_color = base_rgb, size = 2)
+        # # view.add(scatter)
+        
+        # scatter2 = visuals.Markers()
+        # scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = snow_rgb, size = 2)
+        # view.add(scatter2)
+        
+        # view.camera = 'arcball' #'turntable'  # or try 'arcball'
+        # axis = visuals.XYZAxis(parent=view.scene)
+        # view.add(axis)
+
+        return self.scene
         
 
 

@@ -142,8 +142,18 @@ class Manager:
     
     def plot_points(self):
         if self.count_checked_files() > 0:
-            plot = self.grid.plot_points()
-            return plot
+            scene = self.grid.plot_points()
+            return scene
+
+    def select_points(self):
+        self.grid.scene.select_flag = self.window.select_points_button.isChecked()
+        self.grid.scene.event_connect(self.grid.scene.select_flag)
+        self.grid.scene.select_id = '2'
+        if self.window.select_points_button.isChecked():
+            self.grid.scene.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
+        else:
+            self.grid.scene.text.text = ''
+
 
     def get_ground_basis_info(self):
         self.grid.snow_depth_key = 'Ground'
