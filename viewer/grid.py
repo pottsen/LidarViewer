@@ -44,10 +44,10 @@ class Grid():
 
     def make_grid(self, cell_size=1):
         self.grid = None
-        max_x = -float("INF")
-        min_x = float("INF")
-        max_y = -float("INF")
-        min_y = float("INF")
+        self.max_x = -float("INF")
+        self.min_x = float("INF")
+        self.max_y = -float("INF")
+        self.min_y = float("INF")
         self.cell_size = cell_size
         for key in self.manager.file_dict:
             if self.manager.file_dict[key] != None:
@@ -58,19 +58,19 @@ class Grid():
                 self.files[key].max_z = np.max(self.files[key].xyz[:,2])
                 self.files[key].min_z = np.min(self.files[key].xyz[:,2])
 
-                if self.files[key].max_x > max_x:
-                    max_x = self.files[key].max_x
-                if self.files[key].min_x < min_x:
-                    min_x= self.files[key].min_x
-                if self.files[key].max_y > max_y:
-                    max_y = self.files[key].max_y
-                if self.files[key].min_y < min_y:
-                    min_y= self.files[key].min_y
+                if self.files[key].max_x > self.max_x:
+                    self.max_x = self.files[key].max_x
+                if self.files[key].min_x < self.min_x:
+                    self.min_x= self.files[key].min_x
+                if self.files[key].max_y > self.max_y:
+                    self.max_y = self.files[key].max_y
+                if self.files[key].min_y < self.min_y:
+                    self.min_y= self.files[key].min_y
 
         ################################################
         # calculate x and y length of scan to be used in determing grid spots
-        delta_x = abs(max_x - min_x)
-        delta_y = abs(max_y - min_y)
+        delta_x = abs(self.max_x - self.min_x)
+        delta_y = abs(self.max_y - self.min_y)
 
         self.number_of_cells_x = math.ceil(delta_x/self.cell_size)
         self.number_of_cells_y = math.ceil(delta_y/self.cell_size)
@@ -305,6 +305,39 @@ class Grid():
         # view.add(axis)
 
         return self.scene
+
+    def get_stats(self, points):
+        sum_depth = 0
+        count = 0
+        max_depth = -float('INF')
+        min_depth = float('INF')
+        # print('points', len(points))
+        for point in points:
+            # print(point)
+            i = math.floor((point[0]-self.min_x)/self.cell_size)
+            j = math.floor((point[1]-self.min_y)/self.cell_size)
+            # print(i)
+            # print(j)
+            # print('snow depth key', self.snow_depth_key)
+            # print('cell depth',self.grid[i][j].depth_dict[self.snow_depth_key])
+            print(self.grid[i][j].vegetation_flag_dict['New Snow'])
+            if not self.grid[i][j].vegetation_flag_dict['New Snow']:
+                print('here')
+                depth = self.grid[i][j].depth_dict[self.snow_depth_key]
+                if depth > max_depth:
+                    max_depth = depth
+                if depth < min_depth:
+                    min_depth = depth
+                sum_depth += depth
+                count +=1
+            try:
+                average_depth = round(sum_depth/count, 2)
+            except:
+                average_depth = float('INF')
+
+        return average_depth, round(max_depth, 2), round(min_depth, 2)
+
+
         
 
 
