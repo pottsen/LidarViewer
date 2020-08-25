@@ -135,9 +135,9 @@ class Manager:
         else:
             self.window.message_window.append("Please select files.")
 
-    def color_points(self):
+    def color_points(self, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        message = self.grid.color_points()
+        message = self.grid.color_points(upper_bound, lower_bound)
         self.window.message_window.append(message)
     
     def plot_points(self):

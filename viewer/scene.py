@@ -105,7 +105,7 @@ class Scene(QtWidgets.QWidget):
         box = QtWidgets.QVBoxLayout(self)
         # self.resize(500, 500)
         self.grid = grid
-        print('grid', self.grid)
+        # print('grid', self.grid)
         self.setLayout(box)
         self.canvas = scene.SceneCanvas(keys=keys)
         box.addWidget(self.canvas.native)
@@ -190,7 +190,7 @@ class Scene(QtWidgets.QWidget):
 
     def mark_selected(self):
         # Change the color of the selected point
-        print('changing color')
+        # print('changing color')
         self.facecolor = copy.deepcopy(self.base_facecolor)
         # print('equal' , self.facecolor==self.base_facecolor)
         self.scatter.set_data(self.data, face_color=self.facecolor,

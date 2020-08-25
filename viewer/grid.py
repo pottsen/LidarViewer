@@ -40,7 +40,7 @@ class Grid():
             if file_dict[key] != None:
                 print('Key', key)
                 self.files[key] = Grid_File(key, file_dict[key])
-        print('Loaded Files')
+        # print('Loaded Files')
 
     def make_grid(self, cell_size=1):
         self.grid = None
@@ -75,7 +75,7 @@ class Grid():
         self.number_of_cells_x = math.ceil(delta_x/self.cell_size)
         self.number_of_cells_y = math.ceil(delta_y/self.cell_size)
 
-        print("\nTotal number of grid cells: ", self.number_of_cells_x*self.number_of_cells_y)
+        # print("\nTotal number of grid cells: ", self.number_of_cells_x*self.number_of_cells_y)
 
         #################################################
         # make grid
@@ -161,9 +161,9 @@ class Grid():
                         else:
                             # print("no snow or base points")
                             pass
-            plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
-            plt.title(key)
-            plt.show()
+            # plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
+            # plt.title(key)
+            # plt.show()
 
             self.average_scan_depth_dict[key] = self.average_scan_depth_dict[key]/(len(self.grid)*len(self.grid[0]))
 
@@ -189,7 +189,7 @@ class Grid():
             return '-', '-'
 
 
-    def color_points(self):
+    def color_points(self, upper_bound, lower_bound):
         # TODO: Write shading according to the std of the depths make the max 2 stdevs away
         # TODO: Add toggle button for plotting. Color all points each time regardless?
         # TODO: When coloring and calculating snowdepth, if we are basing vegetation off of snow, should the min z value for depth be used in the ground and intermediate scans?
@@ -211,18 +211,29 @@ class Grid():
                                 self.files['New Snow'].plot_green[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[1]
                                 self.files['New Snow'].plot_blue[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[2]
 
-            return "Only one file loaded. Only coloring by vegetation and using default colors."
+            return "Only coloring by vegetation and using default colors."
 
         else:
-            stdev = np.std(self.snow_depth_array_dict[self.snow_depth_key])
-            if (self.average_scan_depth_dict[self.snow_depth_key]-2*stdev) < 0:
-                lower_bound = self.average_scan_depth_dict[self.snow_depth_key] - 2*stdev
+            if upper_bound != '':
+                self.upper_bound = float(upper_bound)
             else:
-                lower_bound = 0
-            if (self.average_scan_depth_dict[self.snow_depth_key]+2*stdev) > 0:
-                upper_bound = self.average_scan_depth_dict[self.snow_depth_key] + 2*stdev
+                stdev = np.std(self.snow_depth_array_dict[self.snow_depth_key])
+                if (self.average_scan_depth_dict[self.snow_depth_key]+2*stdev) > 0:
+                    self.upper_bound = self.average_scan_depth_dict[self.snow_depth_key] + 2*stdev
+                else:
+                    self.upper_bound = 0
+
+            if lower_bound != '':
+                self.lower_bound = float(lower_bound)
             else:
-                upper_bound = 0
+                stdev = np.std(self.snow_depth_array_dict[self.snow_depth_key])
+                if (self.average_scan_depth_dict[self.snow_depth_key]-2*stdev) < 0:
+                    self.lower_bound = self.average_scan_depth_dict[self.snow_depth_key] - 2*stdev
+                else:
+                    self.lower_bound = 0
+
+            print('upper bound', self.upper_bound)
+            print('lower bound', self.lower_bound)   
 
             for key in [self.snow_depth_key, 'New Snow']:
                 self.files[key].plot_red = self.files[key].red
@@ -239,19 +250,19 @@ class Grid():
                                 self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = vegetation_color[2]
 
                         elif self.grid[i][j].depth_dict[self.snow_depth_key] < 0:
-                            if self.grid[i][j].depth_dict[self.snow_depth_key] <= lower_bound:
+                            if self.grid[i][j].depth_dict[self.snow_depth_key] <= self.lower_bound:
                                 for k in range(len(self.grid[i][j].point_arrays[key])):
                                     self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[0]
                                     self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[1]
                                     self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = negative_depth_color[2]
                             else: 
                                 for k in range(len(self.grid[i][j].point_arrays[key])):
-                                    self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound))*65535 )
-                                    self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - lower_bound)/(lower_bound))*65535 )
+                                    self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - self.lower_bound)/(self.lower_bound))*65535 )
+                                    self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - self.lower_bound)/(self.lower_bound))*65535 )
                                     self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = 65535
 
                         else:
-                            if self.grid[i][j].depth_dict[self.snow_depth_key] >= upper_bound:
+                            if self.grid[i][j].depth_dict[self.snow_depth_key] >= self.upper_bound:
                                 for k in range(len(self.grid[i][j].point_arrays[key])):
                                     self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = positive_depth_color[0]
                                     self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = positive_depth_color[1]
@@ -259,8 +270,8 @@ class Grid():
                             else: 
                                 for k in range(len(self.grid[i][j].point_arrays[key])):
                                     self.files[key].plot_red[self.grid[i][j].point_arrays[key][k].index] = 65535
-                                    self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound))*65535 )
-                                    self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - upper_bound)/(upper_bound))*65535 )
+                                    self.files[key].plot_green[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - self.upper_bound)/(self.upper_bound))*65535 )
+                                    self.files[key].plot_blue[self.grid[i][j].point_arrays[key][k].index] = int(abs((self.grid[i][j].depth_dict[self.snow_depth_key] - self.upper_bound)/(self.upper_bound))*65535 )
                 return "Points colored by snowdepth."
 
     def plot_points_initial(self):   
@@ -320,9 +331,9 @@ class Grid():
             # print(j)
             # print('snow depth key', self.snow_depth_key)
             # print('cell depth',self.grid[i][j].depth_dict[self.snow_depth_key])
-            print(self.grid[i][j].vegetation_flag_dict['New Snow'])
+            # print(self.grid[i][j].vegetation_flag_dict['New Snow'])
             if not self.grid[i][j].vegetation_flag_dict['New Snow']:
-                print('here')
+                # print('here')
                 depth = self.grid[i][j].depth_dict[self.snow_depth_key]
                 if depth > max_depth:
                     max_depth = depth

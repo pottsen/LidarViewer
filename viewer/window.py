@@ -243,7 +243,7 @@ class Window(QMainWindow):
 
 
     def click_plot_button(self):
-        self.manager.color_points()
+        self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
         self.scene = self.manager.plot_points()
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
