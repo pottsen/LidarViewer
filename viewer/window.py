@@ -64,8 +64,10 @@ class Window(QMainWindow):
         self.alg_widget_layout = QVBoxLayout()
         self.vegetation_button = QPushButton("Find Vegetation and Cliffs")
         self.vegetation_button.clicked.connect(self.click_vegetation_button)
+        self.vegetation_button.setEnabled(False)
         self.calculate_snowdepth_button = QPushButton("Calculate Snow Depth")
         self.calculate_snowdepth_button.clicked.connect(self.click_snowdepth_button)
+        self.calculate_snowdepth_button.setEnabled(False)
 
         self.alg_widget_layout.addWidget(self.vegetation_button)
         self.alg_widget_layout.addWidget(self.calculate_snowdepth_button)
@@ -82,8 +84,10 @@ class Window(QMainWindow):
         self.depth_basis_label = QLabel('Depth Basis:')
         self.ground_basis_checkbox = QCheckBox('Ground')
         self.ground_basis_checkbox.stateChanged.connect(lambda:self.get_ground_basis_info())
+        self.ground_basis_checkbox.setEnabled(False)
         self.intSnow_basis_checkbox = QCheckBox('Inter. Snow')
         self.intSnow_basis_checkbox.stateChanged.connect(lambda:self.get_intSnow_basis_info())
+        self.intSnow_basis_checkbox.setEnabled(False)
         self.depth_checkbox_layout.addWidget(self.depth_basis_label)
         self.depth_checkbox_layout.addWidget(self.ground_basis_checkbox)
         self.depth_checkbox_layout.addWidget(self.intSnow_basis_checkbox)
@@ -106,6 +110,7 @@ class Window(QMainWindow):
         self.upperbound_label_layout = QHBoxLayout()
         self.upperbound_label_name = QLabel('Upper Bound:')
         self.upperbound_text_slot = QLineEdit()
+        self.upperbound_text_slot.setEnabled(False)
         self.upperbound_label_layout.addWidget(self.upperbound_label_name)
         self.upperbound_label_layout.addWidget(self.upperbound_text_slot)
 
@@ -115,6 +120,7 @@ class Window(QMainWindow):
         self.lowerbound_label_layout = QHBoxLayout()
         self.lowerbound_label_name = QLabel('Lower Bound:')
         self.lowerbound_text_slot = QLineEdit()
+        self.lowerbound_text_slot.setEnabled(False)
         self.lowerbound_label_layout.addWidget(self.lowerbound_label_name)
         self.lowerbound_label_layout.addWidget(self.lowerbound_text_slot)
 
@@ -137,6 +143,7 @@ class Window(QMainWindow):
         self.plot_widget_layout.addWidget(self.mindepth_label_widget)
         self.plot_button = QPushButton("Plot")
         self.plot_button.clicked.connect(self.click_plot_button)
+        self.plot_button.setEnabled(False)
         self.plot_widget_layout.addWidget(self.plot_button)
 
         self.plot_widget = QWidget()
@@ -147,6 +154,7 @@ class Window(QMainWindow):
         self.select_points_button = QPushButton("Select Points")
         self.select_points_button.setCheckable(True)
         self.select_points_button.clicked.connect(self.click_select_points_button)
+        self.select_points_button.setEnabled(False)
         self.stats_widget_layout.addWidget(self.select_points_button)
         self.stats_widget = QWidget()
         self.stats_widget.setLayout(self.stats_widget_layout)
@@ -222,6 +230,8 @@ class Window(QMainWindow):
             self.message_window.append(" ")
             self.manager.clear_flags()
             self.left_dock()
+        if len(self.manager.file_list) > 0:
+            self.vegetation_button.setEnabled(True)
 
 
     # def click_plot_initial_button(self):
@@ -237,9 +247,15 @@ class Window(QMainWindow):
     def click_vegetation_button(self):
         self.manager.make_grid()
         self.manager.flag_vegetation()
+        self.calculate_snowdepth_button.setEnabled(True)
+        self.plot_button.setEnabled(True)
 
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()
+        self.ground_basis_checkbox.setEnabled(True)
+        self.intSnow_basis_checkbox.setEnabled(True)
+        self.upperbound_text_slot.setEnabled(True)
+        self.lowerbound_text_slot.setEnabled(True)
 
 
     def click_plot_button(self):
@@ -247,6 +263,7 @@ class Window(QMainWindow):
         self.scene = self.manager.plot_points()
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
+        self.select_points_button.setEnabled(True)
 
     def click_select_points_button(self):
         self.manager.select_points()
