@@ -198,7 +198,7 @@ class Grid():
         vegetation_color = [0, 65535, 0]
         negative_depth_color = [0, 0, 65535]
         positive_depth_color = [65535, 0, 0]
-        if self.files[self.snow_depth_key] == None:
+        if self.snow_depth_key not in ['Ground', 'Inter. Snow']:
             self.files['New Snow'].plot_red =  self.files['New Snow'].red
             self.files['New Snow'].plot_green =  self.files['New Snow'].green
             self.files['New Snow'].plot_blue =  self.files['New Snow'].blue
