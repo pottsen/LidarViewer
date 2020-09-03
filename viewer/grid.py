@@ -210,7 +210,7 @@ class Grid():
                                 self.files['New Snow'].plot_red[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[0]
                                 self.files['New Snow'].plot_green[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[1]
                                 self.files['New Snow'].plot_blue[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[2]
-
+            print("Only coloring by vegetation and using default colors.")
             return "Only coloring by vegetation and using default colors."
 
         else:

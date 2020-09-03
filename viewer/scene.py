@@ -123,14 +123,13 @@ class Scene(QtWidgets.QWidget):
         self.black = (0.0, 0.0, 0.0)#, 0.0)
 
         # Data
-        avg_x = np.average(points[:,0])
-        avg_y = np.average(points[:,1])
-        avg_z = np.average(points[:,2])
         self.data = points
-
+        avg_x = np.average(self.data[:,0])
+        avg_y = np.average(self.data[:,1])
+        avg_z = np.average(self.data[:,2])
+        
         # Camera
         self.view = self.canvas.central_widget.add_view()
-        # self.view.camera = 'arcball'#scene.cameras.ArcballCamera()
         self.view.camera = scene.cameras.TurntableCamera(#fov=45,
         elevation=-np.arctan(avg_z/avg_x)*360,
         azimuth=np.arctan(avg_y/avg_x)*360,
@@ -195,7 +194,6 @@ class Scene(QtWidgets.QWidget):
         # print('equal' , self.facecolor==self.base_facecolor)
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
-        # print('selected', len(self.selected[0]))
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
 
@@ -203,13 +201,18 @@ class Scene(QtWidgets.QWidget):
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
         self.scatter.update()
-        stats = self.grid.get_stats(self.data[self.selected]) 
+        if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
+            stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
 
-        # add call to get snowdepth here
-        # get average x,y,z
-        self.stats_text.text = str(f'Average Depth: {stats[0]}')
-        self.stats_text2.text = str(f'Max Depth: {stats[1]}')
-        self.stats_text3.text = str(f'Min Depth: {stats[2]}')
+            # add call to get snowdepth here
+            # get average x,y,z
+            self.stats_text.text = str(f'Average Depth: {stats[0]}')
+            self.stats_text2.text = str(f'Max Depth: {stats[1]}')
+            self.stats_text3.text = str(f'Min Depth: {stats[2]}')
+        else:
+            self.stats_text.text = str(f'Average Depth: n/a')
+            self.stats_text2.text = str(f'Max Depth: n/a')
+            self.stats_text3.text = str(f'Min Depth: n/a')
 
     def on_key_press(self, event):
         # Set select_flag and instruction text
@@ -242,6 +245,7 @@ class Scene(QtWidgets.QWidget):
             select_path = path.Path(self.line_pos, closed=True)
             mask = [select_path.contains_points(data)]
 
+            # if len(self.data[tuple(mask)]) > 0:
             self.selected = mask
             self.mark_selected()
 
