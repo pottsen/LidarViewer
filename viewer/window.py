@@ -245,10 +245,10 @@ class Window(QMainWindow):
     #     self.message_window.append(" ")
 
     def click_vegetation_button(self):
-        self.manager.make_grid()
-        self.manager.flag_vegetation()
-        self.calculate_snowdepth_button.setEnabled(True)
-        self.plot_button.setEnabled(True)
+        flag = self.manager.make_grid()
+        # self.manager.flag_vegetation()
+        self.calculate_snowdepth_button.setEnabled(flag)
+        self.plot_button.setEnabled(flag)
 
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()

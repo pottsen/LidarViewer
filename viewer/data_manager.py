@@ -108,16 +108,18 @@ class Manager:
 
     def make_grid(self):
         if self.count_checked_files() > 0:
-            if len(self.file_list) == 1:
-                self.file_dict['New Snow'] = self.file_list[0].file_path
             self.window.message_window.append("Creating grid and adding points.")
             self.grid.load_files(self.file_dict)
-            num_cells = self.grid.make_grid()
-            self.window.message_window.append("Grid Complete!")
-            self.window.message_window.append(str(num_cells) + " Total Grid Cells")
-            self.flag_vegetation
+            message = self.grid.make_grid()
+            self.window.message_window.append(str(message))
+            print(self.grid.grid)
+            if self.grid.grid != None:
+                self.flag_vegetation()
+                return True
+            return False
         else:
             self.window.message_window.append("Please select files.")
+            return False
 
     def flag_vegetation(self):
         if self.count_checked_files() > 0:

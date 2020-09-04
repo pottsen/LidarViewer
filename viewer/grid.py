@@ -44,13 +44,33 @@ class Grid():
 
     def make_grid(self, cell_size=1):
         self.grid = None
+
+        # Center points about origin
+        print('centering points')
+        avg_x = []
+        avg_y = []
+        avg_z = []
+        
+        for key in self.manager.file_dict:
+            if self.manager.file_dict[key] != None:
+                avg_x.append(np.mean(self.files[key].init_xyz[:,0]))
+                avg_y.append(np.mean(self.files[key].init_xyz[:,1]))
+                avg_z.append(np.mean(self.files[key].init_xyz[:,2]))
+
+        self.shift_x = np.mean(avg_x)
+        self.shift_y = np.mean(avg_y)
+        self.shift_z = np.mean(avg_z)
+
+        print('check extents')
         self.max_x = -float("INF")
         self.min_x = float("INF")
         self.max_y = -float("INF")
         self.min_y = float("INF")
         self.cell_size = cell_size
         for key in self.manager.file_dict:
+            print(key)
             if self.manager.file_dict[key] != None:
+                self.files[key].shift_points(self.shift_x, self.shift_y, self.shift_z)
                 self.files[key].max_x = np.max(self.files[key].xyz[:,0])
                 self.files[key].min_x = np.min(self.files[key].xyz[:,0])
                 self.files[key].max_y = np.max(self.files[key].xyz[:,1])
@@ -58,10 +78,29 @@ class Grid():
                 self.files[key].max_z = np.max(self.files[key].xyz[:,2])
                 self.files[key].min_z = np.min(self.files[key].xyz[:,2])
 
+                if self.files[key].max_x < self.min_x and self.min_x != float("INF"):
+                    print(self.files[key].max_x, self.min_x)
+                    print(f"{key} max_x < global min_x. Scans may not overlap. Check accuracy of coordinates")
+                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                if self.files[key].min_x > self.max_x and self.max_x != -float("INF"):
+                    print(self.files[key].min_x, self.max_x)
+                    print(f"{key} min_x > global max_x. Scans may not overlap. Check accuracy of coordinates")
+                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+
                 if self.files[key].max_x > self.max_x:
                     self.max_x = self.files[key].max_x
                 if self.files[key].min_x < self.min_x:
                     self.min_x= self.files[key].min_x
+
+                if self.files[key].max_y < self.min_y and self.min_y != float("INF"):
+                    print(self.files[key].max_y, self.min_y)
+                    print(f"{key} max_y < global min_y. Scans may not overlap. Check accuracy of coordinates")
+                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                if self.files[key].min_y > self.max_y and self.max_y != -float("INF"):
+                    print(self.files[key].min_y, self.max_y)
+                    print(f"{key} min_y > global max_y. Scans may not overlap. Check accuracy of coordinates")
+                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                
                 if self.files[key].max_y > self.max_y:
                     self.max_y = self.files[key].max_y
                 if self.files[key].min_y < self.min_y:
@@ -85,7 +124,7 @@ class Grid():
             if self.files[key] != None:
                 self.add_points_to_grid(key)
 
-        return self.number_of_cells_y*self.number_of_cells_x
+        return f"Grid Complete! {self.number_of_cells_y*self.number_of_cells_x} Total Grid Cells"
 
 
     def add_points_to_grid(self, key):
@@ -199,21 +238,32 @@ class Grid():
         negative_depth_color = [0, 0, 65535]
         positive_depth_color = [65535, 0, 0]
         if self.snow_depth_key not in ['Ground', 'Inter. Snow']:
-            self.files['New Snow'].plot_red =  self.files['New Snow'].red
-            self.files['New Snow'].plot_green =  self.files['New Snow'].green
-            self.files['New Snow'].plot_blue =  self.files['New Snow'].blue
+            if self.files['New Snow'] != None:
+                self.plot_key = 'New Snow'
+            elif self.files['Ground'] != None:
+                self.plot_key = 'Ground'
+            elif self.files['Inter. Snow'] != None:
+                self.plot_key = 'Inter. Snow'
+            else:
+                print('No file selected to plot')
+                return 'No file selected to plot'
+                
+            self.files[self.plot_key].plot_red =  self.files[self.plot_key].red
+            self.files[self.plot_key].plot_green =  self.files[self.plot_key].green
+            self.files[self.plot_key].plot_blue =  self.files[self.plot_key].blue
 
             for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
-                        if self.grid[i][j].vegetation_flag_dict['New Snow']:
-                            for k in range(len(self.grid[i][j].point_arrays['New Snow'])):
-                                self.files['New Snow'].plot_red[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[0]
-                                self.files['New Snow'].plot_green[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[1]
-                                self.files['New Snow'].plot_blue[self.grid[i][j].point_arrays['New Snow'][k].index] = vegetation_color[2]
+                        if self.grid[i][j].vegetation_flag_dict[self.plot_key]:
+                            for k in range(len(self.grid[i][j].point_arrays[self.plot_key])):
+                                self.files[self.plot_key].plot_red[self.grid[i][j].point_arrays[self.plot_key][k].index] = vegetation_color[0]
+                                self.files[self.plot_key].plot_green[self.grid[i][j].point_arrays[self.plot_key][k].index] = vegetation_color[1]
+                                self.files[self.plot_key].plot_blue[self.grid[i][j].point_arrays[self.plot_key][k].index] = vegetation_color[2]
             print("Only coloring by vegetation and using default colors.")
             return "Only coloring by vegetation and using default colors."
 
         else:
+            self.plot_key = 'New Snow'
             if upper_bound != '':
                 self.upper_bound = float(upper_bound)
             else:
@@ -292,28 +342,11 @@ class Grid():
         return self.init_canvas
                 
     def plot_points(self):   
-        # base_rgb = np.stack((self.files[self.snow_depth_key].plot_red/max(self.files[self.snow_depth_key].plot_red), self.files[self.snow_depth_key].plot_green/max(self.files[self.snow_depth_key].plot_green), self.files[self.snow_depth_key].plot_blue/max(self.files[self.snow_depth_key].plot_blue)))
-        # base_rgb = np.transpose(base_rgb)
 
-        snow_rgb = np.stack((self.files['New Snow'].plot_red/max(self.files['New Snow'].plot_red), self.files['New Snow'].plot_green/max(self.files['New Snow'].plot_green), self.files['New Snow'].plot_blue/max(self.files['New Snow'].plot_blue)))
+        snow_rgb = np.stack((self.files[self.plot_key].plot_red/max(self.files[self.plot_key].plot_red), self.files[self.plot_key].plot_green/max(self.files[self.plot_key].plot_green), self.files[self.plot_key].plot_blue/max(self.files[self.plot_key].plot_blue)))
         snow_rgb = np.transpose(snow_rgb)
 
-        self.scene = Scene(self, self.files['New Snow'].xyz, snow_rgb)
-
-        # self.plot_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        # view = self.plot_canvas.central_widget.add_view()
-
-        # # scatter = visuals.Markers()
-        # # scatter.set_data(self.files[self.snow_depth_key].xyz, edge_color = None, face_color = base_rgb, size = 2)
-        # # view.add(scatter)
-        
-        # scatter2 = visuals.Markers()
-        # scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = snow_rgb, size = 2)
-        # view.add(scatter2)
-        
-        # view.camera = 'arcball' #'turntable'  # or try 'arcball'
-        # axis = visuals.XYZAxis(parent=view.scene)
-        # view.add(axis)
+        self.scene = Scene(self, self.files[self.plot_key].xyz, snow_rgb)
 
         return self.scene
 
