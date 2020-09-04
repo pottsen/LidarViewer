@@ -10,10 +10,10 @@ class Grid_File:
         self.file = File(cleaned_file, mode = "r")
         self.file_name = file_path.split('/')[-1]
         self.file_name = self.file_name.split('.')[0]
-        self.x = self.file.x
-        self.y = self.file.y
-        self.z = self.file.z 
-        self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
+        self.init_x = self.file.x 
+        self.init_y = self.file.y 
+        self.init_z = self.file.z 
+        self.init_xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
         self.plot_red = []
         self.plot_blue = []
         self.plot_green = []
@@ -28,4 +28,10 @@ class Grid_File:
             self.blue = np.ones(len(self.file.points)) * 65535
         
         self.intensity = copy.deepcopy(self.file.intensity)
-        
+    
+    def shift_points(self, shift_x, shift_y, shift_z):
+        self.x = self.file.x - shift_x
+        self.y = self.file.y - shift_y
+        self.z = self.file.z - shift_z
+        self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
+
