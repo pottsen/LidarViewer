@@ -1208,7 +1208,7 @@ grid.flag_vegetation("base")
 grid.flag_vegetation("snow")
 
 # print("Aligning point clouds...")
-# grid.align_point_clouds()
+grid.align_point_clouds()
 # grid.save_match_file()
 
 # print("Regridding point clouds...")

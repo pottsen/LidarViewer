@@ -346,7 +346,7 @@ class Grid():
         snow_rgb = np.stack((self.files[self.plot_key].plot_red/max(self.files[self.plot_key].plot_red), self.files[self.plot_key].plot_green/max(self.files[self.plot_key].plot_green), self.files[self.plot_key].plot_blue/max(self.files[self.plot_key].plot_blue)))
         snow_rgb = np.transpose(snow_rgb)
 
-        self.scene = Scene(self, self.files[self.plot_key].xyz, snow_rgb)
+        self.scene = Scene(self, self.files[self.plot_key].xyz, snow_rgb, 'Depth')
 
         return self.scene
 

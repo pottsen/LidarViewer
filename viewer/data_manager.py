@@ -112,7 +112,7 @@ class Manager:
             self.grid.load_files(self.file_dict)
             message = self.grid.make_grid()
             self.window.message_window.append(str(message))
-            print(self.grid.grid)
+            # print(self.grid.grid)
             if self.grid.grid != None:
                 self.flag_vegetation()
                 return True

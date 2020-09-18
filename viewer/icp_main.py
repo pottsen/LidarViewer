@@ -1,5 +1,4 @@
-# from canvas import Canvas
-from window import Window
+from ICP_window import Window
 import vispy.app
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
@@ -19,4 +18,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
