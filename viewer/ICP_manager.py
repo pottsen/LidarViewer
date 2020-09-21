@@ -5,9 +5,11 @@ import sys
 from grid import Grid
 from grid_file import Grid_File
 from scene import Scene
+from multi_scene import Multi_Scene
 import numpy as np
 import ICP_algorithm as ia
 import copy
+from datetime import datetime
 
 import tie_point_check as tpc
 import vispy.scene
@@ -102,8 +104,6 @@ class Manager:
         print(f"{key} file added.")
         return scene
 
-
-
     def make_grid(self):
         if self.count_checked_files() > 0:
             self.window.message_window.append("Creating grid and adding points.")
@@ -171,39 +171,61 @@ class Manager:
             self.window.scene_2_matched_data[i] = np.matmul(rotation, self.window.scene_2_matched_data[i]) + translation
 
         # tpc.tie_point_error(self.window.scene_1.data, self.window.scene_2.data, self.window.scene_2_matched_data)
+        points = [self.window.scene_1_selected_areas, match, scene_2_selected_area_copy]
+        color = ['red', 'white', 'green']
+        self.add_multi_scene(points, color, 'Selected Point Match')
 
-        canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        view = canvas.central_widget.add_view()
-        scatter = visuals.Markers()
-        scatter.set_data(self.window.scene_1_selected_areas, edge_color = None, face_color = "red", size = 4)
-        view.add(scatter)
-        scatter2 = visuals.Markers()
-        scatter2.set_data(match, edge_color = None, face_color = "blue", size = 4)
-        view.add(scatter2)
-        scatter3 = visuals.Markers()
-        scatter3.set_data(scene_2_selected_area_copy, edge_color = None, face_color = "green", size = 4)
-        view.add(scatter3)
-        view.camera = 'arcball'
-        axis = visuals.XYZAxis(parent=view.scene)
-        vispy.app.run()
+        points = [self.window.scene_1.data, self.window.scene_2_matched_data, self.window.scene_2.data]
+        self.add_multi_scene(points, color, 'Match Comparison')
 
-        canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        view = canvas.central_widget.add_view()
-        scatter = visuals.Markers()
-        scatter.set_data(self.window.scene_1.data, edge_color = None, face_color = "red", size = 4)
-        view.add(scatter)
-        scatter2 = visuals.Markers()
-        scatter2.set_data(self.window.scene_2_matched_data, edge_color = None, face_color = "blue", size = 4)
-        view.add(scatter2)
-        scatter3 = visuals.Markers()
-        scatter3.set_data(self.window.scene_2.data, edge_color = None, face_color = "green", size = 4)
-        view.add(scatter3)
-        view.camera = 'arcball'
-        axis = visuals.XYZAxis(parent=view.scene)
-        vispy.app.run()
+        # canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        # view = canvas.central_widget.add_view()
+        # scatter = visuals.Markers()
+        # scatter.set_data(self.window.scene_1_selected_areas, edge_color = None, face_color = "red", size = 4)
+        # view.add(scatter)
+        # scatter2 = visuals.Markers()
+        # scatter2.set_data(match, edge_color = None, face_color = "blue", size = 4)
+        # view.add(scatter2)
+        # scatter3 = visuals.Markers()
+        # scatter3.set_data(scene_2_selected_area_copy, edge_color = None, face_color = "green", size = 4)
+        # view.add(scatter3)
+        # view.camera = 'arcball'
+        # axis = visuals.XYZAxis(parent=view.scene)
+        # vispy.app.run()
+
+        # canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        # view = canvas.central_widget.add_view()
+        # scatter = visuals.Markers()
+        # scatter.set_data(self.window.scene_1.data, edge_color = None, face_color = "red", size = 4)
+        # view.add(scatter)
+        # scatter2 = visuals.Markers()
+        # scatter2.set_data(self.window.scene_2_matched_data, edge_color = None, face_color = "blue", size = 4)
+        # view.add(scatter2)
+        # scatter3 = visuals.Markers()
+        # scatter3.set_data(self.window.scene_2.data, edge_color = None, face_color = "green", size = 4)
+        # view.add(scatter3)
+        # view.camera = 'arcball'
+        # axis = visuals.XYZAxis(parent=view.scene)
+        # vispy.app.run()
 
 
-        aligned_file_name = self.files['Alignment'].file_name +"_aligned.las" #file_dict['Alignment'].split('/')[-1] +"_aligned.las"
+        # aligned_file_name = self.files['Alignment'].file_name +"_aligned.las" #file_dict['Alignment'].split('/')[-1] +"_aligned.las"
+        # aligned_file = File(aligned_file_name, mode = "w", header = self.files['Alignment'].file.header)
+        # aligned_file.x = self.window.scene_2_matched_data[:,0]
+        # aligned_file.y = self.window.scene_2_matched_data[:,1]
+        # aligned_file.z = self.window.scene_2_matched_data[:,2]
+        # aligned_file.close()
+
+    def add_multi_scene(self, points, color, title):
+        multi_scene = Multi_Scene(points, color, title)
+
+        self.window.plot_widgets.addTab(multi_scene, title)
+
+    def save_matched_file(self):
+        now = datetime.now()
+        date = now.strftime("%D").replace('/','-')
+        time = now.strftime("%H-%M")
+        aligned_file_name = self.files['Alignment'].file_name +'_aligned_to_'+self.files['Base'].file_name+date+'.las'
         aligned_file = File(aligned_file_name, mode = "w", header = self.files['Alignment'].file.header)
         aligned_file.x = self.window.scene_2_matched_data[:,0]
         aligned_file.y = self.window.scene_2_matched_data[:,1]
