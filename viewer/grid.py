@@ -30,7 +30,7 @@ class Grid():
         self.snow_depth_array_dict = {'Ground':[], 'Inter. Snow':[]}
         self.files = {'Ground': None, 'Inter. Snow': None, 'New Snow': None}
         self.manager = manager
-        self.snow_depth_key = None
+        self.snow_depth_key = 'New Snow'
 
     # def set_grid_to_manager(self):
     #     return self
@@ -57,9 +57,9 @@ class Grid():
                 avg_y.append(np.mean(self.files[key].init_xyz[:,1]))
                 avg_z.append(np.mean(self.files[key].init_xyz[:,2]))
 
-        self.shift_x = np.mean(avg_x)
-        self.shift_y = np.mean(avg_y)
-        self.shift_z = np.mean(avg_z)
+        self.shift_x = 0#np.mean(avg_x)
+        self.shift_y = 0#np.mean(avg_y)
+        self.shift_z = 0#np.mean(avg_z)
 
         print('check extents')
         self.max_x = -float("INF")
@@ -122,9 +122,24 @@ class Grid():
         
         for key in self.files:
             if self.files[key] != None:
+                print(f'{key} point density(per m2): ', len(self.files[key].x)/(delta_x*delta_y))
                 self.add_points_to_grid(key)
 
-        return f"Grid Complete! {self.number_of_cells_y*self.number_of_cells_x} Total Grid Cells"
+
+        canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
+        view = canvas.central_widget.add_view()
+        scatter = visuals.Markers()
+        scatter.set_data(self.files['Ground'].xyz, edge_color = None, face_color = "green", size = 4)
+        view.add(scatter)
+        scatter2 = visuals.Markers()
+        scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = "white", size = 4)
+        view.add(scatter2)
+        view.camera = 'arcball'
+        axis = visuals.XYZAxis(parent=view.scene)
+        vispy.app.run()
+
+        return f"Grid Complete! {self.number_of_cells_y*self.number_of_cells_x} Total Grid Cells" 
+
 
 
     def add_points_to_grid(self, key):
@@ -328,11 +343,11 @@ class Grid():
         self.init_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
         view = self.init_canvas.central_widget.add_view()
         scatter = visuals.Markers()
-        scatter.set_data(self.base_xyz, edge_color = None, face_color = "red", size = 4)
+        scatter.set_data(self.files['Ground'].xyz, edge_color = None, face_color = "red", size = 4)
         view.add(scatter)
         
         scatter2 = visuals.Markers()
-        scatter2.set_data(self.snow_xyz, edge_color = None, face_color = "blue", size = 4)
+        scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = "blue", size = 4)
         view.add(scatter2)
 
         view.camera = 'arcball' 
@@ -367,7 +382,10 @@ class Grid():
             # print(self.grid[i][j].vegetation_flag_dict['New Snow'])
             if not self.grid[i][j].vegetation_flag_dict['New Snow']:
                 # print('here')
+                print(len(self.grid[i][j].point_arrays[self.snow_depth_key]))
+                print(len(self.grid[i][j].point_arrays['New Snow']))
                 depth = self.grid[i][j].depth_dict[self.snow_depth_key]
+                print('grid cell:', i, ", ", j, " Depth ", depth)
                 if depth > max_depth:
                     max_depth = depth
                 if depth < min_depth:

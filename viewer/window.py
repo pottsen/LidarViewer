@@ -253,17 +253,24 @@ class Window(QMainWindow):
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()
         self.ground_basis_checkbox.setEnabled(True)
+        self.ground_basis_checkbox.isChecked(False)
         self.intSnow_basis_checkbox.setEnabled(True)
+        self.intSnow_basis_checkbox.isChecked(False)
+        max_bound, min_bound = self.manager.reset_basis_info()
+        self.maxdepth_label_value.setText(str(max_bound))
+        self.mindepth_label_value.setText(str(min_bound))
         self.upperbound_text_slot.setEnabled(True)
         self.lowerbound_text_slot.setEnabled(True)
 
 
     def click_plot_button(self):
-        self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
+        if self.ground_basis_checkbox.isEnabled():
+            self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
         self.scene = self.manager.plot_points()
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
         self.select_points_button.setEnabled(True)
+        self.select_points_button.isChecked(False)
 
     def click_select_points_button(self):
         self.manager.select_points()

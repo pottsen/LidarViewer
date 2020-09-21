@@ -122,6 +122,7 @@ class Manager:
             return False
 
     def flag_vegetation(self):
+        self.grid.snow_depth_key == 'New Snow'
         if self.count_checked_files() > 0:
             self.window.message_window.append("Flagging vegetation.")
             counts = self.grid.flag_vegetation()

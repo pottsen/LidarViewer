@@ -39,7 +39,18 @@ def print_stats(las_file, las_file2):
         Z2 = base_file2.z
         XYZ2 = np.stack((X2,Y2,Z2), axis=-1)
 
+        greater_points = max(len(points), len(points2))
+        lesser_points = min(len(points), len(points2))
+        step = int(np.ceil(greater_points/lesser_points))
+        array = np.arange(0,len(points), step)
+        if len(points2)> len(points):
+                XYZ2 = XYZ2[array]
+        else:
+                XYZ = XYZ[array]
 
+        print('len1', len(XYZ))
+        print('len2', len(XYZ2))
+        
         unique_XYZ, unique_indices = np.unique(XYZ, return_index=True, axis=0)
 
         points = points[unique_indices]
