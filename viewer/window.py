@@ -240,10 +240,6 @@ class Window(QMainWindow):
     #     self.plot_widgets.addTab(self.initial_view.native, "Initial Plot")
     #     self.message_window.append(" ")
 
-    # def click_run_alignment_button(self):
-    #     print("Calculate the depth")
-    #     self.message_window.append(" ")
-
     def click_vegetation_button(self):
         flag = self.manager.make_grid()
         # self.manager.flag_vegetation()
@@ -253,9 +249,9 @@ class Window(QMainWindow):
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()
         self.ground_basis_checkbox.setEnabled(True)
-        self.ground_basis_checkbox.isChecked(False)
+        self.ground_basis_checkbox.setChecked(False)
         self.intSnow_basis_checkbox.setEnabled(True)
-        self.intSnow_basis_checkbox.isChecked(False)
+        self.intSnow_basis_checkbox.setChecked(False)
         max_bound, min_bound = self.manager.reset_basis_info()
         self.maxdepth_label_value.setText(str(max_bound))
         self.mindepth_label_value.setText(str(min_bound))
@@ -264,13 +260,14 @@ class Window(QMainWindow):
 
 
     def click_plot_button(self):
-        if self.ground_basis_checkbox.isEnabled():
-            self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
+        # if self.ground_basis_checkbox.isEnabled():
+        self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
         self.scene = self.manager.plot_points()
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
+        # self.select_points_button.setEnabled(False)
         self.select_points_button.setEnabled(True)
-        self.select_points_button.isChecked(False)
+        self.select_points_button.setChecked(False)
 
     def click_select_points_button(self):
         self.manager.select_points()
