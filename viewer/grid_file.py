@@ -14,6 +14,10 @@ class Grid_File:
         self.init_y = self.file.y 
         self.init_z = self.file.z 
         self.init_xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
+        self.x = self.file.x 
+        self.y = self.file.y 
+        self.z = self.file.z 
+        self.xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
         self.plot_red = []
         self.plot_blue = []
         self.plot_green = []

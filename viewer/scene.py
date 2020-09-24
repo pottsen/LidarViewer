@@ -99,7 +99,7 @@ def ellipse_vertice(center, radius, start_angle, span_angle, num_segments):
 
 """
 class Scene(QtWidgets.QWidget):
-    def __init__(self, grid, points, color, keys='interactive'):
+    def __init__(self, grid, points, color, scene_type, keys='interactive'):
         super(Scene, self).__init__()
         # Layout and canvas creation
         box = QtWidgets.QVBoxLayout(self)
@@ -108,6 +108,7 @@ class Scene(QtWidgets.QWidget):
         # print('grid', self.grid)
         self.setLayout(box)
         self.canvas = scene.SceneCanvas(keys=keys)
+        self.scene_type = scene_type
         box.addWidget(self.canvas.native)
 
         # Connect events
@@ -194,25 +195,39 @@ class Scene(QtWidgets.QWidget):
         # print('equal' , self.facecolor==self.base_facecolor)
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
+
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
 
+        print('selected point XYZ: ', self.data[tuple(self.selected)])
 
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
         self.scatter.update()
-        if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
-            stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
 
-            # add call to get snowdepth here
-            # get average x,y,z
-            self.stats_text.text = str(f'Average Depth: {stats[0]}')
-            self.stats_text2.text = str(f'Max Depth: {stats[1]}')
-            self.stats_text3.text = str(f'Min Depth: {stats[2]}')
-        else:
-            self.stats_text.text = str(f'Average Depth: n/a')
-            self.stats_text2.text = str(f'Max Depth: n/a')
-            self.stats_text3.text = str(f'Min Depth: n/a')
+        if self.scene_type == 'Depth':
+            if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
+                stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
+
+                # add call to get snowdepth here
+                # get average x,y,z
+                self.stats_text.text = str(f'Average Depth: {stats[0]}')
+                self.stats_text2.text = str(f'Max Depth: {stats[1]}')
+                self.stats_text3.text = str(f'Min Depth: {stats[2]}')
+            else:
+                self.stats_text.text = str(f'Average Depth: n/a')
+                self.stats_text2.text = str(f'Max Depth: n/a')
+                self.stats_text3.text = str(f'Min Depth: n/a')
+
+        if self.scene_type == 'ICP':
+            pass
+
+    def permanently_mark_selected(self):
+        for i in self.selected:
+            self.base_facecolor[i] = [1.0, 1.0, 1.0]
+        self.scatter.set_data(self.data, face_color=self.base_facecolor,
+                              size=self.ptsize)
+        self.scatter.update()
 
     def on_key_press(self, event):
         # Set select_flag and instruction text

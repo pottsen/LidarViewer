@@ -4,6 +4,7 @@ class Point_Class():
         self.x = x
         self.y = y
         self.z = z
+        self.xyz = [x, y, z]
         self.r = red
         self.g = green
         self.b = blue

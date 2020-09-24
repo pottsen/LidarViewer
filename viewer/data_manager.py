@@ -112,7 +112,7 @@ class Manager:
             self.grid.load_files(self.file_dict)
             message = self.grid.make_grid()
             self.window.message_window.append(str(message))
-            print(self.grid.grid)
+            # print(self.grid.grid)
             if self.grid.grid != None:
                 self.flag_vegetation()
                 return True
@@ -122,6 +122,7 @@ class Manager:
             return False
 
     def flag_vegetation(self):
+        self.grid.snow_depth_key == 'New Snow'
         if self.count_checked_files() > 0:
             self.window.message_window.append("Flagging vegetation.")
             counts = self.grid.flag_vegetation()
@@ -139,6 +140,7 @@ class Manager:
 
     def color_points(self, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
+        print('coloring points')
         message = self.grid.color_points(upper_bound, lower_bound)
         self.window.message_window.append(message)
     
