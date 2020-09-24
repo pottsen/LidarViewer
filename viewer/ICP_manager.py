@@ -225,7 +225,7 @@ class Manager:
         now = datetime.now()
         date = now.strftime("%D").replace('/','-')
         time = now.strftime("%H-%M")
-        aligned_file_name = self.files['Alignment'].file_name +'_aligned_to_'+self.files['Base'].file_name+date+'.las'
+        aligned_file_name = self.files['Alignment'].file_name +'_aligned_to_'+self.files['Base'].file_name+"_"+date+'.las'
         aligned_file = File(aligned_file_name, mode = "w", header = self.files['Alignment'].file.header)
         aligned_file.x = self.window.scene_2_matched_data[:,0]
         aligned_file.y = self.window.scene_2_matched_data[:,1]

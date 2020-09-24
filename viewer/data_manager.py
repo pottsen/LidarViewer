@@ -140,6 +140,7 @@ class Manager:
 
     def color_points(self, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
+        print('coloring points')
         message = self.grid.color_points(upper_bound, lower_bound)
         self.window.message_window.append(message)
     
