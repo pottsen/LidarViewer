@@ -38,6 +38,11 @@ class Window(QMainWindow):
 
         self.main_panel()
 
+    def files_update(self):
+        self.left_dock()
+        if len(self.manager.file_list) > 1:
+            self.add_match_area_button.setEnabled(True)
+
     def left_dock(self):
         self.left_dock_widget_layout = QVBoxLayout()
         self.data_widget_layout = QVBoxLayout()
@@ -175,6 +180,9 @@ class Window(QMainWindow):
     #     self.message_window.append(" ")
 
     def click_add_match_area_button(self):
+        if self.manager.count_checked_files() != 2:
+            self.message_window.append("Please select files.")
+            return
         self.scene_1_selected_areas = []
         self.scene_2_selected_areas = []
         # set scan 1 scene
