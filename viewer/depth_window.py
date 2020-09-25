@@ -8,7 +8,7 @@ from data_manager import Manager, file_object
 import numpy as np
 # from scene import DemoScene
 
-class Window(QMainWindow):
+class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
     def __init__(self):
         super(Window, self).__init__()

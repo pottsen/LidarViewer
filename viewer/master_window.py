@@ -1,5 +1,5 @@
-import window as SDW
-import ICP_window as AlgnW
+import depth_window as SDW
+import alignment_window as AlgnW
 from PyQt5 import QtWidgets, QtCore, QtGui
 from canvas import Canvas
 import vispy.app
