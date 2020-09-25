@@ -38,7 +38,11 @@ class file_object(QWidget):
         self.newSnow_checkbox = QCheckBox('New Snow')
         self.newSnow_checkbox.stateChanged.connect(lambda:self.newSnow_check_boxes())
         # self.checkbox_group.addButton(self.newSnow_checkbox)
-        self.horizontal_layout.addWidget(self.newSnow_checkbox) 
+        self.horizontal_layout.addWidget(self.newSnow_checkbox)
+
+        self.delete_button = QPushButton('Delete')
+        self.delete_button.clicked.connect(self.click_delete_button)
+        self.horizontal_layout.addWidget(self.delete_button)
 
         self.horizontal_file_widget = QWidget()
         self.horizontal_file_widget.setLayout(self.horizontal_layout)
@@ -84,7 +88,10 @@ class file_object(QWidget):
                 self.ground_checkbox.setEnabled(True)
             if self.manager.file_dict['Inter. Snow'] == None:
                 self.intSnow_checkbox.setEnabled(True)
-            
+    
+    def click_delete_button(self):
+        self.manager.delete_file(self.file_path)
+
 class Manager:
     def __init__(self, window):
         self.window = window
@@ -97,6 +104,20 @@ class Manager:
         print('Adding file to list', file_path)
         self.file_list.append(file_object(self, file_path))
         print('Length of list', len(self.file_list))
+
+    def delete_file(self, file_path):
+        print('Deleting file from list ', file_path)
+        for i in range(len(self.file_list)):
+            print('i', i)
+            if self.file_list[i].file_path == file_path:
+                pop = self.file_list.pop(i)
+                print(pop.file_path)
+                # self.window.file_layout.takeAt(i)
+                self.clear_flags()
+                self.window.files_update()
+                break
+            
+        print('file list', self.file_list)
 
     def count_checked_files(self):
         count = 0

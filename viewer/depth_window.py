@@ -33,6 +33,11 @@ class Window(QtWidgets.QMainWindow):
 
         self.main_panel()
 
+    def files_update(self):
+        self.left_dock()
+        if len(self.manager.file_list) > 0:
+            self.vegetation_button.setEnabled(True)
+
     def left_dock(self):
         self.left_dock_widget_layout = QVBoxLayout()
         self.data_widget_layout = QVBoxLayout()
