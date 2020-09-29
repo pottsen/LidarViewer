@@ -45,9 +45,9 @@ class file_object(QWidget):
         # self.checkbox_group.addButton(self.alignment_checkbox)
         self.horizontal_layout.addWidget(self.alignment_checkbox)
 
-        self.delete_button = QPushButton('Delete')
-        self.delete_button.clicked.connect(self.click_delete_button)
-        self.horizontal_layout.addWidget(self.delete_button)
+        self.remove_button = QPushButton('Remove')
+        self.remove_button.clicked.connect(self.click_remove_button)
+        self.horizontal_layout.addWidget(self.remove_button)
 
         self.horizontal_file_widget = QWidget()
         self.horizontal_file_widget.setLayout(self.horizontal_layout)
@@ -75,8 +75,8 @@ class file_object(QWidget):
             if self.manager.file_dict['Base'] == None:
                 self.base_checkbox.setEnabled(True)
 
-    def click_delete_button(self):
-        self.manager.delete_file(self.file_path)
+    def click_remove_button(self):
+        self.manager.remove_file(self.file_path)
 
 class Manager:
     def __init__(self, window):
@@ -91,7 +91,7 @@ class Manager:
         self.file_list.append(file_object(self, file_path))
         print('Length of list', len(self.file_list))
 
-    def delete_file(self, file_path):
+    def remove_file(self, file_path):
         print('Deleting file from list ', file_path)
         for i in range(len(self.file_list)):
             print('i', i)
