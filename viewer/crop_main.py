@@ -1,5 +1,5 @@
 # from canvas import Canvas
-from depth_window import Window
+from cropping_window import Window
 import vispy.app
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys

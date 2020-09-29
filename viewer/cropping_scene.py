@@ -110,6 +110,7 @@ class Scene(QtWidgets.QWidget):
         self.canvas = scene.SceneCanvas(keys=keys)
         self.scene_type = scene_type
         box.addWidget(self.canvas.native)
+        self.total_selected = [False for i in points]
 
         # Connect events
         self.canvas.events.mouse_press.connect(self.on_mouse_press)
@@ -197,9 +198,10 @@ class Scene(QtWidgets.QWidget):
                               size=self.ptsize)
 
         for i in self.selected:
-            self.facecolor[i] = [1.0, 0.0, 1.0]
-
+            self.facecolor[i] = [1.0, 1.0, 1.0]
         print('selected point XYZ: ', self.data[tuple(self.selected)])
+        print('not selected point XYZ: ', len(self.data[tuple(np.invert(self.selected))]))
+        print('total data', len(self.data))
 
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
@@ -219,12 +221,16 @@ class Scene(QtWidgets.QWidget):
                 self.stats_text2.text = str(f'Max Depth: n/a')
                 self.stats_text3.text = str(f'Min Depth: n/a')
 
-    def permanently_mark_selected(self):
-        for i in self.selected:
-            self.base_facecolor[i] = [1.0, 1.0, 1.0]
-        self.scatter.set_data(self.data, face_color=self.base_facecolor,
-                              size=self.ptsize)
-        self.scatter.update()
+    def remove_selected_points(self):#, removal_points):
+            if len(self.selected) > 0:
+                self.data = self.data[tuple(np.invert(self.selected))]
+                self.base_facecolor = self.base_facecolor[tuple(np.invert(self.selected))]
+                self.facecolor = copy.deepcopy(self.base_facecolor)
+                self.scatter.set_data(self.data, face_color=self.facecolor,
+                                    size=self.ptsize)
+                self.scatter.update()
+                self.selected = []
+                return self.data
 
     def on_key_press(self, event):
         # Set select_flag and instruction text
