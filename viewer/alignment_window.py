@@ -159,7 +159,7 @@ class Window(QMainWindow):
         # self.plot_widgets.addTab(self.scene, "Plot")
 
     def click_load_file_button(self):
-        file_path = get_file()
+        file_path = QFileDialog.getOpenFileName()
         print(file_path)
         if 'las' in str(file_path[0]).lower():
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))

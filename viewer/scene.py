@@ -64,40 +64,6 @@ def rectangle_vertice(center, height, width):
     # vertices = np.array(output, dtype=np.float32)
     return vertices[1:, ..., :2]
 
-"""
-def ellipse_vertice(center, radius, start_angle, span_angle, num_segments):
-    # Borrow from _generate_vertices in vispy/visual/ellipse.py
-
-    if isinstance(radius, (list, tuple)):
-        if len(radius) == 2:
-            xr, yr = radius
-        else:
-            raise ValueError("radius must be float or 2 value tuple/list"
-                             " (got %s of length %d)" % (type(radius),
-                                                         len(radius)))
-    else:
-        xr = yr = radius
-
-    start_angle = np.deg2rad(start_angle)
-
-    # Segment as 1000
-    vertices = np.empty([num_segments + 2, 2], dtype=np.float32)
-
-    # split the total angle as num segments
-    theta = np.linspace(start_angle,
-                        start_angle + np.deg2rad(span_angle),
-                        num_segments + 1)
-
-    # PolarProjection
-    vertices[:-1, 0] = center[0] + xr * np.cos(theta)
-    vertices[:-1, 1] = center[1] + yr * np.sin(theta)
-
-    # close the curve
-    vertices[num_segments + 1] = np.float32([center[0], center[1]])
-
-    return vertices[:-1]
-
-"""
 class Scene(QtWidgets.QWidget):
     def __init__(self, grid, points, color, scene_type, keys='interactive'):
         super(Scene, self).__init__()
@@ -110,6 +76,7 @@ class Scene(QtWidgets.QWidget):
         self.canvas = scene.SceneCanvas(keys=keys)
         self.scene_type = scene_type
         box.addWidget(self.canvas.native)
+        self.total_selected = [False for i in points]
 
         # Connect events
         self.canvas.events.mouse_press.connect(self.on_mouse_press)
@@ -139,7 +106,6 @@ class Scene(QtWidgets.QWidget):
         center=(avg_x, avg_y, avg_z))
 
         # Add Plot
-        self.minz = np.min(self.data[:, 2])
         self.base_facecolor = copy.deepcopy(color)
         self.facecolor = copy.deepcopy(color)
         self.ptsize = 3
@@ -199,8 +165,6 @@ class Scene(QtWidgets.QWidget):
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
 
-        print('selected point XYZ: ', self.data[tuple(self.selected)])
-
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
         self.scatter.update()
@@ -218,6 +182,17 @@ class Scene(QtWidgets.QWidget):
                 self.stats_text.text = str(f'Average Depth: n/a')
                 self.stats_text2.text = str(f'Max Depth: n/a')
                 self.stats_text3.text = str(f'Min Depth: n/a')
+
+    def remove_selected_points(self):#, removal_points):
+            if len(self.selected) > 0:
+                self.data = self.data[tuple(np.invert(self.selected))]
+                self.base_facecolor = self.base_facecolor[tuple(np.invert(self.selected))]
+                self.facecolor = copy.deepcopy(self.base_facecolor)
+                self.scatter.set_data(self.data, face_color=self.facecolor,
+                                    size=self.ptsize)
+                self.scatter.update()
+                self.selected = []
+                return self.data
 
     def permanently_mark_selected(self):
         for i in self.selected:
@@ -285,9 +260,3 @@ class Scene(QtWidgets.QWidget):
                           height/2.+self.select_origin[1], 0)
                 self.line_pos = rectangle_vertice(center, height, width)
                 self.line.set_data(np.array(self.line_pos))
-
-# if __name__ == '__main__':
-#     appQt = QtWidgets.QApplication(sys.argv)
-#     view = DemoScene(keys='interactive')
-#     view.show()
-#     appQt.exec_()

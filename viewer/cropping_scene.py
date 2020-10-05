@@ -140,7 +140,6 @@ class Scene(QtWidgets.QWidget):
         center=(avg_x, avg_y, avg_z))
 
         # Add Plot
-        self.minz = np.min(self.data[:, 2])
         self.base_facecolor = copy.deepcopy(color)
         self.facecolor = copy.deepcopy(color)
         self.ptsize = 3
@@ -199,9 +198,6 @@ class Scene(QtWidgets.QWidget):
 
         for i in self.selected:
             self.facecolor[i] = [1.0, 1.0, 1.0]
-        print('selected point XYZ: ', self.data[tuple(self.selected)])
-        print('not selected point XYZ: ', len(self.data[tuple(np.invert(self.selected))]))
-        print('total data', len(self.data))
 
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
@@ -291,9 +287,3 @@ class Scene(QtWidgets.QWidget):
                           height/2.+self.select_origin[1], 0)
                 self.line_pos = rectangle_vertice(center, height, width)
                 self.line.set_data(np.array(self.line_pos))
-
-# if __name__ == '__main__':
-#     appQt = QtWidgets.QApplication(sys.argv)
-#     view = DemoScene(keys='interactive')
-#     view.show()
-#     appQt.exec_()

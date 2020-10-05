@@ -3,8 +3,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
 # from grid import Grid
-# from grid_file import Grid_File
-from cropping_scene import Scene
+from grid_file import Grid_File
+from scene import Scene
 # from multi_scene import Multi_Scene
 import numpy as np
 # import ICP_algorithm as ia
