@@ -21,6 +21,8 @@ class Grid_File:
         self.plot_red = []
         self.plot_blue = []
         self.plot_green = []
+        self.intensity = self.file.intensity
+
 
         try:
             self.red = copy.deepcopy(self.file.red)
