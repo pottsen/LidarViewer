@@ -2,19 +2,19 @@ from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
-from grid import Grid
-from grid_file import Grid_File
+# from grid import Grid
+# from grid_file import Grid_File
 from cropping_scene import Scene
-from multi_scene import Multi_Scene
+# from multi_scene import Multi_Scene
 import numpy as np
-import ICP_algorithm as ia
+# import ICP_algorithm as ia
 import copy
 from datetime import datetime
 
-import tie_point_check as tpc
-import vispy.scene
-from vispy.scene import visuals
-from laspy.file import File
+# import tie_point_check as tpc
+# import vispy.scene
+# from vispy.scene import visuals
+# from laspy.file import File
 
 class file_object(QWidget):
     def __init__(self, manager, path):

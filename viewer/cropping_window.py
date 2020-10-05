@@ -1,9 +1,9 @@
-from button_actions import *
+# from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 from canvas import Canvas
 import vispy.app
 import sys
-from grid import Grid
+# from grid import Grid
 from cropping_manager import Manager, file_object
 import numpy as np
 # from scene import DemoScene
