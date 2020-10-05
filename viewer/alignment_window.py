@@ -188,10 +188,12 @@ class Window(QMainWindow):
         # set scan 1 scene
         # if self.scene_1 == None:
         self.scene_1 = self.manager.add_scene("Base")
+        self.scene_1_selected_areas = [[] for i in range(len(self.scene_1.data))]
 
         # set scan 2 scene
         # if self.scene_2 == None:
         self.scene_2 = self.manager.add_scene("Alignment")
+        self.scene_2_selected_areas = [[] for i in range(len(self.scene_2.data))]
 
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene_1, "Scan 1")

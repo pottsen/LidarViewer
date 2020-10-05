@@ -222,15 +222,15 @@ class Scene(QtWidgets.QWidget):
                 self.stats_text3.text = str(f'Min Depth: n/a')
 
     def remove_selected_points(self):#, removal_points):
-            if len(self.selected) > 0:
-                self.data = self.data[tuple(np.invert(self.selected))]
-                self.base_facecolor = self.base_facecolor[tuple(np.invert(self.selected))]
-                self.facecolor = copy.deepcopy(self.base_facecolor)
-                self.scatter.set_data(self.data, face_color=self.facecolor,
-                                    size=self.ptsize)
-                self.scatter.update()
-                self.selected = []
-                return self.data
+        if len(self.selected) > 0:
+            self.data = self.data[tuple(np.invert(self.selected))]
+            self.base_facecolor = self.base_facecolor[tuple(np.invert(self.selected))]
+            self.facecolor = copy.deepcopy(self.base_facecolor)
+            self.scatter.set_data(self.data, face_color=self.facecolor,
+                                size=self.ptsize)
+            self.scatter.update()
+            self.selected = []
+            return self.data
 
     def on_key_press(self, event):
         # Set select_flag and instruction text

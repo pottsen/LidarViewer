@@ -99,10 +99,12 @@ def ellipse_vertice(center, radius, start_angle, span_angle, num_segments):
 
 """
 class Multi_Scene(QtWidgets.QWidget):
-    def __init__(self, points, color, keys='interactive'):
-        super(Scene, self).__init__()
+    def __init__(self, points, color, scene_type, keys='interactive'):
+        super(Multi_Scene, self).__init__()
         # Layout and canvas creation
         box = QtWidgets.QVBoxLayout(self)
+        self.scene_type = scene_type
+        print('scene type', scene_type)
         self.setLayout(box)
         self.canvas = scene.SceneCanvas(keys=keys)
         box.addWidget(self.canvas.native)
@@ -120,12 +122,21 @@ class Multi_Scene(QtWidgets.QWidget):
 
         # Data
         self.data = points
-        avg_x = np.average(self.data[:,0])
-        avg_y = np.average(self.data[:,1])
-        avg_z = np.average(self.data[:,2])
+        avg_x = 0
+        avg_y = 0
+        avg_z = 0
+        for data in self.data:
+            avg_x += np.average(data[:,0])
+            avg_y += np.average(data[:,1])
+            avg_z += np.average(data[:,2])
 
+        avg_x /= len(self.data)
+        avg_y /= len(self.data)
+        avg_z /= len(self.data)
+        
         # Color
-        self.color = color
+        self.base_facecolor = copy.deepcopy(color)
+        self.facecolor = copy.deepcopy(color)
         
         # Camera
         self.view = self.canvas.central_widget.add_view()
@@ -138,11 +149,12 @@ class Multi_Scene(QtWidgets.QWidget):
 
         # Add Plot
         self.scatter = []
+        self.base_facecolor = copy.deepcopy(color)
+        self.facecolor = copy.deepcopy(color)
+        self.ptsize = 3
         for i in range(len(self.data)):
             data = self.data[i]
-            self.minz = np.min(self.data[i][:, 2])
-            color = self.color[i]
-            self.ptsize = 3
+            color = self.facecolor[i]
             scatter = scene.visuals.Markers()
             scatter.set_data(data, face_color=color,
                                 edge_color=None, size=self.ptsize)
@@ -159,7 +171,7 @@ class Multi_Scene(QtWidgets.QWidget):
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*3+font_size*1.33*2*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.tr = self.scatter.node_transform(self.view)
+        self.tr = self.scatter[0].node_transform(self.view)
 
         # Add a 3D axis to keep us oriented
         self.axis = scene.visuals.XYZAxis(parent=self.view.scene)
@@ -189,25 +201,25 @@ class Multi_Scene(QtWidgets.QWidget):
             cam_events.mouse_release.connect(cam_mouse_event)
             cam_events.mouse_wheel.connect(cam_mouse_event)
 
-    def mark_selected(self):
+    def mark_selected(self, i):
+        # i is the index reference
         # Change the color of the selected point
-        # print('changing color')
-        self.facecolor = copy.deepcopy(self.base_facecolor)
-        # print('equal' , self.facecolor==self.base_facecolor)
-        self.scatter.set_data(self.data, face_color=self.facecolor,
+        self.facecolor[i] = copy.deepcopy(self.base_facecolor[i])
+
+        self.scatter[i].set_data(self.data[i], face_color=self.facecolor[i],
                               size=self.ptsize)
 
-        for i in self.selected:
-            self.facecolor[i] = [1.0, 0.0, 1.0]
+        for j in self.selected[i]:
+            self.facecolor[i][j] = [1.0, 0.0, 1.0]
 
 
-        self.scatter.set_data(self.data, face_color=self.facecolor,
+        self.scatter[i].set_data(self.data[i], face_color=self.facecolor[i],
                               size=self.ptsize)
-        self.scatter.update()
+        self.scatter[i].update()
 
         if self.scene_type == 'Depth':
-            if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
-                stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
+            if len(self.data[i][tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
+                stats = self.grid.get_stats(self.data[i][tuple(self.selected)]) 
 
                 # add call to get snowdepth here
                 # get average x,y,z
@@ -223,11 +235,24 @@ class Multi_Scene(QtWidgets.QWidget):
             pass
 
     def permanently_mark_selected(self):
+        for i in range(len(self.selected)):
+            for j in self.selected[i]:
+                self.base_facecolor[i][j]= [1.0, 1.0, 1.0]
+            self.scatter[i].set_data(self.data[i], face_color=self.base_facecolor[i],
+                                size=self.ptsize)
+            self.scatter[i].update()
+
+    def remove_selected_points(self):#, removal_points):
         for i in self.selected:
-            self.base_facecolor[i] = [1.0, 1.0, 1.0]
-        self.scatter.set_data(self.data, face_color=self.base_facecolor,
-                              size=self.ptsize)
-        self.scatter.update()
+            if len(self.selected[i]) > 0:
+                self.data[i] = self.data[i][tuple(np.invert(self.selected[i]))]
+                self.base_facecolor[i] = self.base_facecolor[i][tuple(np.invert(self.selected[i]))]
+                self.facecolor[i] = copy.deepcopy(self.base_facecolor[i])
+                self.scatter[i].set_data(self.data[i], face_color=self.facecolor[i],
+                                    size=self.ptsize)
+                self.scatter[i].update()
+                self.selected[i] = []
+        return self.data
 
     def on_key_press(self, event):
         # Set select_flag and instruction text
@@ -252,17 +277,18 @@ class Multi_Scene(QtWidgets.QWidget):
         # Identify selected points and mark them
 
         if event.button == 1 and self.select_flag:
-
-            self.facecolor = self.base_facecolor
-            data = self.tr.map(self.data)[:, :2]
-
             self.selected = []
-            select_path = path.Path(self.line_pos, closed=True)
-            mask = [select_path.contains_points(data)]
+            for i in range(len(self.data)):
+                self.facecolor[i] = self.base_facecolor[i]
+                data = self.tr.map(self.data[i])[:, :2]
 
-            # if len(self.data[tuple(mask)]) > 0:
-            self.selected = mask
-            self.mark_selected()
+                self.selected.append([])
+                select_path = path.Path(self.line_pos, closed=True)
+                mask = [select_path.contains_points(data)]
+
+                # if len(self.data[tuple(mask)]) > 0:
+                self.selected[i] = mask
+                self.mark_selected(i)
 
             # Reset lasso
             # TODO: Empty pos input is not allowed for line_visual

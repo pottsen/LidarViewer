@@ -5,7 +5,7 @@ import sys
 from grid import Grid
 from grid_file import Grid_File
 from scene import Scene
-from multi_scene import Multi_Scene
+from scene_multi_scan import Multi_Scene
 import numpy as np
 import ICP_algorithm as ia
 import copy
@@ -114,41 +114,23 @@ class Manager:
 
     def add_scene(self, key):
         self.files[key] = Grid_File(key, self.file_dict[key])
+        print(key)
         if key == "Base":
-            scene = Scene(self, self.files[key].init_xyz, np.array([[1.0, 0.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'ICP')
+            points = [self.files[key].init_xyz]
+            color = [np.array([[1.0, 0.0, 0.0] for i in range(len(self.files[key].init_xyz))])]
+            scene = Multi_Scene(points,
+            color,
+            'ICP')
 
         if key == "Alignment":
-            scene = Scene(self, self.files[key].init_xyz, np.array([[0.0, 1.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'ICP')
+            points = [self.files[key].init_xyz]
+            color = [np.array([[0.0, 1.0, 0.0] for i in range(len(self.files[key].init_xyz))])]
+            scene = Multi_Scene(points,
+            color,
+            'ICP')
 
         print(f"{key} file added.")
         return scene
-
-    def make_grid(self):
-        if self.count_checked_files() > 0:
-            self.window.message_window.append("Creating grid and adding points.")
-            self.grid.load_files(self.file_dict)
-            message = self.grid.make_grid()
-            self.window.message_window.append(str(message))
-            # print(self.grid.grid)
-            if self.grid.grid != None:
-                self.flag_vegetation()
-                return True
-            return False
-        else:
-            self.window.message_window.append("Please select files.")
-            return False
-
-
-    def color_points(self, upper_bound, lower_bound):
-        self.window.message_window.append("Coloring points...")
-        message = self.grid.color_points(upper_bound, lower_bound)
-        self.window.message_window.append(message)
-    
-    def plot_points(self):
-        if self.count_checked_files() > 0:
-            scene = self.grid.plot_points()
-            return scene
-
 
     def select_points(self):
         self.window.scene_1.select_flag = self.window.select_points_button.isChecked()
@@ -165,18 +147,21 @@ class Manager:
             self.window.scene_2.text.text = ''
 
     def set_match_area(self):
-        selected = self.window.scene_1.selected
-        data = self.window.scene_1.data
-        self.window.scene_1_selected_areas.append(data[selected])
-        self.window.scene_1.permanently_mark_selected()
+        for i in range(len(self.window.scene_1.selected)):
+            self.window.scene_1_selected_areas.append([])
+            selected = self.window.scene_1.selected[i]
+            data = self.window.scene_1.data[i]
+            self.window.scene_1_selected_areas[i].append(data[selected])
+            self.window.scene_1.permanently_mark_selected()
         
+        for i in range(len(self.window.scene_2.selected)):
+            self.window.scene_2_selected_areas.append([])
+            selected = self.window.scene_2.selected[i]
+            data = self.window.scene_1.data[i]
+            self.window.scene_2_selected_areas[i].append(data[selected])
+            self.window.scene_2.permanently_mark_selected()
 
-        selected = self.window.scene_2.selected
-        data = self.window.scene_2.data
-        self.window.scene_2_selected_areas.append(data[selected])
-        self.window.scene_2.permanently_mark_selected()
-
-        print(self.window.scene_1_selected_areas)
+        print(self.window.scene_2_selected_areas)
 
     def run_alignment(self):
         scene_2_selected_area_copy = copy.deepcopy(self.window.scene_2_selected_areas)
