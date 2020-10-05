@@ -1,4 +1,4 @@
-# from button_actions import *
+from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 from canvas import Canvas
 import vispy.app
@@ -8,7 +8,7 @@ from cropping_manager import Manager, file_object
 import numpy as np
 # from scene import DemoScene
 
-class Window(QMainWindow):
+class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
     def __init__(self):
         super(Window, self).__init__()
@@ -24,15 +24,15 @@ class Window(QMainWindow):
     def initInterface(self):
         self.setWindowTitle("Lidar Snow Depth Calculator")
         
-        self.leftDock = QDockWidget('Data Options', self)
-        self.leftDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.leftDock = QtWidgets.QDockWidget('Data Options', self)
+        self.leftDock.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
 
         self.leftDock.setAcceptDrops(False)
         self.left_dock()
 
-        self.bottomDock = QDockWidget('Output', self)
+        self.bottomDock = QtWidgets.QDockWidget('Output', self)
         self.bottomDock.setAcceptDrops(False)
-        self.bottomDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.bottomDock.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.bottom_dock()
 
         self.main_panel()
@@ -43,19 +43,19 @@ class Window(QMainWindow):
             self.add_match_area_button.setEnabled(True)
 
     def left_dock(self):
-        self.left_dock_widget_layout = QVBoxLayout()
-        self.data_widget_layout = QVBoxLayout()
+        self.left_dock_widget_layout = QtWidgets.QVBoxLayout()
+        self.data_widget_layout = QtWidgets.QVBoxLayout()
 
         """
         Left data widget. Button to load in data and check boxes for files
         """
-        self.plot_widget_layout = QVBoxLayout()
-        self.load_file_button = QPushButton("Load Data")
+        self.plot_widget_layout = QtWidgets.QVBoxLayout()
+        self.load_file_button = QtWidgets.QPushButton("Load Data")
         self.load_file_button.clicked.connect(self.click_load_file_button)
         self.data_widget_layout.addWidget(self.load_file_button)
 
-        self.file_box = QWidget()
-        self.file_layout = QVBoxLayout()
+        self.file_box = QtWidgets.QWidget()
+        self.file_layout = QtWidgets.QVBoxLayout()
         
         for i in range(len(self.manager.file_list)):
             self.file_layout.addWidget(self.manager.file_list[i])
@@ -63,37 +63,37 @@ class Window(QMainWindow):
         self.file_box.setLayout(self.file_layout)
         self.data_widget_layout.addWidget(self.file_box)
 
-        self.data_widget = QWidget()
+        self.data_widget = QtWidgets.QWidget()
         self.data_widget.setLayout(self.data_widget_layout)
         self.left_dock_widget_layout.addWidget(self.data_widget)
 
         """
         Left algorithm widget. Buttons to flag vegetation and calculate snowdepth
         """
-        self.alg_widget_layout = QVBoxLayout()
+        self.alg_widget_layout = QtWidgets.QVBoxLayout()
 
-        self.plot_scan_button = QPushButton("Plot Scans")
+        self.plot_scan_button = QtWidgets.QPushButton("Plot Scans")
         self.plot_scan_button.clicked.connect(self.click_plot_scan_button)
         self.plot_scan_button.setEnabled(False)
 
-        self.select_points_button = QPushButton("Select Points")
+        self.select_points_button = QtWidgets.QPushButton("Select Points")
         self.select_points_button.setCheckable(True)
         self.select_points_button.clicked.connect(self.click_select_points_button)
         self.select_points_button.setEnabled(False)
 
-        self.remove_selected_points_button = QPushButton("Remove Selected")
+        self.remove_selected_points_button = QtWidgets.QPushButton("Remove Selected")
         self.remove_selected_points_button.clicked.connect(self.click_remove_selected_points_button)
         self.remove_selected_points_button.setEnabled(False)
 
-        self.save_crop_1_button = QPushButton("Save Cropped Scan 1")
+        self.save_crop_1_button = QtWidgets.QPushButton("Save Cropped Scan 1")
         self.save_crop_1_button.clicked.connect(self.click_save_crop_1_button)
         self.save_crop_1_button.setEnabled(False)
 
-        self.save_crop_2_button = QPushButton("Save Cropped Scan 2")
+        self.save_crop_2_button = QtWidgets.QPushButton("Save Cropped Scan 2")
         self.save_crop_2_button.clicked.connect(self.click_save_crop_2_button)
         self.save_crop_2_button.setEnabled(False)
 
-        self.reset_button = QPushButton("Reset/Clear")
+        self.reset_button = QtWidgets.QPushButton("Reset/Clear")
         self.reset_button.clicked.connect(self.click_reset_button)
 
         self.alg_widget_layout.addWidget(self.plot_scan_button)
@@ -103,26 +103,26 @@ class Window(QMainWindow):
         self.alg_widget_layout.addWidget(self.save_crop_2_button)
         self.alg_widget_layout.addWidget(self.reset_button)
         
-        self.alg_widget = QWidget()
+        self.alg_widget = QtWidgets.QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
         self.left_dock_widget_layout.addWidget(self.alg_widget)
 
         """
         Make left dock widget.
         """
-        self.left_dock_widget = QWidget()
+        self.left_dock_widget = QtWidgets.QWidget()
         self.left_dock_widget.setLayout(self.left_dock_widget_layout)
         self.leftDock.setWidget(self.left_dock_widget)
         
     def bottom_dock(self):
         ##### BOTTOM TEXT DOCK AND WIDGET
-        self.message_window = QTextBrowser()
+        self.message_window = QtWidgets.QTextBrowser()
         self.bottomDock.setWidget(self.message_window)
 
     def main_panel(self):
         ##### MAIN PLOT WIDGET
         # Create Tab widget for plots
-        self.plot_widgets = QTabWidget()
+        self.plot_widgets = QtWidgets.QTabWidget()
 
         self.plot_widgets.tabBar().setObjectName("mainTab")
         self.setCentralWidget(self.plot_widgets)
@@ -130,7 +130,7 @@ class Window(QMainWindow):
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.bottomDock)
 
     def click_load_file_button(self):
-        file_path = get_file()
+        file_path = QFileDialog.getOpenFileName()
         print(file_path)
         if 'las' in str(file_path[0]).lower():
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
