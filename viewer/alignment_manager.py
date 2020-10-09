@@ -1,4 +1,4 @@
-from button_actions import *
+from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
@@ -17,17 +17,15 @@ from vispy.scene import visuals
 from laspy.file import File
 
 class file_object(QWidget):
-    def __init__(self, manager, path):
+    def __init__(self, manager, file_path):
         super(QWidget, self).__init__()
         self.manager = manager
-        self.file_path = path
+        self.file_path = file_path
         print(self.file_path)
-        self.file_name = path.split('/')[-1]
+        self.file_name = file_path.split('/')[-1]
         print(self.file_name)
         self.vertical_layout = QVBoxLayout()
         self.horizontal_layout = QHBoxLayout()
-        # self.checkbox_group = QButtonGroup()
-        # self.checkbox_group.exclusive(True)
 
         self.alignment_flag = False
         self.base_flag = False
@@ -76,22 +74,31 @@ class file_object(QWidget):
                 self.base_checkbox.setEnabled(True)
 
     def click_remove_button(self):
-        self.manager.remove_file(self.file_path)
+        self.manager.remove_file_from_manager(self.file_path)
 
 class Manager:
-    def __init__(self, window):
+    def __init__(self, window, file_manager):
         self.window = window
+        self.file_manager = file_manager
+        self.file_manager.add_manager('Align', self)
         self.file_list = []
         self.file_dict = {'Base': None, 'Alignment': None}
-        self.files = {}
-        self.files_updated = True
 
-    def add_file(self, file_path):
+    def add_file_to_manager(self, file_path):
+        self.file_manager.add_file(file_path)
+
+    def add_file_object(self, file_path):
         print('Adding file to list', file_path)
         self.file_list.append(file_object(self, file_path))
-        print('Length of list', len(self.file_list))
+        self.clear_flags()
+        self.window.left_dock()
+        if len(self.file_list) > 1:
+            self.window.add_match_area_button.setEnabled(True)
 
-    def remove_file(self, file_path):
+    def remove_file_from_manager(self, file_path):
+        self.file_manager.remove_file(file_path)
+
+    def remove_file_object(self, file_path):
         print('Deleting file from list ', file_path)
         for i in range(len(self.file_list)):
             print('i', i)
@@ -102,6 +109,7 @@ class Manager:
                 self.clear_flags()
                 self.window.files_update()
                 break
+        self.window.left_dock()
         
 
     def count_checked_files(self):
@@ -113,42 +121,22 @@ class Manager:
         return count
 
     def add_scene(self, key):
-        self.files[key] = Grid_File(key, self.file_dict[key])
-        if key == "Base":
-            scene = Scene(self, self.files[key].init_xyz, np.array([[1.0, 0.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'ICP')
+        if self.file_dict[key] != None:
+            file_path = self.file_dict[key]
+            if key == "Base":
+                scene = Scene(self,
+                 self.file_manager.file_dict[file_path].init_xyz,
+                 np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
+                 'ICP')
 
-        if key == "Alignment":
-            scene = Scene(self, self.files[key].init_xyz, np.array([[0.0, 1.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'ICP')
+            if key == "Alignment":
+                scene = Scene(self,
+                self.file_manager.file_dict[file_path].init_xyz,
+                np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
+                'ICP')
 
-        print(f"{key} file added.")
-        return scene
-
-    def make_grid(self):
-        if self.count_checked_files() > 0:
-            self.window.message_window.append("Creating grid and adding points.")
-            self.grid.load_files(self.file_dict)
-            message = self.grid.make_grid()
-            self.window.message_window.append(str(message))
-            # print(self.grid.grid)
-            if self.grid.grid != None:
-                self.flag_vegetation()
-                return True
-            return False
-        else:
-            self.window.message_window.append("Please select files.")
-            return False
-
-
-    def color_points(self, upper_bound, lower_bound):
-        self.window.message_window.append("Coloring points...")
-        message = self.grid.color_points(upper_bound, lower_bound)
-        self.window.message_window.append(message)
-    
-    def plot_points(self):
-        if self.count_checked_files() > 0:
-            scene = self.grid.plot_points()
+            print(f"{key} file added.")
             return scene
-
 
     def select_points(self):
         self.window.scene_1.select_flag = self.window.select_points_button.isChecked()
@@ -190,6 +178,7 @@ class Manager:
             self.window.scene_2_matched_data[i] = np.matmul(rotation, self.window.scene_2_matched_data[i]) + translation
 
         # tpc.tie_point_error(self.window.scene_1.data, self.window.scene_2.data, self.window.scene_2_matched_data)
+
         points = [self.window.scene_1_selected_areas, match, scene_2_selected_area_copy]
         color = ['red', 'white', 'green']
         self.add_multi_scene(points, color, 'Selected Point Match')
@@ -197,59 +186,36 @@ class Manager:
         points = [self.window.scene_1.data, self.window.scene_2_matched_data, self.window.scene_2.data]
         self.add_multi_scene(points, color, 'Match Comparison')
 
-        # canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        # view = canvas.central_widget.add_view()
-        # scatter = visuals.Markers()
-        # scatter.set_data(self.window.scene_1_selected_areas, edge_color = None, face_color = "red", size = 4)
-        # view.add(scatter)
-        # scatter2 = visuals.Markers()
-        # scatter2.set_data(match, edge_color = None, face_color = "blue", size = 4)
-        # view.add(scatter2)
-        # scatter3 = visuals.Markers()
-        # scatter3.set_data(scene_2_selected_area_copy, edge_color = None, face_color = "green", size = 4)
-        # view.add(scatter3)
-        # view.camera = 'arcball'
-        # axis = visuals.XYZAxis(parent=view.scene)
-        # vispy.app.run()
-
-        # canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        # view = canvas.central_widget.add_view()
-        # scatter = visuals.Markers()
-        # scatter.set_data(self.window.scene_1.data, edge_color = None, face_color = "red", size = 4)
-        # view.add(scatter)
-        # scatter2 = visuals.Markers()
-        # scatter2.set_data(self.window.scene_2_matched_data, edge_color = None, face_color = "blue", size = 4)
-        # view.add(scatter2)
-        # scatter3 = visuals.Markers()
-        # scatter3.set_data(self.window.scene_2.data, edge_color = None, face_color = "green", size = 4)
-        # view.add(scatter3)
-        # view.camera = 'arcball'
-        # axis = visuals.XYZAxis(parent=view.scene)
-        # vispy.app.run()
-
-
-        # aligned_file_name = self.files['Alignment'].file_name +"_aligned.las" #file_dict['Alignment'].split('/')[-1] +"_aligned.las"
-        # aligned_file = File(aligned_file_name, mode = "w", header = self.files['Alignment'].file.header)
-        # aligned_file.x = self.window.scene_2_matched_data[:,0]
-        # aligned_file.y = self.window.scene_2_matched_data[:,1]
-        # aligned_file.z = self.window.scene_2_matched_data[:,2]
-        # aligned_file.close()
-
     def add_multi_scene(self, points, color, title):
         multi_scene = Multi_Scene(points, color, title)
 
         self.window.plot_widgets.addTab(multi_scene, title)
 
+    def set_alignment(self):
+        file_path = self.file_dict['Alignment']
+        self.file_manager.update_aligned_points(self.window.scene_2_matched_data, file_path)
+
     def save_matched_file(self):
-        now = datetime.now()
-        date = now.strftime("%D").replace('/','-')
-        time = now.strftime("%H-%M")
-        aligned_file_name = self.files['Alignment'].file_name +'_aligned_to_'+self.files['Base'].file_name+"_"+date+'.las'
-        aligned_file = File(aligned_file_name, mode = "w", header = self.files['Alignment'].file.header)
-        aligned_file.x = self.window.scene_2_matched_data[:,0]
-        aligned_file.y = self.window.scene_2_matched_data[:,1]
-        aligned_file.z = self.window.scene_2_matched_data[:,2]
-        aligned_file.close()
+        if self.file_dict['Alignment'] != None:
+            aligned_file_path = self.file_dict['Alignment']
+            base_file_path = self.file_dict['Base']
+            now = datetime.now()
+            date = now.strftime("%D").replace('/','-')
+            time = now.strftime("%H-%M")
+            aligned_file_name = self.file_manager.file_dict[aligned_file_path].file_name +'_aligned_to_'+ self.file_manager.file_dict[base_file_path].file_name + "_" + date +'.las'
+            aligned_file = File(aligned_file_name, mode = "w", header = self.file_manager.file_dict[aligned_file_path].file.header)
+            aligned_file.points = self.file_manager.file_dict[aligned_file_path].points
+            aligned_file.x = self.file_manager.file_dict[aligned_file_path].x
+            aligned_file.y = self.file_manager.file_dict[aligned_file_path].y
+            aligned_file.z = self.file_manager.file_dict[aligned_file_path].z
+            aligned_file.intensity = self.file_manager.file_dict[aligned_file_path].intensity
+            try:
+                aligned_file.red = self.file_manager.file_dict[aligned_file_path].red
+                aligned_file.green = self.file_manager.file_dict[aligned_file_path].green
+                aligned_file.blue = self.file_manager.file_dict[aligned_file_path].blue
+            except:
+                pass
+            aligned_file.close()
 
     def reset_basis_info(self):
         self.grid.snow_depth_key == None

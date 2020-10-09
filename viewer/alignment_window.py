@@ -1,6 +1,5 @@
 from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
-from canvas import Canvas
 import vispy.app
 import sys
 from grid import Grid
@@ -11,10 +10,10 @@ import ICP_algorithm as ia
 
 class Window(QMainWindow):
     # resize = pyqtSignal()
-    def __init__(self):
+    def __init__(self, file_manager):
         super(Window, self).__init__()
         # self.setWindowTitle("Lidar Snow Depth Calculator")
-        self.manager = Manager(self)
+        self.manager = Manager(self, file_manager)
         self.initInterface()
         self.scene_1 = None
         self.scene_2 = None
@@ -78,30 +77,28 @@ class Window(QMainWindow):
         self.add_match_area_button = QPushButton("Add Match Area")
         self.add_match_area_button.clicked.connect(self.click_add_match_area_button)
         self.add_match_area_button.setEnabled(False)
+        self.alg_widget_layout.addWidget(self.add_match_area_button)
+
         self.select_points_button = QPushButton("Select Points")
         self.select_points_button.setCheckable(True)
         self.select_points_button.clicked.connect(self.click_select_points_button)
         self.select_points_button.setEnabled(False)
-        # self.scan_1_button = QPushButton("Scan 1")
-        # self.scan_1_button.clicked.connect(self.click_scan_1_button)
-        # self.scan_1_button.setEnabled(False)
-        # self.scan_2_button = QPushButton("Scan 2")
-        # self.scan_2_button.clicked.connect(self.click_scan_2_button)
-        # self.scan_2_button.setEnabled(False)
+        self.alg_widget_layout.addWidget(self.select_points_button)
+
         self.set_match_area_button = QPushButton("Set Match Area")
         self.set_match_area_button.clicked.connect(self.click_set_match_area_button)
         self.set_match_area_button.setEnabled(False)
+        self.alg_widget_layout.addWidget(self.set_match_area_button)
+
         self.run_alignment_button = QPushButton("Run Alignment")
         self.run_alignment_button.clicked.connect(self.click_run_alignment_button)
         self.run_alignment_button.setEnabled(False)
-
-        # self.alg_widget_layout.addWidget(self.plot_initial_button)
-        self.alg_widget_layout.addWidget(self.add_match_area_button)
-        self.alg_widget_layout.addWidget(self.select_points_button)
-        # self.alg_widget_layout.addWidget(self.scan_1_button)
-        # self.alg_widget_layout.addWidget(self.scan_2_button)
-        self.alg_widget_layout.addWidget(self.set_match_area_button)
         self.alg_widget_layout.addWidget(self.run_alignment_button)
+
+        self.set_alignment_button = QPushButton("Set Alignment")
+        self.set_alignment_button.clicked.connect(self.click_set_alignment_button)
+        self.set_alignment_button.setEnabled(False)
+        self.alg_widget_layout.addWidget(self.set_alignment_button)
 
         self.save_match_button = QPushButton("Save Match")
         self.save_match_button.clicked.connect(self.click_save_match_button)
@@ -116,20 +113,6 @@ class Window(QMainWindow):
         self.alg_widget = QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
         self.left_dock_widget_layout.addWidget(self.alg_widget)
-
-        """
-        Left plot widget. Has all the plotting options in it.
-        """
-        # self.plot_button = QPushButton("Plot")
-        # self.plot_button.clicked.connect(self.click_plot_button)
-        # self.plot_button.setEnabled(False)
-        # self.plot_widget_layout.addWidget(self.plot_button)
-
-        # self.plot_widget = QWidget()
-        # self.plot_widget.setLayout(self.plot_widget_layout)
-        # self.left_dock_widget_layout.addWidget(self.plot_widget)
-
-
 
         """
         Make left dock widget.
@@ -163,21 +146,8 @@ class Window(QMainWindow):
         print(file_path)
         if 'las' in str(file_path[0]).lower():
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
-            self.manager.add_file(str(file_path[0])) 
+            self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")
-            self.manager.clear_flags()
-            self.left_dock()
-        # if len(self.manager.file_list) > 0:
-        #     self.plot_initial_button.setEnabled(True)
-        if len(self.manager.file_list) > 1:
-            self.add_match_area_button.setEnabled(True)
-
-
-    # def click_plot_initial_button(self):
-    #     self.message_window.append("Plotting scans...")
-    #     self.initial_view = self.grid.plot_points_initial()
-    #     self.plot_widgets.addTab(self.initial_view.native, "Initial Plot")
-    #     self.message_window.append(" ")
 
     def click_add_match_area_button(self):
         if self.manager.count_checked_files() != 2:
@@ -230,15 +200,11 @@ class Window(QMainWindow):
         self.scene_2_selected_areas = np.concatenate(self.scene_2_selected_areas)
         print(self.scene_2_selected_areas)
         self.manager.run_alignment()
+        self.set_alignment_button.setEnabled(True)
         self.save_match_button.setEnabled(True)
 
-
-    # def click_plot_button(self):
-    #     self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
-    #     self.scene = self.manager.plot_points()
-    #     self.plot_widgets.clear()
-    #     self.plot_widgets.addTab(self.scene, "Plot")
-    #     self.select_points_button.setEnabled(True)
+    def click_set_alignment_button(self):
+        self.manager.set_alignment()
 
     def click_select_points_button(self):
         self.manager.select_points()

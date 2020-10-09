@@ -35,11 +35,15 @@ class Grid():
     # def set_grid_to_manager(self):
     #     return self
 
+    def add_data(self, key, las_data):
+        self.files[key] = las_data
+
     def load_files(self, file_dict):
         for key in file_dict:
             if file_dict[key] != None:
                 print('Key', key)
-                self.files[key] = Grid_File(key, file_dict[key])
+                # self.files[key] = Grid_File(key, file_dict[key])
+                self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
     def make_grid(self, cell_size=1):
@@ -67,45 +71,45 @@ class Grid():
         self.max_y = -float("INF")
         self.min_y = float("INF")
         self.cell_size = cell_size
-        for key in self.manager.file_dict:
+        for key, value in self.files.items():
             print(key)
-            if self.manager.file_dict[key] != None:
+            if value != None:
                 # print('shifting scan: ', key)
                 # self.files[key].shift_points(self.shift_x, self.shift_y, self.shift_z)
-                self.files[key].max_x = np.max(self.files[key].xyz[:,0])
-                self.files[key].min_x = np.min(self.files[key].xyz[:,0])
-                self.files[key].max_y = np.max(self.files[key].xyz[:,1])
-                self.files[key].min_y = np.min(self.files[key].xyz[:,1])
-                self.files[key].max_z = np.max(self.files[key].xyz[:,2])
-                self.files[key].min_z = np.min(self.files[key].xyz[:,2])
+                value.max_x = np.max(value.xyz[:,0])
+                value.min_x = np.min(value.xyz[:,0])
+                value.max_y = np.max(value.xyz[:,1])
+                value.min_y = np.min(value.xyz[:,1])
+                value.max_z = np.max(value.xyz[:,2])
+                value.min_z = np.min(value.xyz[:,2])
 
-                if self.files[key].max_x < self.min_x and self.min_x != float("INF"):
-                    print(self.files[key].max_x, self.min_x)
+                if value.max_x < self.min_x and self.min_x != float("INF"):
+                    print(value.max_x, self.min_x)
                     print(f"{key} max_x < global min_x. Scans may not overlap. Check accuracy of coordinates")
                     return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
-                if self.files[key].min_x > self.max_x and self.max_x != -float("INF"):
-                    print(self.files[key].min_x, self.max_x)
+                if value.min_x > self.max_x and self.max_x != -float("INF"):
+                    print(value.min_x, self.max_x)
                     print(f"{key} min_x > global max_x. Scans may not overlap. Check accuracy of coordinates")
                     return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
 
-                if self.files[key].max_x > self.max_x:
-                    self.max_x = self.files[key].max_x
-                if self.files[key].min_x < self.min_x:
-                    self.min_x= self.files[key].min_x
+                if value.max_x > self.max_x:
+                    self.max_x = value.max_x
+                if value.min_x < self.min_x:
+                    self.min_x= value.min_x
 
-                if self.files[key].max_y < self.min_y and self.min_y != float("INF"):
-                    print(self.files[key].max_y, self.min_y)
+                if value.max_y < self.min_y and self.min_y != float("INF"):
+                    print(value.max_y, self.min_y)
                     print(f"{key} max_y < global min_y. Scans may not overlap. Check accuracy of coordinates")
                     return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
-                if self.files[key].min_y > self.max_y and self.max_y != -float("INF"):
-                    print(self.files[key].min_y, self.max_y)
+                if value.min_y > self.max_y and self.max_y != -float("INF"):
+                    print(value.min_y, self.max_y)
                     print(f"{key} min_y > global max_y. Scans may not overlap. Check accuracy of coordinates")
                     return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
                 
-                if self.files[key].max_y > self.max_y:
-                    self.max_y = self.files[key].max_y
-                if self.files[key].min_y < self.min_y:
-                    self.min_y= self.files[key].min_y
+                if value.max_y > self.max_y:
+                    self.max_y = value.max_y
+                if value.min_y < self.min_y:
+                    self.min_y= value.min_y
 
         ################################################
         # calculate x and y length of scan to be used in determing grid spots
@@ -121,9 +125,9 @@ class Grid():
         # make grid
         self.grid = [[Grid_Cell() for i in range(self.number_of_cells_y)] for j in range(self.number_of_cells_x)]
         
-        for key in self.files:
-            if self.files[key] != None:
-                print(f'{key} point density(per m2): ', len(self.files[key].x)/(delta_x*delta_y))
+        for key, value in self.files.items():
+            if value != None:
+                print(f'{key} point density(per m2): ', len(value.x)/(delta_x*delta_y))
                 self.add_points_to_grid(key)
 
 
@@ -167,9 +171,9 @@ class Grid():
     def flag_vegetation(self):
         counts = {}
         point_counts={}
-        for key in self.files:
+        for key, value in self.files.items():
             
-            if self.files[key] != None:
+            if value != None:
                 max_points = 0
                 veg_count = 0
                 point_count = 0
@@ -190,7 +194,7 @@ class Grid():
         return counts
 
     def calculate_snow_depth(self):
-        for key in self.snow_depth_array_dict:
+        for key in self.snow_depth_array_dict.keys():
             self.snow_depth_array_dict[key] = []
             print('Calculating snow depth')
             print(key, self.files[key])

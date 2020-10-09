@@ -1,19 +1,18 @@
 from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
-from canvas import Canvas
 import vispy.app
 import sys
 from grid import Grid
-from data_manager import Manager, file_object
+from depth_manager import Manager
 import numpy as np
 # from scene import DemoScene
 
 class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
-    def __init__(self):
+    def __init__(self, file_manager):
         super(Window, self).__init__()
         # self.setWindowTitle("Lidar Snow Depth Calculator")
-        self.manager = Manager(self)
+        self.manager = Manager(self, file_manager)
         self.initInterface()
 
 
@@ -231,23 +230,14 @@ class Window(QtWidgets.QMainWindow):
         print(file_path)
         if 'las' in str(file_path[0]).lower():
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
-            self.manager.add_file(str(file_path[0])) 
+            self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")
-            self.manager.clear_flags()
-            self.left_dock()
+
         if len(self.manager.file_list) > 0:
             self.vegetation_button.setEnabled(True)
 
-
-    # def click_plot_initial_button(self):
-    #     self.message_window.append("Plotting scans...")
-    #     self.initial_view = self.grid.plot_points_initial()
-    #     self.plot_widgets.addTab(self.initial_view.native, "Initial Plot")
-    #     self.message_window.append(" ")
-
     def click_vegetation_button(self):
         flag = self.manager.make_grid()
-        # self.manager.flag_vegetation()
         self.calculate_snowdepth_button.setEnabled(flag)
         self.plot_button.setEnabled(flag)
 

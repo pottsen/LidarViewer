@@ -191,8 +191,9 @@ class Scene(QtWidgets.QWidget):
                 self.scatter.set_data(self.data, face_color=self.facecolor,
                                     size=self.ptsize)
                 self.scatter.update()
-                self.selected = []
-                return self.data
+                print('selected 1', self.selected)
+                # self.selected = []
+                return self.selected
 
     def permanently_mark_selected(self):
         for i in self.selected:

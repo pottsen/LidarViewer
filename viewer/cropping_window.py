@@ -1,6 +1,5 @@
 from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
-from canvas import Canvas
 import vispy.app
 import sys
 # from grid import Grid
@@ -10,10 +9,10 @@ import numpy as np
 
 class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
-    def __init__(self):
+    def __init__(self, file_manager):
         super(Window, self).__init__()
         # self.setWindowTitle("Lidar Snow Depth Calculator")
-        self.manager = Manager(self)
+        self.manager = Manager(self, file_manager)
         self.initInterface()
         self.crop_1 = None
         self.crop_2 = None
@@ -134,19 +133,13 @@ class Window(QtWidgets.QMainWindow):
         print(file_path)
         if 'las' in str(file_path[0]).lower():
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
-            self.manager.add_file(str(file_path[0])) 
+            self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")
-            self.manager.clear_flags()
-            self.left_dock()
-        if len(self.manager.file_list) > 0:
-            self.plot_scan_button.setEnabled(True)
 
     def click_plot_scan_button(self):
         if self.manager.count_checked_files() < 1:
             self.message_window.append("Please select a file.")
             return
-        self.crop_1_selected_areas = []
-        self.crop_2_selected_areas = []
 
         self.crop_1 = self.manager.add_scene("Crop 1")
         self.crop_2 = self.manager.add_scene("Crop 2")

@@ -1,15 +1,15 @@
-from button_actions import *
+from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
 # from grid import Grid
 from grid_file import Grid_File
 from scene import Scene
-# from multi_scene import Multi_Scene
 import numpy as np
-# import ICP_algorithm as ia
 import copy
 from datetime import datetime
+from file_manager import File_Manager
+from laspy.file import File
 
 # import tie_point_check as tpc
 # import vispy.scene
@@ -17,12 +17,12 @@ from datetime import datetime
 # from laspy.file import File
 
 class file_object(QWidget):
-    def __init__(self, manager, path):
+    def __init__(self, manager, file_path):
         super(QWidget, self).__init__()
         self.manager = manager
-        self.file_path = path
+        self.file_path = file_path
         print(self.file_path)
-        self.file_name = path.split('/')[-1]
+        self.file_name = file_path.split('/')[-1]
         print(self.file_name)
         self.vertical_layout = QVBoxLayout()
         self.horizontal_layout = QHBoxLayout()
@@ -76,22 +76,32 @@ class file_object(QWidget):
                 self.crop_1_checkbox.setEnabled(True)
 
     def click_remove_button(self):
-        self.manager.remove_file(self.file_path)
+        self.manager.remove_file_from_manager(self.file_path)
 
 class Manager:
-    def __init__(self, window):
+    def __init__(self, window, file_manager):
         self.window = window
+        self.file_manager = file_manager
+        self.file_manager.add_manager('Crop', self)
         self.file_list = []
         self.file_dict = {'Crop 1': None, 'Crop 2': None}
-        self.files = {'Crop 1': None, 'Crop 2': None}
-        self.files_updated = True
+        # self.files = {'Crop 1': None, 'Crop 2': None}
 
-    def add_file(self, file_path):
+    def add_file_to_manager(self, file_path):
+        self.file_manager.add_file(file_path)
+
+    def add_file_object(self, file_path):
         print('Adding file to list', file_path)
         self.file_list.append(file_object(self, file_path))
-        print('Length of list', len(self.file_list))
+        self.clear_flags()
+        self.window.left_dock()        
+        if len(self.file_list) > 0:
+            self.window.plot_scan_button.setEnabled(True)
 
-    def remove_file(self, file_path):
+    def remove_file_from_manager(self, file_path):
+        self.file_manager.remove_file(file_path)
+        
+    def remove_file_object(self, file_path):
         print('Deleting file from list ', file_path)
         for i in range(len(self.file_list)):
             print('i', i)
@@ -102,6 +112,7 @@ class Manager:
                 self.clear_flags()
                 self.window.files_update()
                 break
+        self.window.left_dock()
         
 
     def count_checked_files(self):
@@ -114,40 +125,47 @@ class Manager:
 
     def add_scene(self, key):
         if self.file_dict[key] != None:
-            self.files[key] = Grid_File(key, self.file_dict[key])
-            if key == "Crop 1" and key in self.files.keys():
-                scene = Scene(self, self.files[key].init_xyz, np.array([[1.0, 0.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'Crop')
+            file_path = self.file_dict[key]
+            print('file path', file_path)
+            if key == "Crop 1": # and key in self.files.keys():
+                scene = Scene(self, 
+                self.file_manager.file_dict[file_path].init_xyz,
+                np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
+                'Crop')
 
-            if key == "Crop 2" and key in self.files.keys():
-                scene = Scene(self, self.files[key].init_xyz, np.array([[0.0, 1.0, 0.0] for i in range(len(self.files[key].init_xyz))]), 'Crop')
+            if key == "Crop 2": # and key in self.files.keys():
+                scene = Scene(self, 
+                self.file_manager.file_dict[file_path].init_xyz,
+                np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
+                'Crop')
 
             print(f"{key} file added.")
             return scene
-        else:
-            self.files.pop(key, None)
 
     def select_points(self):
-        if "Crop 1" in self.files.keys():
+        if self.file_dict["Crop 1"] != None: # in self.files.keys():
             self.window.crop_1.select_flag = self.window.select_points_button.isChecked()
             self.window.crop_1.event_connect(self.window.crop_1.select_flag)
             self.window.crop_1.select_id = '2'
             self.window.crop_1.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
 
-        if "Crop 2" in self.files.keys():
+        if self.file_dict["Crop 2"] != None: # in self.files.keys():
             self.window.crop_2.select_flag = self.window.select_points_button.isChecked()     
             self.window.crop_2.event_connect(self.window.crop_2.select_flag)
             self.window.crop_2.select_id = '2'
             self.window.crop_2.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
 
     def add_selected_points(self):
-        if "Crop 1" in self.files.keys():
+        if self.file_dict["Crop 1"] != None:
+            # if "Crop 1" in self.files.keys():
             selected = self.window.crop_1.selected
             data = self.window.crop_1.data
             self.window.crop_1_selected_areas.append(data[selected])
             self.window.crop_1.permanently_mark_selected()
             print("crop 1 selected\n", self.window.crop_1_selected_areas)
             
-        if "Crop 2" in self.files.keys():
+        if self.file_dict["Crop 2"] != None:
+            # if "Crop 2" in self.files.keys():
             selected = self.window.crop_2.selected
             data = self.window.crop_2.data
             self.window.crop_2_selected_areas.append(data[selected])
@@ -155,37 +173,63 @@ class Manager:
             print("crop 2 selected\n", self.window.crop_1_selected_areas)
 
     def remove_selected_points(self):
-        if "Crop 1" in self.files.keys():
+        if self.file_dict["Crop 1"] != None:
             print('Uncropped length', len(self.window.crop_1.data))
-            self.window.crop_1.remove_selected_points()
+            selected = self.window.crop_1.remove_selected_points()
+            # print(selected)
             print('Cropped length', len(self.window.crop_1.data))
+            self.update_file_manager(selected, self.file_dict["Crop 1"])
 
-        if "Crop 2" in self.files.keys():
+        if self.file_dict["Crop 2"] != None:
             print('Uncropped length', len(self.window.crop_2.data))
-            self.window.crop_2.remove_selected_points()
+            selected = self.window.crop_2.remove_selected_points()
             print('Cropped length', len(self.window.crop_2.data))
+            self.update_file_manager(selected, self.file_dict["Crop 2"])
     
+    def update_file_manager(self, selected, file_path):
+        self.file_manager.remove_cropped_points(selected, file_path)
+
     def save_crop_1(self):
-        now = datetime.now()
-        date = now.strftime("%D").replace('/','-')
-        time = now.strftime("%H-%M")
-        cropped_file_name = self.files['Crop 1'].file_name +'_cropped_'+date+'.las'
-        cropped_file = File(cropped_file_name, mode = "w", header = self.files['Crop 1'].file.header)
-        cropped_file.x = self.window.crop_1.data[:,0]
-        cropped_file.y = self.window.crop_1.data[:,1]
-        cropped_file.z = self.window.crop_1.data[:,2]
-        cropped_file.close()
+        if self.file_dict["Crop 1"] != None:
+            file_path = self.file_dict["Crop 1"]
+            now = datetime.now()
+            date = now.strftime("%D").replace('/','-')
+            time = now.strftime("%H-%M")
+            cropped_file_name = self.file_manager.file_dict[file_path].file_name +'_cropped_'+date+'.las'
+            cropped_file = File(cropped_file_name, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
+            cropped_file.points = self.file_manager.file_dict[file_path].points
+            cropped_file.x = self.file_manager.file_dict[file_path].x
+            cropped_file.y = self.file_manager.file_dict[file_path].y
+            cropped_file.z = self.file_manager.file_dict[file_path].z
+            cropped_file.intensity = self.file_manager.file_dict[file_path].intensity
+            try:
+                cropped_file.red = self.file_manager.file_dict[file_path].red
+                cropped_file.green = self.file_manager.file_dict[file_path].green
+                cropped_file.blue = self.file_manager.file_dict[file_path].blue
+            except:
+                pass
+            cropped_file.close()
 
     def save_crop_2(self):
-        now = datetime.now()
-        date = now.strftime("%D").replace('/','-')
-        time = now.strftime("%H-%M")
-        cropped_file_name = self.files['Crop 2'].file_name +'_cropped_'+date+'.las'
-        cropped_file = File(cropped_file_name, mode = "w", header = self.files['Crop 2'].file.header)
-        cropped_file.x = self.window.crop_2.data[:,0]
-        cropped_file.y = self.window.crop_2.data[:,1]
-        cropped_file.z = self.window.crop_2.data[:,2]
-        cropped_file.close()
+        if self.file_dict["Crop 2"] != None:
+            file_path = self.file_dict["Crop 2"]
+            now = datetime.now()
+            date = now.strftime("%D").replace('/','-')
+            time = now.strftime("%H-%M")
+            cropped_file_name = self.file_manager.file_dict[file_path].file_name +'_cropped_'+date+'.las'
+            cropped_file = File(cropped_file_name, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
+            cropped_file.points = self.file_manager.file_dict[file_path].points
+            cropped_file.x = self.file_manager.file_dict[file_path].x
+            cropped_file.y = self.file_manager.file_dict[file_path].y
+            cropped_file.z = self.file_manager.file_dict[file_path].z
+            cropped_file.intensity = self.file_manager.file_dict[file_path].intensity
+            try:
+                cropped_file.red = self.file_manager.file_dict[file_path].red
+                cropped_file.green = self.file_manager.file_dict[file_path].green
+                cropped_file.blue = self.file_manager.file_dict[file_path].blue
+            except:
+                pass
+            cropped_file.close()
 
     def reset_basis_info(self):
         self.grid.snow_depth_key == None
