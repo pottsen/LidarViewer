@@ -25,7 +25,7 @@ class file_object(QWidget):
         # self.checkbox_group.addButton(self.ground_checkbox)
         self.horizontal_layout.addWidget(self.ground_checkbox)
 
-        self.intSnow_checkbox = QCheckBox('Inter. Snow')
+        self.intSnow_checkbox = QCheckBox('Int. Snow')
         self.intSnow_checkbox.stateChanged.connect(lambda:self.intSnow_check_boxes())
         # self.checkbox_group.addButton(self.intSnow_checkbox)
         self.horizontal_layout.addWidget(self.intSnow_checkbox)
@@ -53,7 +53,7 @@ class file_object(QWidget):
             return
         if not self.ground_checkbox.isChecked():
             self.manager.unset_ground_flags()
-            if self.manager.file_dict['Inter. Snow'] == None:
+            if self.manager.file_dict['Int. Snow'] == None:
                 self.intSnow_checkbox.setEnabled(True)
             if self.manager.file_dict['New Snow'] == None:
                 self.newSnow_checkbox.setEnabled(True)
@@ -81,7 +81,7 @@ class file_object(QWidget):
             self.manager.unset_newSnow_flags()
             if self.manager.file_dict['Ground'] == None:
                 self.ground_checkbox.setEnabled(True)
-            if self.manager.file_dict['Inter. Snow'] == None:
+            if self.manager.file_dict['Int. Snow'] == None:
                 self.intSnow_checkbox.setEnabled(True)
     
     def click_remove_button(self):
@@ -93,8 +93,10 @@ class Manager:
         self.file_manager = file_manager
         self.file_manager.add_manager('Depth', self)
         self.file_list = []
-        self.file_dict = {'Ground': None, 'Inter. Snow': None, 'New Snow': None}
+        self.file_dict = {'Ground': None, 'Int. Snow': None, 'New Snow': None}
         self.grid = Grid(self)
+        self.scan_basis = None
+        self.color_basis = None
 
     def add_file_to_manager(self, file_path):
         self.file_manager.add_file(file_path)
@@ -151,7 +153,6 @@ class Manager:
             return False
 
     def flag_vegetation(self):
-        self.grid.snow_depth_key == 'New Snow'
         if self.count_checked_files() > 0:
             self.window.message_window.append("Flagging vegetation.")
             counts = self.grid.flag_vegetation()
@@ -167,15 +168,14 @@ class Manager:
         else:
             self.window.message_window.append("Please select files.")
 
-    def color_points(self, upper_bound, lower_bound):
+    def color_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        print('coloring points')
-        message = self.grid.color_points(upper_bound, lower_bound)
+        message = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
         self.window.message_window.append(message)
     
-    def plot_points(self):
+    def plot_points(self, color_basis, scan_basis):
         if self.count_checked_files() > 0:
-            scene = self.grid.plot_points()
+            scene = self.grid.plot_points(scan_basis)
             return scene
 
     def select_points(self):
@@ -187,22 +187,20 @@ class Manager:
         else:
             self.grid.scene.text.text = ''
 
-    def get_ground_basis_info(self):
-        self.grid.snow_depth_key = 'Ground'
-        max_bound, min_bound = self.grid.get_max_and_min_depth()
-        return max_bound, min_bound
+    def get_basis_info(self, color_basis, scan_basis):
+        if self.file_dict[scan_basis] == None:
+            return '-', '-'
+        
+        if color_basis == 'intensity':
+            max_bound, min_bound = self.grid.get_max_and_min_intensity(scan_basis)
 
-    def get_intSnow_basis_info(self):
-        self.grid.snow_depth_key = 'Inter. Snow'
-        print(self.grid.snow_depth_key)
-        max_bound, min_bound = self.grid.get_max_and_min_depth()
+        if color_basis == 'depth':
+            max_bound, min_bound = self.grid.get_max_and_min_depth(scan_basis)
         return max_bound, min_bound
 
     def reset_basis_info(self):
-        self.grid.snow_depth_key == None
-        self.grid.max_bound = None
-        self.grid.min_bound = None
-        return '-', '-'
+        max_bound, min_bound = self.grid.reset_basis_info()
+        return max_bound, min_bound
 
     def set_ground_flags(self, path):
         self.file_dict['Ground'] = path
@@ -220,16 +218,16 @@ class Manager:
                 i.ground_checkbox.setEnabled(True)
 
     def set_intSnow_flags(self, path):
-        self.file_dict['Inter. Snow'] = path
-        print(self.file_dict['Inter. Snow'])
+        self.file_dict['Int. Snow'] = path
+        print(self.file_dict['Int. Snow'])
         for i in self.file_list:
-            if i.file_path == self.file_dict['Inter. Snow']:
+            if i.file_path == self.file_dict['Int. Snow']:
                 pass
             else:
                 i.intSnow_checkbox.setEnabled(False)
 
     def unset_intSnow_flags(self):
-        self.file_dict['Inter. Snow'] = None
+        self.file_dict['Int. Snow'] = None
         for i in self.file_list:
             if not i.ground_checkbox.isChecked() and not i.newSnow_checkbox.isChecked():
                 i.intSnow_checkbox.setEnabled(True)
@@ -251,7 +249,7 @@ class Manager:
 
     def clear_flags(self):
         self.file_dict['Ground'] = None
-        self.file_dict['Inter. Snow'] = None
+        self.file_dict['Int. Snow'] = None
         self.file_dict['New Snow'] = None
         for i in self.file_list:
             i.ground_checkbox.setChecked(False)
