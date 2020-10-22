@@ -178,13 +178,15 @@ class Manager:
             selected = self.window.crop_1.remove_selected_points()
             # print(selected)
             print('Cropped length', len(self.window.crop_1.data))
-            self.update_file_manager(selected, self.file_dict["Crop 1"])
+            if len(selected) > 0:
+                self.update_file_manager(selected, self.file_dict["Crop 1"])
 
         if self.file_dict["Crop 2"] != None:
             print('Uncropped length', len(self.window.crop_2.data))
             selected = self.window.crop_2.remove_selected_points()
             print('Cropped length', len(self.window.crop_2.data))
-            self.update_file_manager(selected, self.file_dict["Crop 2"])
+            if len(selected) > 0:
+                self.update_file_manager(selected, self.file_dict["Crop 2"])
     
     def update_file_manager(self, selected, file_path):
         self.file_manager.remove_cropped_points(selected, file_path)

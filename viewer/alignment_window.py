@@ -151,7 +151,7 @@ class Window(QMainWindow):
 
     def click_add_match_area_button(self):
         if self.manager.count_checked_files() != 2:
-            self.message_window.append("Please select files.")
+            self.message_window.append("Please select 2 files.")
             return
         self.scene_1_selected_areas = []
         self.scene_2_selected_areas = []
@@ -164,44 +164,38 @@ class Window(QMainWindow):
         self.scene_2 = self.manager.add_scene("Alignment")
 
         self.plot_widgets.clear()
-        self.plot_widgets.addTab(self.scene_1, "Scan 1")
-        self.plot_widgets.addTab(self.scene_2, "Scan 2")
+        self.plot_widgets.addTab(self.scene_1, "Base")
+        self.plot_widgets.addTab(self.scene_2, "Alignment")
         
         self.select_points_button.setEnabled(True)
+        self.select_points_button.setChecked(False)
         self.set_match_area_button.setEnabled(True)
+        self.run_alignment_button.setEnabled(False)
+        self.set_alignment_button.setEnabled(False)
+        self.save_match_button.setEnabled(False)
         print("Base and Alignment file plotted.")
-        # self.scan_1_button.setEnabled(True)
-        # self.scan_2_button.setEnabled(True)
+
 
     def click_select_points_button(self):
         self.manager.select_points()
-
-    # def click_scan_1_button(self):
-    #     self.plot_widgets.clear()
-    #     self.plot_widgets.addTab(self.scene_1, "Scan 1")
-    #     print("Scan 1 ready to view")
-
-    # def click_scan_2_button(self):
-    #     # self.plot_widgets.clear()
-    #     self.plot_widgets.addTab(self.scene_2, "Scan 2")
-    #     self.set_match_area_button.setEnabled(True)
-    #     print("Scan 2 ready to view")
 
     def click_set_match_area_button(self):
         self.manager.set_match_area()
         print("s1 selected length", len(self.scene_1_selected_areas))
         print("s2 selected length", len(self.scene_2_selected_areas))
         self.run_alignment_button.setEnabled(True)
-    
 
     def click_run_alignment_button(self):
-        self.scene_1_selected_areas = np.concatenate(self.scene_1_selected_areas)
-        print(self.scene_1_selected_areas)
-        self.scene_2_selected_areas = np.concatenate(self.scene_2_selected_areas)
-        print(self.scene_2_selected_areas)
-        self.manager.run_alignment()
-        self.set_alignment_button.setEnabled(True)
-        self.save_match_button.setEnabled(True)
+        if self.scene_1_selected_areas != [] and self.scene_2_selected_areas != []:
+            self.scene_1_selected_areas = np.concatenate(self.scene_1_selected_areas)
+            print(self.scene_1_selected_areas)
+            self.scene_2_selected_areas = np.concatenate(self.scene_2_selected_areas)
+            print(self.scene_2_selected_areas)
+            self.manager.run_alignment()
+            self.set_alignment_button.setEnabled(True)
+            self.save_match_button.setEnabled(True)
+        else:
+            self.message_window.append('Please select points in both scans.')
 
     def click_set_alignment_button(self):
         self.manager.set_alignment()
@@ -213,9 +207,11 @@ class Window(QMainWindow):
         self.manager.save_matched_file()
 
     def click_reset_button(self):
+        self.manager.file_manager.reset_files()
         self.plot_widgets.clear()
         self.select_points_button.setChecked(False)
         self.select_points_button.setEnabled(False)
         self.set_match_area_button.setEnabled(False)
+        self.set_alignment_button.setEnabled(False)
         self.run_alignment_button.setEnabled(False)
         self.save_match_button.setEnabled(False)

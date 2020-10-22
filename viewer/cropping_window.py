@@ -167,6 +167,7 @@ class Window(QtWidgets.QMainWindow):
         self.manager.save_crop_2()
 
     def click_reset_button(self):
+        self.manager.file_manager.reset_files()
         self.plot_widgets.clear()
         self.plot_scan_button.setChecked(False)
         self.select_points_button.setChecked(False)
