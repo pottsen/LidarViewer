@@ -37,4 +37,11 @@ class File_Manager:
     def update_aligned_points(self, points, file_path):
         self.file_dict[file_path].update_aligned_points(points)
 
+    def reset_files(self):
+        for key in self.file_dict.keys():
+            self.file_dict[key] = Las_Data(key)
+            print(key, ' reset in manager')
+        # self.push_file_to_child_managers(file_path)
+
+
 

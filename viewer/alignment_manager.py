@@ -154,19 +154,26 @@ class Manager:
 
     def set_match_area(self):
         selected = self.window.scene_1.selected
-        data = self.window.scene_1.data
-        self.window.scene_1_selected_areas.append(data[selected])
-        self.window.scene_1.permanently_mark_selected()
+        if selected != []:
+            data = self.window.scene_1.data
+            self.window.scene_1_selected_areas.append(data[selected])
+            self.window.scene_1.permanently_mark_selected()
         
-
         selected = self.window.scene_2.selected
-        data = self.window.scene_2.data
-        self.window.scene_2_selected_areas.append(data[selected])
-        self.window.scene_2.permanently_mark_selected()
-
-        print(self.window.scene_1_selected_areas)
+        if selected != []:
+            data = self.window.scene_2.data
+            self.window.scene_2_selected_areas.append(data[selected])
+            self.window.scene_2.permanently_mark_selected()
 
     def run_alignment(self):
+        ### Remove Duplicates
+        ## Scene 1
+        unique_points, unique_indices = np.unique(self.window.scene_1_selected_areas, return_index=True, axis=0)
+        self.window.scene_1_selected_areas = self.window.scene_1_selected_areas[unique_indices]
+        ## Scene 2
+        unique_points, unique_indices = np.unique(self.window.scene_2_selected_areas, return_index=True, axis=0)
+        self.window.scene_2_selected_areas = self.window.scene_2_selected_areas[unique_indices]
+
         scene_2_selected_area_copy = copy.deepcopy(self.window.scene_2_selected_areas)
         match, iteration, error = ia.icp_algorithm(self.window.scene_1_selected_areas, self.window.scene_2_selected_areas)
 
