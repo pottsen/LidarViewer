@@ -169,19 +169,24 @@ class Scene(QtWidgets.QWidget):
                               size=self.ptsize)
         self.scatter.update()
 
-        if self.scene_type == 'Depth':
-            if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
-                stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
+        
+        if len(self.data[tuple(self.selected)]) > 0 and self.grid.stats_key != None:
+            if self.scene_type in ['depth']:
+                stats = self.grid.get_depth_stats(self.data[tuple(self.selected)], self.scene_type) 
 
-                # add call to get snowdepth here
-                # get average x,y,z
-                self.stats_text.text = str(f'Average Depth: {stats[0]}')
-                self.stats_text2.text = str(f'Max Depth: {stats[1]}')
-                self.stats_text3.text = str(f'Min Depth: {stats[2]}')
-            else:
-                self.stats_text.text = str(f'Average Depth: n/a')
-                self.stats_text2.text = str(f'Max Depth: n/a')
-                self.stats_text3.text = str(f'Min Depth: n/a')
+            if self.scene_type in ['intensity']:
+                stats = self.grid.get_intensity_stats(self.selected)
+            
+            # add call to get snowdepth here
+            # get average x,y,z
+            self.stats_text.text = str(f'Average {self.scene_type}: {stats[0]}')
+            self.stats_text2.text = str(f'Max {self.scene_type}: {stats[1]}')
+            self.stats_text3.text = str(f'Min {self.scene_type}: {stats[2]}')
+            
+        else:
+                self.stats_text.text = str(f'Average: n/a')
+                self.stats_text2.text = str(f'Max: n/a')
+                self.stats_text3.text = str(f'Min: n/a')
 
     def remove_selected_points(self):#, removal_points):
             if len(self.selected) > 0:

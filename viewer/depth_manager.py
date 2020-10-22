@@ -136,7 +136,9 @@ class Manager:
 
     def make_grid(self):
         if self.count_checked_files() > 0:
+            print('file dict \n', self.file_dict)
             self.window.message_window.append("Creating grid and adding points.")
+            self.grid.reset_files()
             for key, value in self.file_dict.items():
                 if value != None:
                     self.grid.add_data(key, self.file_manager.file_dict[value])
@@ -168,15 +170,15 @@ class Manager:
         else:
             self.window.message_window.append("Please select files.")
 
-    def color_points(self, color_basis, scan_basis, upper_bound, lower_bound):
+    def color_and_plot_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        message = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
-        self.window.message_window.append(message)
+        scene = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
+        return scene
     
-    def plot_points(self, color_basis, scan_basis):
-        if self.count_checked_files() > 0:
-            scene = self.grid.plot_points(scan_basis)
-            return scene
+    # def plot_points(self, color_basis, scan_basis):
+    #     if self.count_checked_files() > 0:
+    #         scene = self.grid.plot_points(color_basis, scan_basis)
+    #         return scene
 
     def select_points(self):
         self.grid.scene.select_flag = self.window.select_points_button.isChecked()
