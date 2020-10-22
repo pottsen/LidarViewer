@@ -14,6 +14,8 @@ class Window(QtWidgets.QMainWindow):
         # self.setWindowTitle("Lidar Snow Depth Calculator")
         self.manager = Manager(self, file_manager)
         self.initInterface()
+        self.scan_basis = None
+        self.color_basis = None
 
 
     def initInterface(self):
@@ -84,32 +86,69 @@ class Window(QtWidgets.QMainWindow):
         Left plot widget. Has all the plotting options in it.
         """
         
-        self.depth_checkbox_layout = QHBoxLayout()
-        self.depth_basis_label = QLabel('Depth Basis:')
+        self.color_checkbox_layout = QHBoxLayout()
+        self.color_basis_label = QLabel('Color By:')
+        self.intensity_basis_checkbox = QCheckBox('Intensity')
+        self.intensity_basis_checkbox.stateChanged.connect(lambda:self.set_color_basis_intensity())
+        self.intensity_basis_checkbox.setEnabled(False)
+        self.snowdepth_basis_checkbox = QCheckBox('Snow Depth')
+        self.snowdepth_basis_checkbox.stateChanged.connect(lambda:self.set_color_basis_snowdepth())
+        self.snowdepth_basis_checkbox.setEnabled(False)
+        self.color_checkbox_layout.addWidget(self.color_basis_label)
+        self.color_checkbox_layout.addWidget(self.intensity_basis_checkbox)
+        self.color_checkbox_layout.addWidget(self.snowdepth_basis_checkbox)
+
+        self.color_checkbox_widget = QWidget()
+        self.color_checkbox_widget.setLayout(self.color_checkbox_layout)
+        self.plot_widget_layout.addWidget(self.color_checkbox_widget)
+
+        self.basis_checkbox_layout = QHBoxLayout()
+        self.basis_label = QLabel('Basis:')
         self.ground_basis_checkbox = QCheckBox('Ground')
-        self.ground_basis_checkbox.stateChanged.connect(lambda:self.get_ground_basis_info())
+        self.ground_basis_checkbox.stateChanged.connect(lambda:self.set_ground_basis())
         self.ground_basis_checkbox.setEnabled(False)
-        self.intSnow_basis_checkbox = QCheckBox('Inter. Snow')
-        self.intSnow_basis_checkbox.stateChanged.connect(lambda:self.get_intSnow_basis_info())
+        self.intSnow_basis_checkbox = QCheckBox('Int. Snow')
+        self.intSnow_basis_checkbox.stateChanged.connect(lambda:self.set_intSnow_basis())
         self.intSnow_basis_checkbox.setEnabled(False)
-        self.depth_checkbox_layout.addWidget(self.depth_basis_label)
-        self.depth_checkbox_layout.addWidget(self.ground_basis_checkbox)
-        self.depth_checkbox_layout.addWidget(self.intSnow_basis_checkbox)
+        self.new_snow_basis_checkbox = QCheckBox('New Snow')
+        self.new_snow_basis_checkbox.stateChanged.connect(lambda:self.set_new_snow_basis())
+        self.new_snow_basis_checkbox.setEnabled(False)
+        self.basis_checkbox_layout.addWidget(self.basis_label)
+        self.basis_checkbox_layout.addWidget(self.ground_basis_checkbox)
+        self.basis_checkbox_layout.addWidget(self.intSnow_basis_checkbox)
+        self.basis_checkbox_layout.addWidget(self.new_snow_basis_checkbox)
 
-        self.depth_checkbox_widget = QWidget()
-        self.depth_checkbox_widget.setLayout(self.depth_checkbox_layout)
-        self.plot_widget_layout.addWidget(self.depth_checkbox_widget)
+        self.basis_checkbox_widget = QWidget()
+        self.basis_checkbox_widget.setLayout(self.basis_checkbox_layout)
+        self.plot_widget_layout.addWidget(self.basis_checkbox_widget)
+        
+        
+        # self.depth_checkbox_layout = QHBoxLayout()
+        # self.depth_basis_label = QLabel('Depth Basis:')
+        # self.ground_basis_checkbox = QCheckBox('Ground')
+        # self.ground_basis_checkbox.stateChanged.connect(lambda:self.get_ground_basis_info())
+        # self.ground_basis_checkbox.setEnabled(False)
+        # self.intSnow_basis_checkbox = QCheckBox('Int. Snow')
+        # self.intSnow_basis_checkbox.stateChanged.connect(lambda:self.get_intSnow_basis_info())
+        # self.intSnow_basis_checkbox.setEnabled(False)
+        # self.depth_checkbox_layout.addWidget(self.depth_basis_label)
+        # self.depth_checkbox_layout.addWidget(self.ground_basis_checkbox)
+        # self.depth_checkbox_layout.addWidget(self.intSnow_basis_checkbox)
+
+        # self.depth_checkbox_widget = QWidget()
+        # self.depth_checkbox_widget.setLayout(self.depth_checkbox_layout)
+        # self.plot_widget_layout.addWidget(self.depth_checkbox_widget)
 
 
-        self.maxdepth_label_layout = QHBoxLayout()
-        self.maxdepth_label_name = QLabel('Max Depth:')
-        self.maxdepth_label_value = QLabel('-')
-        self.maxdepth_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.maxdepth_label_layout.addWidget(self.maxdepth_label_name)
-        self.maxdepth_label_layout.addWidget(self.maxdepth_label_value)
+        self.max_label_layout = QHBoxLayout()
+        self.max_label_name = QLabel('Max:')
+        self.max_label_value = QLabel('-')
+        self.max_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.max_label_layout.addWidget(self.max_label_name)
+        self.max_label_layout.addWidget(self.max_label_value)
 
-        self.maxdepth_label_widget = QWidget()
-        self.maxdepth_label_widget.setLayout(self.maxdepth_label_layout)
+        self.max_label_widget = QWidget()
+        self.max_label_widget.setLayout(self.max_label_layout)
 
         self.upperbound_label_layout = QHBoxLayout()
         self.upperbound_label_name = QLabel('Upper Bound:')
@@ -131,20 +170,20 @@ class Window(QtWidgets.QMainWindow):
         self.lowerbound_label_widget = QWidget()
         self.lowerbound_label_widget.setLayout(self.lowerbound_label_layout)
 
-        self.mindepth_label_layout = QHBoxLayout()
-        self.mindepth_label_name = QLabel('Min Depth:')
-        self.mindepth_label_value = QLabel('-')
-        self.mindepth_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.mindepth_label_layout.addWidget(self.mindepth_label_name)
-        self.mindepth_label_layout.addWidget(self.mindepth_label_value)
+        self.min_label_layout = QHBoxLayout()
+        self.min_label_name = QLabel('Min:')
+        self.min_label_value = QLabel('-')
+        self.min_label_value.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.min_label_layout.addWidget(self.min_label_name)
+        self.min_label_layout.addWidget(self.min_label_value)
 
-        self.mindepth_label_widget = QWidget()
-        self.mindepth_label_widget.setLayout(self.mindepth_label_layout)
+        self.min_label_widget = QWidget()
+        self.min_label_widget.setLayout(self.min_label_layout)
 
-        self.plot_widget_layout.addWidget(self.maxdepth_label_widget)
+        self.plot_widget_layout.addWidget(self.max_label_widget)
         self.plot_widget_layout.addWidget(self.upperbound_label_widget)
         self.plot_widget_layout.addWidget(self.lowerbound_label_widget)
-        self.plot_widget_layout.addWidget(self.mindepth_label_widget)
+        self.plot_widget_layout.addWidget(self.min_label_widget)
         self.plot_button = QPushButton("Plot")
         self.plot_button.clicked.connect(self.click_plot_button)
         self.plot_button.setEnabled(False)
@@ -193,37 +232,185 @@ class Window(QtWidgets.QMainWindow):
         # self.plot_widgets.clear()
         # self.plot_widgets.addTab(self.scene, "Plot")
 
-    def get_ground_basis_info(self):
-        print("Getting Ground basis info...")
-        if self.ground_basis_checkbox.isChecked():
-            self.intSnow_basis_checkbox.setEnabled(False)
-            max_bound, min_bound = self.manager.get_ground_basis_info()
-            self.maxdepth_label_value.setText(str(max_bound))
-            self.mindepth_label_value.setText(str(min_bound))
-            
-        if not self.ground_basis_checkbox.isChecked():
-            ## Reset info
-            max_bound, min_bound = self.manager.reset_basis_info()
-            self.maxdepth_label_value.setText(str(max_bound))
-            self.mindepth_label_value.setText(str(min_bound))
-            self.intSnow_basis_checkbox.setEnabled(True)
-           
+    def set_color_basis_intensity(self):
+        if self.intensity_basis_checkbox.isChecked():
+            self.color_basis = 'intensity'
+            self.snowdepth_basis_checkbox.setChecked(False)
+            self.snowdepth_basis_checkbox.setEnabled(False)
 
-    def get_intSnow_basis_info(self):
-        if self.intSnow_basis_checkbox.isChecked():
-            print("Getting intSnow basis info...")
-            self.ground_basis_checkbox.setEnabled(False)
-            max_bound, min_bound = self.manager.get_intSnow_basis_info()
-            self.maxdepth_label_value.setText(str(max_bound))
-            self.mindepth_label_value.setText(str(min_bound))
-            
-        if not self.intSnow_basis_checkbox.isChecked():
-            ## Reset info
-            max_bound, min_bound = self.manager.reset_basis_info()
-            self.maxdepth_label_value.setText(str(max_bound))
-            self.mindepth_label_value.setText(str(min_bound))
-            # self.reset_basis()
+            self.ground_basis_checkbox.setChecked(False)
             self.ground_basis_checkbox.setEnabled(True)
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(True)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(True)
+            # max_bound, min_bound = self.manager.get_intensity_basis_info()
+            # self.max_label_value.setText(str(max_bound))
+            # self.min_label_value.setText(str(min_bound))
+            
+        if not self.intensity_basis_checkbox.isChecked():
+            self.color_basis = 'intensity'
+            self.snowdepth_basis_checkbox.setChecked(False)
+            self.snowdepth_basis_checkbox.setEnabled(True)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(False)
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(False)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(False)
+
+    def set_color_basis_snowdepth(self):
+        if self.snowdepth_basis_checkbox.isChecked():
+            self.color_basis = 'depth'
+            self.intensity_basis_checkbox.setChecked(False)
+            self.intensity_basis_checkbox.setEnabled(False)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(True)
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(True)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(False)
+            # max_bound, min_bound = self.manager.get_intensity_basis_info()
+            # self.max_label_value.setText(str(max_bound))
+            # self.min_label_value.setText(str(min_bound))
+            
+        if not self.snowdepth_basis_checkbox.isChecked():
+            self.color_basis = None
+            self.intensity_basis_checkbox.setChecked(False)
+            self.intensity_basis_checkbox.setEnabled(True)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(False)
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(False)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(False)
+
+        
+    def set_ground_basis(self):
+        if self.ground_basis_checkbox.isChecked():
+            self.scan_basis = 'Ground'
+
+            max_bound, min_bound = self.manager.get_basis_info(self.color_basis, self.scan_basis)
+
+            if max_bound == '-':
+                self.scan_basis = None
+                self.ground_basis_checkbox.setChecked(False)
+                self.ground_basis_checkbox.setCheckState(False)
+                return
+
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(True)
+            self.lowerbound_text_slot.setEnabled(True)
+
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(False)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(False)
+
+        if not self.ground_basis_checkbox.isChecked():
+            self.scan_basis = None
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(True)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(True)
+
+            max_bound, min_bound = self.manager.reset_basis_info()
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(False)
+            self.lowerbound_text_slot.setEnabled(False)
+
+    def set_intSnow_basis(self):
+        if self.intSnow_basis_checkbox.isChecked():
+            self.scan_basis = 'Int. Snow'
+
+            max_bound, min_bound = self.manager.get_basis_info(self.color_basis, self.scan_basis)
+
+            if max_bound == '-':
+                print('max bound', max_bound)
+                self.scan_basis = None
+                self.intSnow_basis_checkbox.setChecked(False)
+                self.intSnow_basis_checkbox.setCheckState(False)
+                return
+            
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(True)
+            self.lowerbound_text_slot.setEnabled(True)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(False)
+
+            self.new_snow_basis_checkbox.setChecked(False)
+            self.new_snow_basis_checkbox.setEnabled(False)
+
+            
+
+        if not self.intSnow_basis_checkbox.isChecked():
+            self.scan_basis = None
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(True)
+
+            if self.color_basis != 'depth':
+                self.new_snow_basis_checkbox.setChecked(False)
+                self.new_snow_basis_checkbox.setEnabled(True)
+            max_bound, min_bound = self.manager.reset_basis_info()
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(False)
+            self.lowerbound_text_slot.setEnabled(False)
+
+    def set_new_snow_basis(self):
+        if self.new_snow_basis_checkbox.isChecked():
+            self.scan_basis = 'New Snow'
+
+            max_bound, min_bound = self.manager.get_basis_info(self.color_basis, self.scan_basis)
+
+            if max_bound == '-':
+                self.scan_basis = None
+                self.new_snow_basis_checkbox.setChecked(False)
+                self.new_snow_basis_checkbox.setCheckState(False)
+                return
+
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(True)
+            self.lowerbound_text_slot.setEnabled(True)
+
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(False)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(False)
+
+        if not self.new_snow_basis_checkbox.isChecked():
+            self.scan_basis = None
+            self.intSnow_basis_checkbox.setChecked(False)
+            self.intSnow_basis_checkbox.setEnabled(True)
+
+            self.ground_basis_checkbox.setChecked(False)
+            self.ground_basis_checkbox.setEnabled(True)
+            max_bound, min_bound = self.manager.reset_basis_info()
+            self.max_label_value.setText(str(max_bound))
+            self.min_label_value.setText(str(min_bound))
+            self.upperbound_text_slot.setEnabled(False)
+            self.lowerbound_text_slot.setEnabled(False)
 
     def click_load_file_button(self):
         file_path = QFileDialog.getOpenFileName()
@@ -237,27 +424,46 @@ class Window(QtWidgets.QMainWindow):
             self.vegetation_button.setEnabled(True)
 
     def click_vegetation_button(self):
-        flag = self.manager.make_grid()
+        self.intensity_basis_checkbox.setCheckState(False)
+        self.intensity_basis_checkbox.setEnabled(True)
+
+        self.snowdepth_basis_checkbox.setCheckState(False)
+        self.snowdepth_basis_checkbox.setEnabled(False)
+
+        self.ground_basis_checkbox.setCheckState(False)
+        self.ground_basis_checkbox.setEnabled(False)
+
+        self.intSnow_basis_checkbox.setCheckState(False)
+        self.intSnow_basis_checkbox.setEnabled(False)
+
+        self.new_snow_basis_checkbox.setCheckState(False)
+        self.new_snow_basis_checkbox.setEnabled(False) 
+
+        flag = self.manager.make_grid()  
         self.calculate_snowdepth_button.setEnabled(flag)
-        self.plot_button.setEnabled(flag)
+        self.plot_button.setEnabled(flag)     
 
     def click_snowdepth_button(self):
         self.manager.calculate_snow_depth()
-        self.ground_basis_checkbox.setEnabled(True)
-        self.ground_basis_checkbox.setChecked(False)
-        self.intSnow_basis_checkbox.setEnabled(True)
-        self.intSnow_basis_checkbox.setChecked(False)
+        self.intensity_basis_checkbox.setEnabled(True)
+        self.snowdepth_basis_checkbox.setEnabled(True)
         max_bound, min_bound = self.manager.reset_basis_info()
-        self.maxdepth_label_value.setText(str(max_bound))
-        self.mindepth_label_value.setText(str(min_bound))
-        self.upperbound_text_slot.setEnabled(True)
-        self.lowerbound_text_slot.setEnabled(True)
+        self.max_label_value.setText(str(max_bound))
+        self.min_label_value.setText(str(min_bound))
 
 
     def click_plot_button(self):
         # if self.ground_basis_checkbox.isEnabled():
-        self.manager.color_points(self.upperbound_text_slot.text(), self.lowerbound_text_slot.text())
-        self.scene = self.manager.plot_points()
+        if self.upperbound_text_slot.text() != '':
+            upper_bound = int(self.upperbound_text_slot.text())
+        else:
+            upper_bound = ''
+        if self.lowerbound_text_slot.text() != '':
+            lower_bound = int(self.lowerbound_text_slot.text())
+        else:
+            lower_bound = ''
+        
+        self.scene = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
         # self.select_points_button.setEnabled(False)

@@ -4,19 +4,19 @@ import copy
 
 class Grid_Cell():
     def __init__(self):
-        self.vegetation_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
-        self.intensity_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
-        self.cliff_flag_dict = {'Ground':False, 'Inter. Snow':False, 'New Snow':False}
+        self.vegetation_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
+        self.intensity_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
+        self.cliff_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
         self.mid_x = None
         self.mid_y = None
-        self.point_arrays = {'Ground':[], 'Inter. Snow':[], 'New Snow':[]}
-        self.total_z_dict = {'Ground':0, 'Inter. Snow':0, 'New Snow':0}
-        self.max_z_dict = {'Ground':-float("INF"), 'Inter. Snow':-float("INF"), 'New Snow':-float("INF")}
-        self.min_z_dict = {'Ground':float("INF"), 'Inter. Snow':float("INF"), 'New Snow':float("INF")}
-        self.average_z_dict = {'Ground':0, 'Inter. Snow':0, 'New Snow':0}
+        self.point_arrays = {'Ground':[], 'Int. Snow':[], 'New Snow':[]}
+        self.total_z_dict = {'Ground':0, 'Int. Snow':0, 'New Snow':0}
+        self.max_z_dict = {'Ground':-float("INF"), 'Int. Snow':-float("INF"), 'New Snow':-float("INF")}
+        self.min_z_dict = {'Ground':float("INF"), 'Int. Snow':float("INF"), 'New Snow':float("INF")}
+        self.average_z_dict = {'Ground':0, 'Int. Snow':0, 'New Snow':0}
         self.base_delta_z = 0
         self.snow_delta_z = 0
-        self.depth_dict = {'Ground':0, 'Inter. Snow':0}
+        self.depth_dict = {'Ground':0, 'Int. Snow':0}
 
     
     def set_mid_x(self, mid_x):
