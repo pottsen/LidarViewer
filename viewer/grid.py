@@ -49,7 +49,7 @@ class Grid():
                 self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
-    def make_grid(self, cell_size=1):
+    def make_grid(self, cell_size=0.25):
         self.grid = None
 
         # Center points about origin
@@ -212,9 +212,9 @@ class Grid():
                             else:
                                 # print("no snow or base points")
                                 pass
-                plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
-                plt.title(key)
-                plt.show()
+                # plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
+                # plt.title(key)
+                # plt.show()
 
                 self.average_scan_depth_dict[key] = self.average_scan_depth_dict[key]/(len(self.grid)*len(self.grid[0]))
 

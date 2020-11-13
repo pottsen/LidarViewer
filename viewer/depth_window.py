@@ -5,6 +5,9 @@ import sys
 from grid import Grid
 from depth_manager import Manager
 import numpy as np
+import time
+import pandas as pd
+
 # from scene import DemoScene
 
 class Window(QtWidgets.QMainWindow):
@@ -439,7 +442,19 @@ class Window(QtWidgets.QMainWindow):
         self.new_snow_basis_checkbox.setCheckState(False)
         self.new_snow_basis_checkbox.setEnabled(False) 
 
-        flag = self.manager.make_grid()  
+        results = pd.DataFrame(columns =['Iteration', 'Size', 'Time(s)'])
+        for i in range(1):
+            print('iteration: ', i)
+            for size in [1]:#[0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 6]:
+                start = time.time()
+                flag = self.manager.make_grid(cs=size) 
+                self.manager.calculate_snow_depth()
+                end = time.time()
+                results = results.append({'Iteration': int(i), 'Size': size, 'Time(s)':(end-start)}, ignore_index = True)
+                # print(print_str)
+            # results_file.write("\n\n")
+        print(results.head())
+        results.to_csv('results.csv')
         self.calculate_snowdepth_button.setEnabled(flag)
         self.plot_button.setEnabled(flag)     
 

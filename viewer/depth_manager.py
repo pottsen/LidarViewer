@@ -134,7 +134,7 @@ class Manager:
         print('file count', count)
         return count
 
-    def make_grid(self):
+    def make_grid(self, cs = 1):
         if self.count_checked_files() > 0:
             print('file dict \n', self.file_dict)
             self.window.message_window.append("Creating grid and adding points.")
@@ -144,7 +144,7 @@ class Manager:
                     self.grid.add_data(key, self.file_manager.file_dict[value])
 
             # self.grid.load_files(self.file_dict)
-            message = self.grid.make_grid()
+            message = self.grid.make_grid(cell_size=cs)
             self.window.message_window.append(str(message))
             if self.grid.grid != None:
                 self.flag_vegetation()
