@@ -190,8 +190,8 @@ class Scene(QtWidgets.QWidget):
 
     def remove_selected_points(self):#, removal_points):
             if len(self.selected) > 0:
-                self.data = self.data[tuple(np.invert(self.selected))]
-                self.base_facecolor = self.base_facecolor[tuple(np.invert(self.selected))]
+                self.data = copy.deepcopy(self.data[tuple(np.invert(self.selected))])
+                self.base_facecolor = copy.deepcopy(self.base_facecolor[tuple(np.invert(self.selected))])
                 self.facecolor = copy.deepcopy(self.base_facecolor)
                 self.scatter.set_data(self.data, face_color=self.facecolor,
                                     size=self.ptsize)
@@ -199,6 +199,9 @@ class Scene(QtWidgets.QWidget):
                 print('selected 1', self.selected)
                 # self.selected = []
             return self.selected
+
+    def reset_selected(self):
+        self.selected = []
 
     def permanently_mark_selected(self):
         for i in self.selected:
