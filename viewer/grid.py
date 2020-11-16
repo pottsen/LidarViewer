@@ -31,6 +31,8 @@ class Grid():
         self.files = {'Ground': None, 'Int. Snow': None, 'New Snow': None}
         self.manager = manager
         self.stats_key = None
+        self.upper_bound = ''
+        self.lower_bound = ''
 
     # def set_grid_to_manager(self):
     #     return self
@@ -294,14 +296,20 @@ class Grid():
         if color_basis == 'intensity':
             print(f'Coloring: intensity scan basis {scan_basis}')
             intensities = self.files[scan_basis].intensity
+            intensity_stdev = np.std(np.array(intensities))
+            intensity_mean = np.mean(np.array(intensities))
             if upper_bound == '':
-                upper_bound = self.max_intensity
+                self.upper_bound = intensity_mean+intensity_stdev # self.max_intensity
+            else:
+                self.upper_bound = float(upper_bound)
             if lower_bound == '':
-                lower_bound = self.min_intensity
+                self.lower_bound = intensity_mean-intensity_stdev # self.min_intensity
+            else:
+                self.lower_bound = float(lower_bound)
             
             print('upper bound', upper_bound)
             print('lower bound', lower_bound)
-            median = (float(upper_bound) + float(lower_bound))/2
+            median = (self.upper_bound + self.lower_bound)/2
             print('median intensity', median)
 
             for i in range(len(intensities)):
@@ -310,28 +318,28 @@ class Grid():
                     # print(intensities[i])
                     # print(len(intensities))
                     # print(len(self.files[scan_basis].plot_red))
-                    if intensities[i] > lower_bound:
-                        self.files[scan_basis].plot_red[i] = int(abs(intensities[i] - lower_bound)/abs(lower_bound-median)*65535 )
+                    if intensities[i] > self.lower_bound:
+                        self.files[scan_basis].plot_red[i] = int(abs(intensities[i] - self.lower_bound)/abs(self.lower_bound-median)*65535 )
 
-                        self.files[scan_basis].plot_green[i] = int(abs(intensities[i] - lower_bound)/abs(lower_bound-median)*65535 )
+                        self.files[scan_basis].plot_green[i] = int(abs(intensities[i] - self.lower_bound)/abs(self.lower_bound-median)*65535 )
 
                         self.files[scan_basis].plot_blue[i] = 65535
 
-                    if intensities[i] <= lower_bound:
+                    if intensities[i] <= self.lower_bound:
                         self.files[scan_basis].plot_red[i] = negative_color[0]
 
                         self.files[scan_basis].plot_green[i] = negative_color[1]
 
                         self.files[scan_basis].plot_blue[i] = negative_color[2]
                 if intensities[i] > median:
-                    if intensities[i] < upper_bound:
+                    if intensities[i] < self.upper_bound:
                         self.files[scan_basis].plot_red[i] = 65535
 
-                        self.files[scan_basis].plot_green[i] = int(abs(upper_bound - intensities[i])/abs(upper_bound-median)*65535 )
+                        self.files[scan_basis].plot_green[i] = int(abs(self.upper_bound - intensities[i])/abs(self.upper_bound-median)*65535 )
 
-                        self.files[scan_basis].plot_blue[i] = int(abs(upper_bound - intensities[i])/abs(upper_bound-median)*65535 )
+                        self.files[scan_basis].plot_blue[i] = int(abs(self.upper_bound - intensities[i])/abs(self.upper_bound-median)*65535 )
 
-                    if intensities[i] >= upper_bound:
+                    if intensities[i] >= self.upper_bound:
                         self.files[scan_basis].plot_red[i] = positive_color[0]
 
                         self.files[scan_basis].plot_green[i] = positive_color[1]
@@ -405,7 +413,7 @@ class Grid():
 
                                 self.files['New Snow'].plot_blue[index] = int(abs((self.grid[i][j].depth_dict[scan_basis] - self.upper_bound)/(self.upper_bound))*65535 )
 
-        return self.plot_points(color_basis, scan_basis)
+        return self.plot_points(color_basis, scan_basis), round(self.upper_bound), round(self.lower_bound)
 
     def plot_points_initial(self):   
         self.init_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
