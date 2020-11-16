@@ -463,9 +463,15 @@ class Window(QtWidgets.QMainWindow):
         else:
             lower_bound = ''
         
-        self.scene = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
+        if upper_bound < lower_bound:
+            self.message_window.append("Warning: Upper Bound is less than lower bound")
+            return
+
+        self.scene, upper_bound, lower_bound = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
+        self.upperbound_text_slot.setText(str(upper_bound))
+        self.lowerbound_text_slot.setText(str(lower_bound))
         # self.select_points_button.setEnabled(False)
         self.select_points_button.setEnabled(True)
         self.select_points_button.setChecked(False)

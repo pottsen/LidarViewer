@@ -172,8 +172,8 @@ class Manager:
 
     def color_and_plot_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        scene = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
-        return scene
+        scene, upper_bound, lower_bound = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
+        return scene, upper_bound, lower_bound
     
     # def plot_points(self, color_basis, scan_basis):
     #     if self.count_checked_files() > 0:
