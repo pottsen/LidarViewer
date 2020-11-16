@@ -202,15 +202,10 @@ class Manager:
         file_path = self.file_dict['Alignment']
         self.file_manager.update_aligned_points(self.window.scene_2_matched_data, file_path)
 
-    def save_matched_file(self):
+    def save_matched_file(self, save_file_path):
         if self.file_dict['Alignment'] != None:
             aligned_file_path = self.file_dict['Alignment']
-            base_file_path = self.file_dict['Base']
-            now = datetime.now()
-            date = now.strftime("%D").replace('/','-')
-            time = now.strftime("%H-%M")
-            aligned_file_name = self.file_manager.file_dict[aligned_file_path].file_name +'_aligned_to_'+ self.file_manager.file_dict[base_file_path].file_name + "_" + date +'.las'
-            aligned_file = File(aligned_file_name, mode = "w", header = self.file_manager.file_dict[aligned_file_path].file.header)
+            aligned_file = File(save_file_path, mode = "w", header = self.file_manager.file_dict[aligned_file_path].file.header)
             aligned_file.points = self.file_manager.file_dict[aligned_file_path].points
             aligned_file.x = self.file_manager.file_dict[aligned_file_path].x
             aligned_file.y = self.file_manager.file_dict[aligned_file_path].y

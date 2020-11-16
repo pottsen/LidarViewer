@@ -191,14 +191,10 @@ class Manager:
     def update_file_manager(self, selected, file_path):
         self.file_manager.remove_cropped_points(selected, file_path)
 
-    def save_crop_1(self):
+    def save_crop_1(self, save_file_path):
         if self.file_dict["Crop 1"] != None:
             file_path = self.file_dict["Crop 1"]
-            now = datetime.now()
-            date = now.strftime("%D").replace('/','-')
-            time = now.strftime("%H-%M")
-            cropped_file_name = self.file_manager.file_dict[file_path].file_name +'_cropped_'+date+'.las'
-            cropped_file = File(cropped_file_name, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
+            cropped_file = File(save_file_path, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
             cropped_file.points = self.file_manager.file_dict[file_path].points
             cropped_file.x = self.file_manager.file_dict[file_path].x
             cropped_file.y = self.file_manager.file_dict[file_path].y
@@ -212,14 +208,10 @@ class Manager:
                 pass
             cropped_file.close()
 
-    def save_crop_2(self):
+    def save_crop_2(self, save_file_path):
         if self.file_dict["Crop 2"] != None:
             file_path = self.file_dict["Crop 2"]
-            now = datetime.now()
-            date = now.strftime("%D").replace('/','-')
-            time = now.strftime("%H-%M")
-            cropped_file_name = self.file_manager.file_dict[file_path].file_name +'_cropped_'+date+'.las'
-            cropped_file = File(cropped_file_name, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
+            cropped_file = File(save_file_path, mode = "w", header = self.file_manager.file_dict[file_path].file.header)
             cropped_file.points = self.file_manager.file_dict[file_path].points
             cropped_file.x = self.file_manager.file_dict[file_path].x
             cropped_file.y = self.file_manager.file_dict[file_path].y

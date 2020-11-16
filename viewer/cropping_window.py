@@ -161,10 +161,12 @@ class Window(QtWidgets.QMainWindow):
         self.save_crop_2_button.setEnabled(True)
 
     def click_save_crop_1_button(self):
-        self.manager.save_crop_1()
+        save_file_path, file_type = QFileDialog.getSaveFileName()
+        self.manager.save_crop_1(save_file_path)
 
     def click_save_crop_2_button(self):
-        self.manager.save_crop_2()
+        save_file_path, file_type = QFileDialog.getSaveFileName()
+        self.manager.save_crop_2(save_file_path)
 
     def click_reset_button(self):
         self.manager.file_manager.reset_files()

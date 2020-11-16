@@ -204,7 +204,8 @@ class Window(QMainWindow):
         self.manager.select_points()
 
     def click_save_match_button(self):
-        self.manager.save_matched_file()
+        save_file_path, file_type = QFileDialog.getSaveFileName()
+        self.manager.save_matched_file(save_file_path)
 
     def click_reset_button(self):
         self.manager.file_manager.reset_files()
