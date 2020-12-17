@@ -261,6 +261,8 @@ class Grid():
         if color_basis not in ['intensity', 'depth']:
             color_basis = 'default'
             scan_basis = 'default'
+            self.upper_bound = 0
+            self.lower_bound = 0
 
         # SET DEFAULT IF SCAN BASIS NOT SPECIFIED
         if scan_basis not in ['Ground', 'Int. Snow', 'New Snow']:

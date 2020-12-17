@@ -15,6 +15,7 @@ import tie_point_check as tpc
 import vispy.scene
 from vispy.scene import visuals
 from laspy.file import File
+from grid import Grid
 
 class file_object(QWidget):
     def __init__(self, manager, file_path):
@@ -94,6 +95,8 @@ class Manager:
         self.window.left_dock()
         if len(self.file_list) > 1:
             self.window.add_match_area_button.setEnabled(True)
+            self.window.vegetation_basis_checkbox.setEnabled(True)
+            self.window.default_basis_checkbox.setEnabled(True)
 
     def remove_file_from_manager(self, file_path):
         self.file_manager.remove_file(file_path)
@@ -124,16 +127,44 @@ class Manager:
         if self.file_dict[key] != None:
             file_path = self.file_dict[key]
             if key == "Base":
+                self.base_grid = Grid(self)
+                self.base_grid.add_data('New Snow', self.file_manager.file_dict[file_path])
+                self.base_grid.make_grid()
+                self.base_grid.flag_vegetation()
+                self.base_grid.color_points('default', 'New Snow', 0, 0)
+
+                if self.window.color_basis == 'vegetation':
+                    color = np.stack((self.file_manager.file_dict[file_path].plot_red/max(self.file_manager.file_dict[file_path].plot_red),
+                    self.file_manager.file_dict[file_path].plot_green/max(self.file_manager.file_dict[file_path].plot_green), 
+                    self.file_manager.file_dict[file_path].plot_blue/max(self.file_manager.file_dict[file_path].plot_blue)))
+                    color = np.transpose(color)
+
+                else: 
+                    color = np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
                 scene = Scene(self,
                  self.file_manager.file_dict[file_path].init_xyz,
-                 np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
+                 color,
                  'ICP')
 
             if key == "Alignment":
+                self.alignment_grid = Grid(self)
+                self.alignment_grid.add_data('New Snow', self.file_manager.file_dict[file_path])
+                self.alignment_grid.make_grid()
+                self.alignment_grid.flag_vegetation()
+                self.alignment_grid.color_points('default', 'New Snow', 0, 0)
+                
+                if self.window.color_basis == 'vegetation':
+                    color = np.stack((self.file_manager.file_dict[file_path].plot_red/max(self.file_manager.file_dict[file_path].plot_red),
+                    self.file_manager.file_dict[file_path].plot_green/max(self.file_manager.file_dict[file_path].plot_green), 
+                    self.file_manager.file_dict[file_path].plot_blue/max(self.file_manager.file_dict[file_path].plot_blue)))
+                    color = np.transpose(color)
+
+                else: 
+                    color = np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
                 scene = Scene(self,
-                self.file_manager.file_dict[file_path].init_xyz,
-                np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))]),
-                'ICP')
+                 self.file_manager.file_dict[file_path].init_xyz,
+                 color,
+                 'ICP')
 
             print(f"{key} file added.")
             return scene

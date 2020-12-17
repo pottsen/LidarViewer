@@ -15,6 +15,7 @@ class Window(QMainWindow):
         # self.setWindowTitle("Lidar Snow Depth Calculator")
         self.manager = Manager(self, file_manager)
         self.initInterface()
+        self.color_basis = 'default'
         self.scene_1 = None
         self.scene_2 = None
         self.scene_1_selected_areas = []
@@ -68,12 +69,27 @@ class Window(QMainWindow):
         self.left_dock_widget_layout.addWidget(self.data_widget)
 
         """
-        Left algorithm widget. Buttons to flag vegetation and calculate snowdepth
+        Left algorithm widget
         """
         self.alg_widget_layout = QVBoxLayout()
-        # self.plot_initial_button = QPushButton("Plot Initial")
-        # self.plot_initial_button.clicked.connect(self.click_plot_initial_button)
-        # self.plot_initial_button.setEnabled(False)
+
+        # select color for alignment plot
+        self.color_checkbox_layout = QHBoxLayout()
+        self.color_basis_label = QLabel('Color By:')
+        self.default_basis_checkbox = QCheckBox('Default')
+        self.default_basis_checkbox.stateChanged.connect(lambda:self.set_color_basis_default())
+        self.default_basis_checkbox.setEnabled(False)
+        self.vegetation_basis_checkbox = QCheckBox('Cliffs/Vegetation')
+        self.vegetation_basis_checkbox.stateChanged.connect(lambda:self.set_color_basis_vegetation())
+        self.vegetation_basis_checkbox.setEnabled(False)
+        self.color_checkbox_layout.addWidget(self.color_basis_label)
+        self.color_checkbox_layout.addWidget(self.default_basis_checkbox)
+        self.color_checkbox_layout.addWidget(self.vegetation_basis_checkbox)
+
+        self.color_checkbox_widget = QWidget()
+        self.color_checkbox_widget.setLayout(self.color_checkbox_layout)
+        self.alg_widget_layout.addWidget(self.color_checkbox_widget)
+
         self.add_match_area_button = QPushButton("Add Match Area")
         self.add_match_area_button.clicked.connect(self.click_add_match_area_button)
         self.add_match_area_button.setEnabled(False)
@@ -148,6 +164,28 @@ class Window(QMainWindow):
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
             self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")
+
+    def set_color_basis_default(self):
+        if self.default_basis_checkbox.isChecked():
+            self.color_basis = 'default'
+            self.vegetation_basis_checkbox.setChecked(False)
+            self.vegetation_basis_checkbox.setEnabled(False)
+            
+        if not self.default_basis_checkbox.isChecked():
+            self.color_basis = 'default'
+            self.vegetation_basis_checkbox.setChecked(False)
+            self.vegetation_basis_checkbox.setEnabled(True)
+
+    def set_color_basis_vegetation(self):
+        if self.vegetation_basis_checkbox.isChecked():
+            self.color_basis = 'vegetation'
+            self.default_basis_checkbox.setChecked(False)
+            self.default_basis_checkbox.setEnabled(False)
+            
+        if not self.vegetation_basis_checkbox.isChecked():
+            self.color_basis = 'default'
+            self.default_basis_checkbox.setChecked(False)
+            self.default_basis_checkbox.setEnabled(True)
 
     def click_add_match_area_button(self):
         if self.manager.count_checked_files() != 2:
