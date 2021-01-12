@@ -500,9 +500,14 @@ class Grid():
         min_intensity = min(intensities)
         return round(average,2), round(max_intensity, 2), round(min_intensity, 2)
 
+    def get_vegetation_indices(self):
+        indices = []
+        for i in range(len(self.grid)):
+                for j in range(len(self.grid[0])):
+                    if self.grid[i][j].vegetation_flag_dict['New Snow']:
+                        for point in self.grid[i][j].point_arrays['New Snow']:
+                            indices.append(point.index)
+                            
 
-
-        
-
-
+        return indices
     

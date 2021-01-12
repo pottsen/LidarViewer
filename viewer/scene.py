@@ -172,7 +172,7 @@ class Scene(QtWidgets.QWidget):
         if self.scene_type in ['depth', 'intensity']:
             if len(self.data[tuple(self.selected)]) > 0 and self.grid.stats_key != None:
                 if self.scene_type in ['depth']:
-                    stats = self.grid.get_depth_stats(self.data[tuple(self.selected)], self.scene_type) 
+                    stats = self.grid.get_depth_stats(self.data[tuple(self.selected)])#, self.scene_type) 
 
                 if self.scene_type in ['intensity']:
                     stats = self.grid.get_intensity_stats(self.selected)
