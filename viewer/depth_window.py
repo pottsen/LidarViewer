@@ -470,8 +470,11 @@ class Window(QtWidgets.QMainWindow):
         self.scene, upper_bound, lower_bound = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
         self.plot_widgets.clear()
         self.plot_widgets.addTab(self.scene, "Plot")
-        self.upperbound_text_slot.setText(str(upper_bound))
-        self.lowerbound_text_slot.setText(str(lower_bound))
+        if self.color_basis == 'intensity':
+            if self.upperbound_text_slot.text == '':
+                self.upperbound_text_slot.setText(str(upper_bound))
+            if self.lowerbound_text_slot.text == '':
+                self.lowerbound_text_slot.setText(str(lower_bound))
         # self.select_points_button.setEnabled(False)
         self.select_points_button.setEnabled(True)
         self.select_points_button.setChecked(False)
