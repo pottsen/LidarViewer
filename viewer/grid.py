@@ -197,8 +197,8 @@ class Grid():
                 for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         point_count += len(self.grid[i][j].point_arrays[key])
-                        # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
-                        self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
+                        self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        # self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
                         if self.grid[i][j].vegetation_flag_dict[key] == True:
                             veg_count += 1
                         
