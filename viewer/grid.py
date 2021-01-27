@@ -21,7 +21,7 @@ from grid_file import Grid_File
 class Grid():
     def __init__(self, manager):
         # TODO: Have user input cell size?
-        # self.cell_size = cell_size
+        self.cell_size = 0
         self.ground_max_snow_depth = -float("INF")
         self.ground_min_snow_depth = float("INF")
         self.intSnow_max_snow_depth = -float("INF")
@@ -51,7 +51,7 @@ class Grid():
                 self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
-    def make_grid(self, cell_size=1):
+    def make_grid(self):#, cell_size=0.25):
         self.grid = None
 
         # Center points about origin
@@ -75,7 +75,7 @@ class Grid():
         self.min_x = float("INF")
         self.max_y = -float("INF")
         self.min_y = float("INF")
-        self.cell_size = cell_size
+        self.cell_size = 0
         for key, value in self.files.items():
             print(key)
             if value != None:
@@ -87,6 +87,18 @@ class Grid():
                 value.min_y = np.min(value.xyz[:,1])
                 value.max_z = np.max(value.xyz[:,2])
                 value.min_z = np.min(value.xyz[:,2])
+
+                delta_x = abs(value.max_x - value.min_x)
+                delta_y = abs(value.max_y - value.min_y)
+                density = len(value.x)/(delta_x*delta_y)
+                print(f'{key} point density(per m2): ', density)
+                cell_size = np.sqrt(1/density * 3)
+                print('Raw cell size: ', cell_size)
+                cell_size = round(cell_size, 2)
+                if cell_size > self.cell_size:
+                    self.cell_size = cell_size
+                    print('New cell size:', self.cell_size)
+                print(f'{key} min cell size: ', round(cell_size, 2))
 
                 if value.max_x < self.min_x and self.min_x != float("INF"):
                     print(value.max_x, self.min_x)
@@ -121,17 +133,30 @@ class Grid():
         delta_x = abs(self.max_x - self.min_x)
         delta_y = abs(self.max_y - self.min_y)
 
+        # self.cell_size = 0
+        # for key, value in self.files.items():
+        #     if value != None:
+        #         density = len(value.x)/(delta_x*delta_y)
+        #         print(f'{key} point density(per m2): ', density)
+        #         cell_size = np.sqrt(1/density)*1.5# + 0.005
+        #         print('Raw cell size: ', cell_size)
+        #         if cell_size > self.cell_size:
+        #             self.cell_size = round(cell_size, 2)
+        #             print('New cell size:', self.cell_size)
+        #         print(f'{key} min cell size: ', round(cell_size, 2))
+                
         self.number_of_cells_x = math.ceil(delta_x/self.cell_size)
         self.number_of_cells_y = math.ceil(delta_y/self.cell_size)
 
         #################################################
         # make grid
         self.grid = [[Grid_Cell() for i in range(self.number_of_cells_y)] for j in range(self.number_of_cells_x)]
-        
+
+        # add points to grid
         for key, value in self.files.items():
             if value != None:
-                print(f'{key} point density(per m2): ', len(value.x)/(delta_x*delta_y))
                 self.add_points_to_grid(key)
+
 
         return f"Grid Complete! {self.number_of_cells_y*self.number_of_cells_x} Total Grid Cells" 
 
@@ -172,7 +197,8 @@ class Grid():
                 for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         point_count += len(self.grid[i][j].point_arrays[key])
-                        self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
                         if self.grid[i][j].vegetation_flag_dict[key] == True:
                             veg_count += 1
                         
