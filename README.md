@@ -1,5 +1,5 @@
-# Peter Ottsen - Computer Science Master's Student
-# Montana State University - May 2021
+## Peter Ottsen - Computer Science Master's Student
+## Montana State University - May 2021
 
 # January 2021 Update - Crop and Alignment Workflow Demo
 https://youtu.be/xgg58JBMem4
