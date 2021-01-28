@@ -128,7 +128,7 @@ class Window(QMainWindow):
         self.alignment_default_checkbox.stateChanged.connect(lambda:self.set_alignment_basis_default())
         self.alignment_default_checkbox.setEnabled(False)
         self.alignment_selection_checkbox = QCheckBox('Selection')
-        self.alignment_selection_checkbox.stateChanged.connect(lambda:self.set_alignment_basis_vegetation())
+        self.alignment_selection_checkbox.stateChanged.connect(lambda:self.set_alignment_basis_selection())
         self.alignment_selection_checkbox.setEnabled(False)
         self.alignment_checkbox_layout.addWidget(self.alignment_basis_label)
         self.alignment_checkbox_layout.addWidget(self.alignment_default_checkbox)

@@ -51,7 +51,7 @@ class Grid():
                 self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
-    def make_grid(self):#, cell_size=0.25):
+    def make_grid(self, cell_size=0.25):
         self.grid = None
 
         # Center points about origin
@@ -75,7 +75,7 @@ class Grid():
         self.min_x = float("INF")
         self.max_y = -float("INF")
         self.min_y = float("INF")
-        self.cell_size = 0
+        self.cell_size = cell_size
         for key, value in self.files.items():
             print(key)
             if value != None:
@@ -92,13 +92,13 @@ class Grid():
                 delta_y = abs(value.max_y - value.min_y)
                 density = len(value.x)/(delta_x*delta_y)
                 print(f'{key} point density(per m2): ', density)
-                cell_size = np.sqrt(1/density * 3)
-                print('Raw cell size: ', cell_size)
-                cell_size = round(cell_size, 2)
-                if cell_size > self.cell_size:
-                    self.cell_size = cell_size
-                    print('New cell size:', self.cell_size)
-                print(f'{key} min cell size: ', round(cell_size, 2))
+                # cell_size = np.sqrt(1/density * 3)
+                # print('Raw cell size: ', cell_size)
+                # cell_size = round(cell_size, 2)
+                # if cell_size > self.cell_size:
+                #     self.cell_size = cell_size
+                #     print('New cell size:', self.cell_size)
+                # print(f'{key} min cell size: ', round(cell_size, 2))
 
                 if value.max_x < self.min_x and self.min_x != float("INF"):
                     print(value.max_x, self.min_x)
@@ -238,8 +238,13 @@ class Grid():
                                 # if self.grid[i][j].depth < self.min_snow_depth:
                                 #     self.min_snow_depth = self.grid[i][j].depth
                             else:
-                                # print("no snow or base points")
                                 pass
+                                # # print("no snow or base points")
+                                # if len(self.grid[i][j].point_arrays['New Snow']) < 1: 
+                                #     self.grid[i][j].missing_point_flag_dict['New Snow']= True
+                                # if len(self.grid[i][j].point_arrays[key]) < 1:
+                                #     self.grid[i][j].missing_point_flag_dict[key]= True
+                                
                 plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
                 plt.title(key)
                 plt.show()

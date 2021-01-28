@@ -6,6 +6,7 @@ class Grid_Cell():
     def __init__(self):
         self.vegetation_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
         self.intensity_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
+        self.missing_point_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
         self.cliff_flag_dict = {'Ground':False, 'Int. Snow':False, 'New Snow':False}
         self.mid_x = None
         self.mid_y = None
