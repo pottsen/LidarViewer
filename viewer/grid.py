@@ -238,12 +238,10 @@ class Grid():
                                 # if self.grid[i][j].depth < self.min_snow_depth:
                                 #     self.min_snow_depth = self.grid[i][j].depth
                             else:
-                                pass
-                                # # print("no snow or base points")
-                                # if len(self.grid[i][j].point_arrays['New Snow']) < 1: 
-                                #     self.grid[i][j].missing_point_flag_dict['New Snow']= True
-                                # if len(self.grid[i][j].point_arrays[key]) < 1:
-                                #     self.grid[i][j].missing_point_flag_dict[key]= True
+                                if len(self.grid[i][j].point_arrays['New Snow']) < 1: 
+                                    self.grid[i][j].missing_point_flag_dict['New Snow']= True
+                                if len(self.grid[i][j].point_arrays[key]) < 1:
+                                    self.grid[i][j].missing_point_flag_dict[key]= True
                                 
                 plt.hist(self.snow_depth_array_dict[key], bins = 'auto')
                 plt.title(key)
@@ -287,6 +285,7 @@ class Grid():
         vegetation_color = [0, 65535, 0]
         negative_color = [0, 0, 65535]
         positive_color = [65535, 0, 0]
+        missing_point_color = [0, 45500, 0]
 
         # SET DEFAULT IF COLOR BASIS NOT SPECIFIED
         if color_basis not in ['intensity', 'depth']:
@@ -412,6 +411,13 @@ class Grid():
                             self.files['New Snow'].plot_green[index] = vegetation_color[1]
                             self.files['New Snow'].plot_blue[index] = vegetation_color[2]
 
+                    elif self.grid[i][j].missing_point_flag_dict['New Snow'] or self.grid[i][j].missing_point_flag_dict[scan_basis]:
+                        for point in self.grid[i][j].point_arrays['New Snow']:
+                            index = point.index
+                            self.files['New Snow'].plot_red[index] = missing_point_color[0]
+                            self.files['New Snow'].plot_green[index] = missing_point_color[1]
+                            self.files['New Snow'].plot_blue[index] = missing_point_color[2]
+
                     elif self.grid[i][j].depth_dict[scan_basis] < 0:
                         if self.grid[i][j].depth_dict[scan_basis] <= self.lower_bound:
                             for point in self.grid[i][j].point_arrays['New Snow']:
@@ -505,8 +511,7 @@ class Grid():
             print('Vegetation NS: ', self.grid[i][j].vegetation_flag_dict['New Snow'])
             print(f'Vegetation {self.stats_key}: ', self.grid[i][j].vegetation_flag_dict[self.stats_key])
 
-            if not self.grid[i][j].vegetation_flag_dict['New Snow']:
-                # for point in self.grid[i][j].point_arrays['New Snow']:
+            if not self.grid[i][j].vegetation_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict[self.stats_key]:
                 depth = self.grid[i][j].depth_dict[self.stats_key]
                 print('grid cell:', i, ", ", j, " Depth ", depth)
                 if depth > max_depth:
