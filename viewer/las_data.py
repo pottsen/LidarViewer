@@ -6,9 +6,12 @@ import copy
 class Las_Data:
     # def __init__(self, flag, file_path):
     def __init__(self, file_path):
-        # self.flag = flag
-        cleaned_file = remove_duplicates(str(file_path))
-        self.file = File(cleaned_file, mode = "r")
+
+        ### Remove Duplicates If Needed
+        # cleaned_file = remove_duplicates(str(file_path))
+        # self.file = File(cleaned_file, mode = "r")
+
+        self.file =  File(file_path, mode = "r")
         self.file_path = file_path
         self.file_name = file_path.split('/')[-1]
         self.file_name = self.file_name.split('.')[0]
