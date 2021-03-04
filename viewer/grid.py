@@ -16,7 +16,7 @@ from scene import Scene
 
 import vispy.scene
 from vispy.scene import visuals
-from grid_file import Grid_File
+# from grid_file import Grid_File
 
 class Grid():
     def __init__(self, manager):
@@ -51,7 +51,7 @@ class Grid():
                 self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
-    def make_grid(self, cell_size=0.25):
+    def make_grid(self, cell_size=0.2):
         self.grid = None
 
         # Center points about origin
@@ -197,8 +197,8 @@ class Grid():
                 for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         point_count += len(self.grid[i][j].point_arrays[key])
-                        self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
-                        # self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
+                        # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
                         if self.grid[i][j].vegetation_flag_dict[key] == True:
                             veg_count += 1
                         
@@ -499,8 +499,12 @@ class Grid():
 
     def get_depth_stats(self, points):
         sum_depth = 0
+        sum_ground_depth = 0
+        sum_min_g_avg_snow = 0
         count = 0
         max_depth = -float('INF')
+        max_ground_depth = -float('INF')
+        max_min_g_avg_snow = -float('INF')
         min_depth = float('INF')
         # print('points', len(points))
         for point in points:
@@ -513,21 +517,33 @@ class Grid():
 
             if not self.grid[i][j].vegetation_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict[self.stats_key]:
                 depth = self.grid[i][j].depth_dict[self.stats_key]
+                ground_depth = self.grid[i][j].max_depth
+                min_g_avg_snow = self.grid[i][j].ground_depth
                 print('grid cell:', i, ", ", j, " Depth ", depth)
                 if depth > max_depth:
                     max_depth = depth
                 if depth < min_depth:
                     min_depth = depth
+                # if ground_depth > max_ground_depth:
+                #     max_ground_depth = ground_depth
+                if min_g_avg_snow > max_min_g_avg_snow:
+                    max_min_g_avg_snow = min_g_avg_snow
                 sum_depth += depth
+                # sum_ground_depth += ground_depth
+                sum_min_g_avg_snow += min_g_avg_snow
                 count +=1
             else:
                 print("Vegetation cell")
             try:
                 average_depth = round(sum_depth/count, 2)
+                # average_ground_depth = round(sum_ground_depth/count, 2)
+                average_min_g_avg_snow = round(sum_min_g_avg_snow/count, 2)
             except:
                 average_depth = float('INF')
                     
-        return average_depth, round(max_depth, 2), round(min_depth, 2)
+        # return average_depth, round(max_depth, 2), round(min_depth, 2), round(max_ground_depth, 2), average_ground_depth, round(max_min_g_avg_snow, 2), average_min_g_avg_snow
+
+        return average_depth, round(max_depth, 2), round(min_depth, 2), average_min_g_avg_snow, round(max_min_g_avg_snow, 2)
 
     def get_intensity_stats(self, selected):
         intensities = self.files[self.stats_key].intensity[tuple(selected)]
