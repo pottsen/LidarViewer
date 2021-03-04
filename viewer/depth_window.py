@@ -414,8 +414,8 @@ class Window(QtWidgets.QMainWindow):
 
     def click_load_file_button(self):
         file_path = QFileDialog.getOpenFileName()
-        print(file_path)
         if 'las' in str(file_path[0]).lower():
+            print(file_path)
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
             self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")

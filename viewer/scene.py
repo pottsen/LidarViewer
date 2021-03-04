@@ -118,19 +118,19 @@ class Scene(QtWidgets.QWidget):
         # Add a text instruction
         self.text = scene.visuals.Text('', pos=(self.canvas.size[0],  20),
                                        color='w', parent=self.canvas.scene)
-        self.stats_text = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33)),
+        self.stats_text = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33+font_size*1.33*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text2 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*2+font_size*1.33*0.5)),
+        self.stats_text2 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*2+font_size*1.33*2*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*3+font_size*1.33*2*0.5)),
+        self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*3+font_size*1.33*3*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         # self.stats_text4 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*4+font_size*1.33*4*0.5)),
         #                                color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         # self.stats_text5 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0, int(font_size*1.33*5+font_size*1.33*6*0.5)),
         #                                color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text6 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*6+font_size*1.33*8*0.5)),
+        self.stats_text6 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*4+font_size*1.33*4*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text7 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0, int(font_size*1.33*7+font_size*1.33*10*0.5)),
+        self.stats_text7 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0, int(font_size*1.33*5+font_size*1.33*5*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         self.tr = self.scatter.node_transform(self.view)
 
@@ -187,21 +187,24 @@ class Scene(QtWidgets.QWidget):
                 
                 # add call to get snowdepth here
                 # get average x,y,z
-                self.stats_text.text = str(f'Avg Grnd, Avg Snow - Avg {self.scene_type}: {stats[0]}')
-                self.stats_text2.text = str(f'Avg Grnd, Avg Snow - Max {self.scene_type}: {stats[1]}')
-                self.stats_text3.text = str(f'Avg Grnd, Avg Snow - Min {self.scene_type}: {stats[2]}')
+                self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[0]}')
+                self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- Max {self.scene_type}: {stats[1]}')
+                self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- Min {self.scene_type}: {stats[2]}')
                 # self.stats_text4.text = str(f'Grnd Max {self.scene_type}: {stats[3]}')
                 # self.stats_text5.text = str(f'Grnd Avg {self.scene_type}: {stats[4]}')
-                self.stats_text6.text = str(f'Min Grnd, AvgSnow - Avg {self.scene_type}: {stats[5]}')
-                self.stats_text7.text = str(f'Min Grnd, AvgSnow - Max {self.scene_type}: {stats[6]}')
+                self.stats_text6.text = str(f'Min Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[3]}')
+                self.stats_text7.text = str(f'Min Gd/IS, Avg Snow- Max {self.scene_type}: {stats[4]}')
 
 
                 
             else:
-                    self.stats_text.text = str(f'Average: n/a')
-                    self.stats_text2.text = str(f'Max: n/a')
-                    self.stats_text3.text = str(f'Min: n/a')
-                    self.stats_text4.text = str(f'Ground: n/a')
+                self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- AVG: n/a')
+                self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- MAX: n/a')
+                self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- MIN: n/a')
+                # self.stats_text4.text = str(f'Min Gd/IS, Max Snow- Avg: n/a')
+                # self.stats_text5.text = str(f'Min Gd/IS, Max Snow- Avg: n/a')
+                self.stats_text6.text = str(f'Min Gd/IS, Avg Snow- AVG: n/a')
+                self.stats_text7.text = str(f'Min Gd/IS, Avg Snow- MAX: n/a')
 
     def remove_selected_points(self):#, removal_points):
             if len(self.selected) > 0:
