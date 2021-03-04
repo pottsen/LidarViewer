@@ -194,8 +194,8 @@ class Window(QMainWindow):
     def click_load_file_button(self):
         # open built-in dialogue window to load scan
         file_path = QFileDialog.getOpenFileName()
-        print(file_path)
-        if 'las' or 'laz' in str(file_path[0]).lower():
+        if 'las' in str(file_path[0]).lower():
+            print(file_path)
             self.message_window.append("Cleaning and loading file: " + str(file_path[0]))
             self.manager.add_file_to_manager(str(file_path[0])) 
             self.message_window.append(" ")

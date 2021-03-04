@@ -1,0 +1,47 @@
+@startuml
+class master_window
+class file_manager
+class cropping_window
+class depth_window
+class alignment_window
+class cropping_manager
+class depth_manager
+class alignment_manager
+class las_data
+class scene
+class grid
+class file_object
+class grid_cell
+class point
+
+master_window <--> file_manager
+master_window --> cropping_window
+master_window --> alignment_window
+master_window --> depth_window
+
+file_manager <--> cropping_manager
+file_manager <--> alignment_manager
+file_manager <--> depth_manager
+file_manager --> las_data
+
+depth_window <--> depth_manager
+depth_window --> scene
+
+depth_manager <--> grid
+depth_manager --> file_object
+
+alignment_window <--> alignment_manager
+alignment_window --> scene
+
+alignment_manager <--> grid
+alignment_manager --> file_object
+
+cropping_window <--> cropping_manager
+cropping_window --> scene
+
+cropping_manager --> file_object
+
+grid --> grid_cell
+
+grid_cell --> point
+@enduml

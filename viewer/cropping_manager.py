@@ -3,7 +3,6 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
 # from grid import Grid
-from grid_file import Grid_File
 from scene import Scene
 import numpy as np
 import copy

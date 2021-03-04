@@ -2,8 +2,6 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtWidgets, QtCore, QtGui
 import vispy.app
 import sys
-from grid import Grid
-from grid_file import Grid_File
 from scene import Scene
 from multi_scene import Multi_Scene
 import numpy as np
