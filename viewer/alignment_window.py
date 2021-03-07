@@ -315,7 +315,8 @@ class Window(QMainWindow):
 
     def click_save_match_button(self):
         save_file_path, file_type = QFileDialog.getSaveFileName()
-        self.manager.save_matched_file(save_file_path)
+        if save_file_path != '':
+            self.manager.save_matched_file(save_file_path)
 
     def click_reset_button(self):
         # reset everything in window

@@ -155,7 +155,7 @@ class Manager:
 
         if self.file_dict["Crop 2"] != None: # in self.files.keys():
             self.crop_2.select_flag = self.window.select_points_button.isChecked()     
-            self.crop_2.event_connect(self.window.crop_2.select_flag)
+            self.crop_2.event_connect(self.crop_2.select_flag)
             self.crop_2.select_id = '2'
             self.crop_2.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
 
