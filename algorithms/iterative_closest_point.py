@@ -21,7 +21,7 @@ def icp_algorithm(base_points, snow_points):
     error = float("INF")
     #MAKE KD_TREE
     base_tree = spatial.cKDTree(base_points)
-    while error > 0.01 and iteration < 1000:
+    while error > 0.0001 and iteration < 1000:
         
         ###### 2. FIND POINT CORRESPONDENCE
         # SEARCH FOR CLOSEST POINT FROM SNOW SCENE TO BASE

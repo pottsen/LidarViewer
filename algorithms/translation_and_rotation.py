@@ -20,8 +20,8 @@ from icp_rotation import *
 # pyramid1 = [[1, 1, 0], [1.5, 1, 0], [1, 2, 0], [1.25, 1.5, 1]]
 # pyramid1 = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1]]
 start = time.time()
-cloud_x = 1000
-cloud_y = 1000
+cloud_x = 15
+cloud_y = 15
 cloud_size = int(cloud_x*cloud_y)
 print('Creating point cloud')
 base_cloud = []
@@ -34,10 +34,10 @@ base_cloud = np.array(base_cloud)
 
 ### TEST CASES
 # RANDOM POINT SHIFT
-for i in range(5000):
-    j = random.randint(1, 9999)
-    height = random.randint(1,5)
-    base_cloud[j] += [0, 0, height]
+# for i in range(5000):
+#     j = random.randint(1, 9999)
+#     # height = random.randint(1,5)
+#     base_cloud[j] += [0, 0, height]
 
 # RECTANGLE
 # pyramid1[15] += [0, 0, 1]
@@ -94,6 +94,7 @@ snow_cloud_arr = np.array(snow_cloud)
 match_cloud_arr = copy.deepcopy(snow_cloud_arr)
 # print("P2", snow_cloud_arr)
 match_cloud_arr = icp_algorithm(base_cloud_arr, match_cloud_arr)
+print(match_cloud_arr[0])
 end = time.time()
 print("Time", end-start)
 # pyramid3_arr = icp_rotation(base_cloud_arr, pyramid3_arr)
@@ -111,7 +112,7 @@ scatter2 = visuals.Markers()
 scatter2.set_data(snow_cloud_arr, edge_color = None, face_color = "blue", size = 10)
 view.add(scatter2)
 scatter3 = visuals.Markers()
-scatter3.set_data(match_cloud_arr, edge_color = None, face_color = "green", size = 10)
+scatter3.set_data(match_cloud_arr[0], edge_color = None, face_color = "green", size = 10)
 view.add(scatter3)
 view.camera = 'arcball' #'turntable'  # or try 'arcball'
 # add a colored 3D axis for orientation
