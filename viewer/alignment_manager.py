@@ -101,6 +101,13 @@ class Manager:
         self.file_list = []
         # dictionary of alignment file assignments
         self.file_dict = {'Base': None, 'Alignment': None}
+        # initialize scenes
+        self.scene_1 = None
+        self.scene_2 = None
+
+        # initialize areas to align on
+        self.scene_1_selected_areas = []
+        self.scene_2_selected_areas = []
 
     def add_file_to_manager(self, file_path):
         # add file to master manager
@@ -167,7 +174,7 @@ class Manager:
 
                 else: 
                     color = np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
-                scene = Scene(self,
+                self.scene_1 = Scene(self,
                  self.file_manager.file_dict[file_path].init_xyz,
                  color,
                  'ICP')
@@ -188,89 +195,88 @@ class Manager:
 
                 else: 
                     color = np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
-                scene = Scene(self,
+                self.scene_2 = Scene(self,
                  self.file_manager.file_dict[file_path].init_xyz,
                  color,
                  'ICP')
 
             print(f"{key} file added.")
-            return scene
 
     def select_points(self):
         # set 'select points' flag to button state 
-        self.window.scene_1.select_flag = self.window.select_points_button.isChecked()
-        self.window.scene_2.select_flag = self.window.select_points_button.isChecked()
+        self.scene_1.select_flag = self.window.select_points_button.isChecked()
+        self.scene_2.select_flag = self.window.select_points_button.isChecked()
         # connect event to window
-        self.window.scene_1.event_connect(self.window.scene_1.select_flag)
-        self.window.scene_2.event_connect(self.window.scene_2.select_flag)
+        self.scene_1.event_connect(self.scene_1.select_flag)
+        self.scene_2.event_connect(self.scene_2.select_flag)
         # start with rectangular select
-        self.window.scene_1.select_id = '2'
-        self.window.scene_2.select_id = '2'
+        self.scene_1.select_id = '2'
+        self.scene_2.select_id = '2'
         # Add text to window
         if self.window.select_points_button.isChecked():
-            self.window.scene_1.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
-            self.window.scene_2.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
+            self.scene_1.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
+            self.scene_2.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
         else:
-            self.window.scene_1.text.text = ''
-            self.window.scene_2.text.text = ''
+            self.scene_1.text.text = ''
+            self.scene_2.text.text = ''
 
     def set_match_area(self):
         ### save selected areas for matching
-        selected = self.window.scene_1.selected
+        selected = self.scene_1.selected
         if selected != []:
-            data = self.window.scene_1.data
-            self.window.scene_1_selected_areas.append(data[selected])
-            self.window.scene_1.permanently_mark_selected()
+            data = self.scene_1.data
+            self.scene_1_selected_areas.append(data[selected])
+            self.scene_1.permanently_mark_selected()
         
-        selected = self.window.scene_2.selected
+        selected = self.scene_2.selected
         if selected != []:
-            data = self.window.scene_2.data
-            self.window.scene_2_selected_areas.append(data[selected])
-            self.window.scene_2.permanently_mark_selected()
+            data = self.scene_2.data
+            self.scene_2_selected_areas.append(data[selected])
+            self.scene_2.permanently_mark_selected()
 
     def run_alignment(self):
         if self.window.alignment_basis == 'selection':
             ### Remove Duplicates
             ## Scene 1
-            unique_points, unique_indices = np.unique(self.window.scene_1_selected_areas, return_index=True, axis=0)
-            self.window.scene_1_selected_areas = self.window.scene_1_selected_areas[unique_indices]
+            unique_points, unique_indices = np.unique(self.scene_1_selected_areas, return_index=True, axis=0)
+            self.scene_1_selected_areas = self.scene_1_selected_areas[unique_indices]
             ## Scene 2
-            unique_points, unique_indices = np.unique(self.window.scene_2_selected_areas, return_index=True, axis=0)
-            self.window.scene_2_selected_areas = self.window.scene_2_selected_areas[unique_indices]
+            unique_points, unique_indices = np.unique(self.scene_2_selected_areas, return_index=True, axis=0)
+            self.scene_2_selected_areas = self.scene_2_selected_areas[unique_indices]
 
         if self.window.alignment_basis == 'default':
             ## get idices of the vegetation points
             scene_1_indices = self.base_grid.get_vegetation_indices()
             scene_2_indices = self.alignment_grid.get_vegetation_indices()
             ## get vegetation points
-            self.window.scene_1_selected_areas = self.window.scene_1.data[scene_1_indices]
-            self.window.scene_2_selected_areas = self.window.scene_2.data[scene_2_indices]
+            self.scene_1_selected_areas = self.scene_1.data[scene_1_indices]
+            self.scene_2_selected_areas = self.scene_2.data[scene_2_indices]
 
         # copy original points in case match is discarded
-        scene_2_selected_area_copy = copy.deepcopy(self.window.scene_2_selected_areas)
+        scene_2_selected_area_copy = copy.deepcopy(self.scene_2_selected_areas)
 
         # run algorithms
-        match, iteration, error = ia.icp_algorithm(self.window.scene_1_selected_areas, self.window.scene_2_selected_areas)
+        match, iteration, error = ia.icp_algorithm(self.scene_1_selected_areas, self.scene_2_selected_areas)
 
         # get rotation and translation
         rotation, translation = ia.calculate_rotation_translation(match, scene_2_selected_area_copy, match)
 
         # copy points to apply rotation in case match is kept
-        self.window.scene_2_matched_data = copy.deepcopy(self.window.scene_2.data)
+        self.scene_2_matched_data = copy.deepcopy(self.scene_2.data)
 
         # apply rotation to get match
-        for i in range(len(self.window.scene_2_matched_data)):
-            self.window.scene_2_matched_data[i] = np.matmul(rotation, self.window.scene_2_matched_data[i]) + translation
+        for i in range(len(self.scene_2_matched_data)):
+            self.scene_2_matched_data[i] = np.matmul(rotation, self.scene_2_matched_data[i]) + translation
 
         # tpc.tie_point_error(self.window.scene_1.data, self.window.scene_2.data, self.window.scene_2_matched_data)
 
         # plot alignment points: base, original, and match in new window
-        points = [self.window.scene_1_selected_areas, match, scene_2_selected_area_copy]
+        points = [self.scene_1_selected_areas, match, scene_2_selected_area_copy]
         color = ['red', 'white', 'green']
         self.add_multi_scene(points, color, 'Selected Point Match')
 
         # plot full scans:  base, original, and match in new window
-        points = [self.window.scene_1.data, self.window.scene_2_matched_data, self.window.scene_2.data]
+        points = [self.scene_1.data, self.scene_2_matched_data, self.scene_2.data]
         self.add_multi_scene(points, color, 'Match Comparison')
 
     def add_multi_scene(self, points, color, title):
@@ -281,7 +287,7 @@ class Manager:
     def set_alignment(self):
         ### if alignment is accepted this will update the points in the master file manager
         file_path = self.file_dict['Alignment']
-        self.file_manager.update_aligned_points(self.window.scene_2_matched_data, file_path)
+        self.file_manager.update_aligned_points(self.scene_2_matched_data, file_path)
 
     def save_matched_file(self, save_file_path):
         ### save the alignment match as a new las file

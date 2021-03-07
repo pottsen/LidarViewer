@@ -22,14 +22,6 @@ class Window(QMainWindow):
         self.color_basis = 'default'
         self.alignment_basis = 'default'
 
-        # initialize scenes
-        self.scene_1 = None
-        self.scene_2 = None
-
-        # initialize areas to align on
-        self.scene_1_selected_areas = []
-        self.scene_2_selected_areas = []
-
 
     def initInterface(self):
         self.setWindowTitle("Lidar Snow Depth Calculator")
@@ -231,17 +223,17 @@ class Window(QMainWindow):
             return
         
         # initialize/reset selected areas
-        self.scene_1_selected_areas = []
-        self.scene_2_selected_areas = []
+        self.manager.scene_1_selected_areas = []
+        self.manager.scene_2_selected_areas = []
 
         # add scenes
-        self.scene_1 = self.manager.add_scene("Base")
-        self.scene_2 = self.manager.add_scene("Alignment")
+        self.manager.add_scene("Base")
+        self.manager.add_scene("Alignment")
 
         # reset plot tabs and plot selected scans
         self.plot_widgets.clear()
-        self.plot_widgets.addTab(self.scene_1, "Base")
-        self.plot_widgets.addTab(self.scene_2, "Alignment")
+        self.plot_widgets.addTab(self.manager.scene_1, "Base")
+        self.plot_widgets.addTab(self.manager.scene_2, "Alignment")
         
         # enable the appropriate button and checkboxes
         self.select_points_button.setEnabled(True)
@@ -262,8 +254,8 @@ class Window(QMainWindow):
     def click_set_match_area_button(self):
         # add selected poiints to selected area list
         self.manager.set_match_area()
-        print("s1 selected length", len(self.scene_1_selected_areas))
-        print("s2 selected length", len(self.scene_2_selected_areas))
+        print("s1 selected length", len(self.manager.scene_1_selected_areas))
+        print("s2 selected length", len(self.manager.scene_2_selected_areas))
         self.alignment_selection_checkbox.setEnabled(True)
         self.run_alignment_button.setEnabled(True)
 
@@ -298,11 +290,11 @@ class Window(QMainWindow):
     def click_run_alignment_button(self):
         # Check for the alignment basis
         if self.alignment_basis == 'selection':
-            if self.scene_1_selected_areas != [] and self.scene_2_selected_areas != []:
-                self.scene_1_selected_areas = np.concatenate(self.scene_1_selected_areas)
-                print(self.scene_1_selected_areas)
-                self.scene_2_selected_areas = np.concatenate(self.scene_2_selected_areas)
-                print(self.scene_2_selected_areas)
+            if self.manager.scene_1_selected_areas != [] and self.manager.scene_2_selected_areas != []:
+                self.manager.scene_1_selected_areas = np.concatenate(self.manager.scene_1_selected_areas)
+                print(self.manager.scene_1_selected_areas)
+                self.manager.scene_2_selected_areas = np.concatenate(self.manager.scene_2_selected_areas)
+                print(self.manager.scene_2_selected_areas)
                 # self.manager.run_alignment()
                 # self.set_alignment_button.setEnabled(True)
                 # self.save_match_button.setEnabled(True)
@@ -323,7 +315,8 @@ class Window(QMainWindow):
 
     def click_save_match_button(self):
         save_file_path, file_type = QFileDialog.getSaveFileName()
-        self.manager.save_matched_file(save_file_path)
+        if save_file_path != '':
+            self.manager.save_matched_file(save_file_path)
 
     def click_reset_button(self):
         # reset everything in window

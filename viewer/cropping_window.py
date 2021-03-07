@@ -14,10 +14,6 @@ class Window(QtWidgets.QMainWindow):
         # self.setWindowTitle("Lidar Snow Depth Calculator")
         self.manager = Manager(self, file_manager)
         self.initInterface()
-        self.crop_1 = None
-        self.crop_2 = None
-        self.crop_1_selected_areas = []
-        self.crop_2_selected_areas = []
 
 
     def initInterface(self):
@@ -141,12 +137,12 @@ class Window(QtWidgets.QMainWindow):
             self.message_window.append("Please select a file.")
             return
 
-        self.crop_1 = self.manager.add_scene("Crop 1")
-        self.crop_2 = self.manager.add_scene("Crop 2")
+        self.manager.add_scene("Crop 1")
+        self.manager.add_scene("Crop 2")
 
         self.plot_widgets.clear()
-        self.plot_widgets.addTab(self.crop_1, "Crop 1")
-        self.plot_widgets.addTab(self.crop_2, "Crop 2")
+        self.plot_widgets.addTab(self.manager.crop_1, "Crop 1")
+        self.plot_widgets.addTab(self.manager.crop_2, "Crop 2")
         
         self.select_points_button.setEnabled(True)
         self.remove_selected_points_button.setEnabled(True)
@@ -162,11 +158,13 @@ class Window(QtWidgets.QMainWindow):
 
     def click_save_crop_1_button(self):
         save_file_path, file_type = QFileDialog.getSaveFileName()
-        self.manager.save_crop_1(save_file_path)
+        if save_file_path != '':
+            self.manager.save_crop_1(save_file_path)
 
     def click_save_crop_2_button(self):
         save_file_path, file_type = QFileDialog.getSaveFileName()
-        self.manager.save_crop_2(save_file_path)
+        if save_file_path != '':
+            self.manager.save_crop_2(save_file_path)
 
     def click_reset_button(self):
         self.manager.file_manager.reset_files()
