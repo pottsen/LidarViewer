@@ -4,9 +4,6 @@
     Controls:
     * 1 - free lasso select
     * 2 - rectangle select
-    * 3 - ellipse select
-    * 4 - point picking
-    press again to switch between select and view mode
 """
 
 import sys

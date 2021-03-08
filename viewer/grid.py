@@ -1,5 +1,4 @@
 from point import Point_Class
-# from canvas_and_window_dock import Canvas
 from laspy.file import File
 import numpy as np
 from scipy import spatial, signal
@@ -11,12 +10,10 @@ import copy
 from remove_duplicates import remove_duplicates
 from grid_cell import Grid_Cell
 import matplotlib.pyplot as plt
-# from iterative_closest_point_clean import *
 from scene import Scene
 
 import vispy.scene
 from vispy.scene import visuals
-# from grid_file import Grid_File
 
 class Grid():
     def __init__(self, manager):
@@ -197,8 +194,8 @@ class Grid():
                 for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         point_count += len(self.grid[i][j].point_arrays[key])
-                        # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
-                        self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
+                        self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        # self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
                         if self.grid[i][j].vegetation_flag_dict[key] == True:
                             veg_count += 1
                         
@@ -482,7 +479,7 @@ class Grid():
             rgb = np.transpose(rgb)
             print(rgb)
 
-            self.scene = Scene(self, self.files[scan_basis].xyz, rgb, color_basis)
+            scene = Scene(self, self.files[scan_basis].xyz, rgb, color_basis)
             
         if color_basis == 'depth':
             # print('plot key: ', scan_basis)
@@ -493,9 +490,9 @@ class Grid():
             snow_rgb = np.transpose(snow_rgb)
             print(snow_rgb)
 
-            self.scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, color_basis)
+            scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, color_basis)
 
-        return self.scene
+        return scene
 
     def get_depth_stats(self, points):
         sum_depth = 0

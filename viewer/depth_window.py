@@ -5,7 +5,6 @@ import sys
 from grid import Grid
 from depth_manager import Manager
 import numpy as np
-# from scene import DemoScene
 
 class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
@@ -227,10 +226,6 @@ class Window(QtWidgets.QMainWindow):
         self.setCentralWidget(self.plot_widgets)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.leftDock)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.bottomDock)
-
-        # self.scene = DemoScene(keys='interactive')
-        # self.plot_widgets.clear()
-        # self.plot_widgets.addTab(self.scene, "Plot")
 
     def set_color_basis_intensity(self):
         if self.intensity_basis_checkbox.isChecked():
@@ -467,9 +462,9 @@ class Window(QtWidgets.QMainWindow):
             self.message_window.append("Warning: Upper Bound is less than lower bound")
             return
 
-        self.scene, upper_bound, lower_bound = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
+        scene, upper_bound, lower_bound = self.manager.color_and_plot_points(self.color_basis, self.scan_basis, upper_bound, lower_bound)
         self.plot_widgets.clear()
-        self.plot_widgets.addTab(self.scene, "Plot")
+        self.plot_widgets.addTab(scene, "Plot")
         if self.color_basis == 'intensity':
             if self.upperbound_text_slot.text == '':
                 self.upperbound_text_slot.setText(str(upper_bound))

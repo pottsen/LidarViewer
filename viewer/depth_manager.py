@@ -95,6 +95,7 @@ class Manager:
         self.file_list = []
         self.file_dict = {'Ground': None, 'Int. Snow': None, 'New Snow': None}
         self.grid = Grid(self)
+        self.scene = None
         self.scan_basis = None
         self.color_basis = None
 
@@ -172,22 +173,17 @@ class Manager:
 
     def color_and_plot_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        scene, upper_bound, lower_bound = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
-        return scene, upper_bound, lower_bound
-    
-    # def plot_points(self, color_basis, scan_basis):
-    #     if self.count_checked_files() > 0:
-    #         scene = self.grid.plot_points(color_basis, scan_basis)
-    #         return scene
+        self.scene, upper_bound, lower_bound = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
+        return self.scene, upper_bound, lower_bound
 
     def select_points(self):
-        self.grid.scene.select_flag = self.window.select_points_button.isChecked()
-        self.grid.scene.event_connect(self.grid.scene.select_flag)
-        self.grid.scene.select_id = '2'
+        self.scene.select_flag = self.window.select_points_button.isChecked()
+        self.scene.event_connect(self.scene.select_flag)
+        self.scene.select_id = '2'
         if self.window.select_points_button.isChecked():
-            self.grid.scene.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
+            self.scene.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
         else:
-            self.grid.scene.text.text = ''
+            self.scene.text.text = ''
 
     def get_basis_info(self, color_basis, scan_basis):
         if self.file_dict[scan_basis] == None:
