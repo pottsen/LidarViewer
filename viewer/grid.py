@@ -1,5 +1,4 @@
 from point import Point_Class
-# from canvas_and_window_dock import Canvas
 from laspy.file import File
 import numpy as np
 from scipy import spatial, signal
@@ -11,12 +10,10 @@ import copy
 from remove_duplicates import remove_duplicates
 from grid_cell import Grid_Cell
 import matplotlib.pyplot as plt
-# from iterative_closest_point_clean import *
 from scene import Scene
 
 import vispy.scene
 from vispy.scene import visuals
-# from grid_file import Grid_File
 
 class Grid():
     def __init__(self, manager):
@@ -197,8 +194,8 @@ class Grid():
                 for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         point_count += len(self.grid[i][j].point_arrays[key])
-                        # self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
-                        self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
+                        self.grid[i][j].find_vegetation(math.tan(math.pi/3)*self.cell_size, key)
+                        # self.grid[i][j].find_vegetation(math.tan(math.pi/2)*self.cell_size, key)
                         if self.grid[i][j].vegetation_flag_dict[key] == True:
                             veg_count += 1
                         
@@ -226,17 +223,11 @@ class Grid():
                             self.grid[i][j].calculate_average_z('New Snow')
                             if len(self.grid[i][j].point_arrays['New Snow']) > 0 and len(self.grid[i][j].point_arrays[key]) > 0:
                                 self.grid[i][j].depth_dict[key] = self.grid[i][j].average_z_dict['New Snow'] -  self.grid[i][j].average_z_dict[key]
-                                # print(self.grid[i][j].depth)
-                            
-                                self.average_scan_depth_dict[key] += self.grid[i][j].depth_dict[key]
+                                
+                                self.grid[i][j].min_z_depth_dict[key] = self.grid[i][j].average_z_dict['New Snow'] -  self.grid[i][j].min_z_dict[key]
+                        
                                 self.snow_depth_array_dict[key].append(self.grid[i][j].depth_dict[key])
                                 
-                                # ## store max and min depths for coloring
-                                # if self.grid[i][j].depth > self.max_snow_depth:
-                                #     self.max_snow_depth = self.grid[i][j].depth
-
-                                # if self.grid[i][j].depth < self.min_snow_depth:
-                                #     self.min_snow_depth = self.grid[i][j].depth
                             else:
                                 if len(self.grid[i][j].point_arrays['New Snow']) < 1: 
                                     self.grid[i][j].missing_point_flag_dict['New Snow']= True
@@ -247,11 +238,7 @@ class Grid():
                 plt.title(key)
                 plt.show()
 
-                self.average_scan_depth_dict[key] = self.average_scan_depth_dict[key]/(len(self.grid)*len(self.grid[0]))
-
-                # print("Max Depth: ", self.max_snow_depth)
-                # print("Min Depth: ", self.min_snow_depth)
-                # print("Average Depth: ", self.average_snow_depth)
+                self.average_scan_depth_dict[key] = np.mean(self.snow_depth_array_dict[key])
 
         return self.average_scan_depth_dict #, self.max_snow_depth, self.min_snow_depth
 
@@ -451,60 +438,35 @@ class Grid():
                                 self.files['New Snow'].plot_green[index] = int(abs((self.grid[i][j].depth_dict[scan_basis] - self.upper_bound)/(self.upper_bound))*65535 )
 
                                 self.files['New Snow'].plot_blue[index] = int(abs((self.grid[i][j].depth_dict[scan_basis] - self.upper_bound)/(self.upper_bound))*65535 )
+        xyz, rgb = self.get_coordinates_and_scale_color(color_basis, scan_basis)
+        return xyz, rgb, round(self.upper_bound), round(self.lower_bound)
 
-        return self.plot_points(color_basis, scan_basis), round(self.upper_bound), round(self.lower_bound)
-
-    def plot_points_initial(self):   
-        self.init_canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-        view = self.init_canvas.central_widget.add_view()
-        scatter = visuals.Markers()
-        scatter.set_data(self.files['Ground'].xyz, edge_color = None, face_color = "red", size = 4)
-        view.add(scatter)
-        
-        scatter2 = visuals.Markers()
-        scatter2.set_data(self.files['New Snow'].xyz, edge_color = None, face_color = "blue", size = 4)
-        view.add(scatter2)
-
-        view.camera = 'arcball' 
-        axis = visuals.XYZAxis(parent=view.scene)
-        view.add(axis)
-
-        return self.init_canvas
-                
-    def plot_points(self, color_basis, scan_basis):
+    def get_coordinates_and_scale_color(self, color_basis, scan_basis):
         self.stats_key = scan_basis
         if color_basis in ['default', 'intensity']:
-            # print('plot key: ', scan_basis)
-            # print(self.files['New Snow'].plot_red)
-            # print(self.files['New Snow'].plot_green)
-            # print(self.files['New Snow'].plot_blue)
             rgb = np.stack((self.files[scan_basis].plot_red/max(self.files[scan_basis].plot_red), self.files[scan_basis].plot_green/max(self.files[scan_basis].plot_green), self.files[scan_basis].plot_blue/max(self.files[scan_basis].plot_blue)))
             rgb = np.transpose(rgb)
             print(rgb)
 
-            self.scene = Scene(self, self.files[scan_basis].xyz, rgb, color_basis)
+            scene = Scene(self, self.files[scan_basis].xyz, rgb, color_basis)
             
+            return self.files[scan_basis].xyz, rgb
+
         if color_basis == 'depth':
-            # print('plot key: ', scan_basis)
-            print(self.files['New Snow'].plot_red)
-            print(self.files['New Snow'].plot_green)
-            print(self.files['New Snow'].plot_blue)
             snow_rgb = np.stack((self.files['New Snow'].plot_red/max(self.files['New Snow'].plot_red), self.files['New Snow'].plot_green/max(self.files['New Snow'].plot_green), self.files['New Snow'].plot_blue/max(self.files['New Snow'].plot_blue)))
             snow_rgb = np.transpose(snow_rgb)
             print(snow_rgb)
 
-            self.scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, color_basis)
+            scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, color_basis)
 
-        return self.scene
+            return self.files['New Snow'].xyz, snow_rgb
 
     def get_depth_stats(self, points):
         sum_depth = 0
-        sum_ground_depth = 0
-        sum_min_g_avg_snow = 0
+        sum_min_z_depth = 0
         count = 0
         max_depth = -float('INF')
-        max_ground_depth = -float('INF')
-        max_min_g_avg_snow = -float('INF')
+        max_min_z_depth = -float('INF')
         min_depth = float('INF')
         # print('points', len(points))
         for point in points:
@@ -517,33 +479,27 @@ class Grid():
 
             if not self.grid[i][j].vegetation_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict[self.stats_key]:
                 depth = self.grid[i][j].depth_dict[self.stats_key]
-                ground_depth = self.grid[i][j].max_depth
-                min_g_avg_snow = self.grid[i][j].ground_depth
+                min_z_depth = self.grid[i][j].min_z_depth_dict[self.stats_key]
                 print('grid cell:', i, ", ", j, " Depth ", depth)
                 if depth > max_depth:
                     max_depth = depth
                 if depth < min_depth:
                     min_depth = depth
-                # if ground_depth > max_ground_depth:
-                #     max_ground_depth = ground_depth
-                if min_g_avg_snow > max_min_g_avg_snow:
-                    max_min_g_avg_snow = min_g_avg_snow
+                if min_z_depth > max_min_z_depth:
+                    max_min_z_depth = min_z_depth
                 sum_depth += depth
-                # sum_ground_depth += ground_depth
-                sum_min_g_avg_snow += min_g_avg_snow
+                sum_min_z_depth += min_z_depth
                 count +=1
             else:
                 print("Vegetation cell")
             try:
                 average_depth = round(sum_depth/count, 2)
-                # average_ground_depth = round(sum_ground_depth/count, 2)
-                average_min_g_avg_snow = round(sum_min_g_avg_snow/count, 2)
+                average_min_z_depth = round(sum_min_z_depth/count, 2)
             except:
                 average_depth = float('INF')
-                    
-        # return average_depth, round(max_depth, 2), round(min_depth, 2), round(max_ground_depth, 2), average_ground_depth, round(max_min_g_avg_snow, 2), average_min_g_avg_snow
+                average_min_z_depth = float('INF')
 
-        return average_depth, round(max_depth, 2), round(min_depth, 2), average_min_g_avg_snow, round(max_min_g_avg_snow, 2)
+        return average_depth, round(max_depth, 2), round(min_depth, 2), average_min_z_depth, round(max_min_z_depth, 2)
 
     def get_intensity_stats(self, selected):
         intensities = self.files[self.stats_key].intensity[tuple(selected)]

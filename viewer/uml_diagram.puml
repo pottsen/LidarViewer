@@ -19,27 +19,26 @@ master_window --> cropping_window
 master_window --> alignment_window
 master_window --> depth_window
 
+depth_window <--> depth_manager
+alignment_window <--> alignment_manager
+cropping_window <--> cropping_manager
+
+depth_manager <--> grid
+depth_manager --> scene
+depth_manager --> file_object
+
+alignment_manager --> scene
+alignment_manager <--> grid
+alignment_manager --> file_object
+
+
+cropping_manager --> scene
+cropping_manager --> file_object
+
 file_manager <--> cropping_manager
 file_manager <--> alignment_manager
 file_manager <--> depth_manager
 file_manager --> las_data
-
-depth_window <--> depth_manager
-depth_window --> scene
-
-depth_manager <--> grid
-depth_manager --> file_object
-
-alignment_window <--> alignment_manager
-alignment_window --> scene
-
-alignment_manager <--> grid
-alignment_manager --> file_object
-
-cropping_window <--> cropping_manager
-cropping_window --> scene
-
-cropping_manager --> file_object
 
 grid --> grid_cell
 
