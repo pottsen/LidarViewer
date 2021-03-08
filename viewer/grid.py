@@ -223,7 +223,8 @@ class Grid():
                             self.grid[i][j].calculate_average_z('New Snow')
                             if len(self.grid[i][j].point_arrays['New Snow']) > 0 and len(self.grid[i][j].point_arrays[key]) > 0:
                                 self.grid[i][j].depth_dict[key] = self.grid[i][j].average_z_dict['New Snow'] -  self.grid[i][j].average_z_dict[key]
-                                # print(self.grid[i][j].depth)
+                                
+                                self.grid[i][j].min_z_depth_dict[key] = self.grid[i][j].average_z_dict['New Snow'] -  self.grid[i][j].min_z_dict[key]
                         
                                 self.snow_depth_array_dict[key].append(self.grid[i][j].depth_dict[key])
                                 
@@ -462,12 +463,10 @@ class Grid():
 
     def get_depth_stats(self, points):
         sum_depth = 0
-        sum_ground_depth = 0
-        sum_min_g_avg_snow = 0
+        sum_min_z_depth = 0
         count = 0
         max_depth = -float('INF')
-        max_ground_depth = -float('INF')
-        max_min_g_avg_snow = -float('INF')
+        max_min_z_depth = -float('INF')
         min_depth = float('INF')
         # print('points', len(points))
         for point in points:
@@ -480,33 +479,27 @@ class Grid():
 
             if not self.grid[i][j].vegetation_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict['New Snow'] and not self.grid[i][j].missing_point_flag_dict[self.stats_key]:
                 depth = self.grid[i][j].depth_dict[self.stats_key]
-                ground_depth = self.grid[i][j].max_depth
-                min_g_avg_snow = self.grid[i][j].ground_depth
+                min_z_depth = self.grid[i][j].min_z_depth_dict[self.stats_key]
                 print('grid cell:', i, ", ", j, " Depth ", depth)
                 if depth > max_depth:
                     max_depth = depth
                 if depth < min_depth:
                     min_depth = depth
-                # if ground_depth > max_ground_depth:
-                #     max_ground_depth = ground_depth
-                if min_g_avg_snow > max_min_g_avg_snow:
-                    max_min_g_avg_snow = min_g_avg_snow
+                if min_z_depth > max_min_z_depth:
+                    max_min_z_depth = min_z_depth
                 sum_depth += depth
-                # sum_ground_depth += ground_depth
-                sum_min_g_avg_snow += min_g_avg_snow
+                sum_min_z_depth += min_z_depth
                 count +=1
             else:
                 print("Vegetation cell")
             try:
                 average_depth = round(sum_depth/count, 2)
-                # average_ground_depth = round(sum_ground_depth/count, 2)
-                average_min_g_avg_snow = round(sum_min_g_avg_snow/count, 2)
+                average_min_z_depth = round(sum_min_z_depth/count, 2)
             except:
                 average_depth = float('INF')
-                    
-        # return average_depth, round(max_depth, 2), round(min_depth, 2), round(max_ground_depth, 2), average_ground_depth, round(max_min_g_avg_snow, 2), average_min_g_avg_snow
+                average_min_z_depth = float('INF')
 
-        return average_depth, round(max_depth, 2), round(min_depth, 2), average_min_g_avg_snow, round(max_min_g_avg_snow, 2)
+        return average_depth, round(max_depth, 2), round(min_depth, 2), average_min_z_depth, round(max_min_z_depth, 2)
 
     def get_intensity_stats(self, selected):
         intensities = self.files[self.stats_key].intensity[tuple(selected)]

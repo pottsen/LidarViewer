@@ -121,13 +121,10 @@ class Scene(QtWidgets.QWidget):
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*3+font_size*1.33*3*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        # self.stats_text4 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0,  int(font_size*1.33*4+font_size*1.33*4*0.5)),
-        #                                color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        # self.stats_text5 = scene.visuals.Text('', pos=(self.canvas.size[0]/4.0, int(font_size*1.33*5+font_size*1.33*6*0.5)),
-        #                                color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text6 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*4+font_size*1.33*4*0.5)),
+
+        self.stats_text6 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*4+font_size*1.33*5*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text7 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0, int(font_size*1.33*5+font_size*1.33*5*0.5)),
+        self.stats_text7 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0, int(font_size*1.33*5+font_size*1.33*6*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         self.tr = self.scatter.node_transform(self.view)
 
