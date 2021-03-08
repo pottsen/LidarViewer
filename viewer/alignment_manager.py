@@ -174,7 +174,7 @@ class Manager:
 
                 else: 
                     color = np.array([[1.0, 0.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
-                self.scene_1 = Scene(self,
+                self.scene_1 = Scene(self.base_grid,
                  self.file_manager.file_dict[file_path].init_xyz,
                  color,
                  'ICP')
@@ -195,7 +195,7 @@ class Manager:
 
                 else: 
                     color = np.array([[0.0, 1.0, 0.0] for i in range(len(self.file_manager.file_dict[file_path].init_xyz))])
-                self.scene_2 = Scene(self,
+                self.scene_2 = Scene(self.alignment_grid,
                  self.file_manager.file_dict[file_path].init_xyz,
                  color,
                  'ICP')

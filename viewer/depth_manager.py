@@ -4,6 +4,7 @@ import vispy.app
 import sys
 from grid import Grid
 from file_manager import File_Manager
+from scene import Scene
 
 
 class file_object(QWidget):
@@ -98,6 +99,7 @@ class Manager:
         self.scene = None
         self.scan_basis = None
         self.color_basis = None
+        self.stats_key = None
 
     def add_file_to_manager(self, file_path):
         self.file_manager.add_file(file_path)
@@ -173,7 +175,8 @@ class Manager:
 
     def color_and_plot_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         self.window.message_window.append("Coloring points...")
-        self.scene, upper_bound, lower_bound = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
+        xyz, rgb, upper_bound, lower_bound = self.grid.color_points(color_basis, scan_basis, upper_bound, lower_bound)
+        self.scene = Scene(self.grid, xyz, rgb, color_basis)
         return self.scene, upper_bound, lower_bound
 
     def select_points(self):

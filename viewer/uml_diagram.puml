@@ -24,6 +24,7 @@ alignment_window <--> alignment_manager
 cropping_window <--> cropping_manager
 
 depth_manager <--> grid
+depth_manager --> scene
 depth_manager --> file_object
 
 alignment_manager --> scene
@@ -39,7 +40,6 @@ file_manager <--> alignment_manager
 file_manager <--> depth_manager
 file_manager --> las_data
 
-grid --> scene
 grid --> grid_cell
 
 grid_cell --> point
