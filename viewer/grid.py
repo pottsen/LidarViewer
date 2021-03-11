@@ -49,110 +49,124 @@ class Grid():
         # print('Loaded Files')
 
     def make_grid(self, cell_size=0.2):
-        self.grid = None
-
-        # Center points about origin
-        # print('centering points')
-        # avg_x = []
-        # avg_y = []
-        # avg_z = []
-        
-        # for key in self.manager.file_dict:
-        #     if self.manager.file_dict[key] != None:
-        #         avg_x.append(np.mean(self.files[key].init_xyz[:,0]))
-        #         avg_y.append(np.mean(self.files[key].init_xyz[:,1]))
-        #         avg_z.append(np.mean(self.files[key].init_xyz[:,2]))
-
-        # self.shift_x = np.mean(avg_x) #0
-        # self.shift_y = np.mean(avg_y) #0
-        # self.shift_z = np.mean(avg_z) #0
-
-        print('check extents')
-        self.max_x = -float("INF")
-        self.min_x = float("INF")
-        self.max_y = -float("INF")
-        self.min_y = float("INF")
         self.cell_size = cell_size
-        for key, value in self.files.items():
-            print(key)
-            if value != None:
-                # print('shifting scan: ', key)
-                # self.files[key].shift_points(self.shift_x, self.shift_y, self.shift_z)
-                value.max_x = np.max(value.xyz[:,0])
-                value.min_x = np.min(value.xyz[:,0])
-                value.max_y = np.max(value.xyz[:,1])
-                value.min_y = np.min(value.xyz[:,1])
-                value.max_z = np.max(value.xyz[:,2])
-                value.min_z = np.min(value.xyz[:,2])
+        for i in [5, 2, 1, 0.5, 0.25]:
+            results_file = open("cell_size_results.txt", "a+")
+            results_file.write("\n Cell Size = " + str(i) + "\n")
+            results_file.close()
+            for j in range(100):
+                start_time = time.time()
+                self.grid = None
+                self.cell_size = i
 
-                delta_x = abs(value.max_x - value.min_x)
-                delta_y = abs(value.max_y - value.min_y)
-                density = len(value.x)/(delta_x*delta_y)
-                print(f'{key} point density(per m2): ', density)
-                # cell_size = np.sqrt(1/density * 3)
-                # print('Raw cell size: ', cell_size)
-                # cell_size = round(cell_size, 2)
-                # if cell_size > self.cell_size:
-                #     self.cell_size = cell_size
-                #     print('New cell size:', self.cell_size)
-                # print(f'{key} min cell size: ', round(cell_size, 2))
-
-                if value.max_x < self.min_x and self.min_x != float("INF"):
-                    print(value.max_x, self.min_x)
-                    print(f"{key} max_x < global min_x. Scans may not overlap. Check accuracy of coordinates")
-                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
-                if value.min_x > self.max_x and self.max_x != -float("INF"):
-                    print(value.min_x, self.max_x)
-                    print(f"{key} min_x > global max_x. Scans may not overlap. Check accuracy of coordinates")
-                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
-
-                if value.max_x > self.max_x:
-                    self.max_x = value.max_x
-                if value.min_x < self.min_x:
-                    self.min_x= value.min_x
-
-                if value.max_y < self.min_y and self.min_y != float("INF"):
-                    print(value.max_y, self.min_y)
-                    print(f"{key} max_y < global min_y. Scans may not overlap. Check accuracy of coordinates")
-                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
-                if value.min_y > self.max_y and self.max_y != -float("INF"):
-                    print(value.min_y, self.max_y)
-                    print(f"{key} min_y > global max_y. Scans may not overlap. Check accuracy of coordinates")
-                    return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                # Center points about origin
+                # print('centering points')
+                # avg_x = []
+                # avg_y = []
+                # avg_z = []
                 
-                if value.max_y > self.max_y:
-                    self.max_y = value.max_y
-                if value.min_y < self.min_y:
-                    self.min_y= value.min_y
+                # for key in self.manager.file_dict:
+                #     if self.manager.file_dict[key] != None:
+                #         avg_x.append(np.mean(self.files[key].init_xyz[:,0]))
+                #         avg_y.append(np.mean(self.files[key].init_xyz[:,1]))
+                #         avg_z.append(np.mean(self.files[key].init_xyz[:,2]))
 
-        ################################################
-        # calculate x and y length of scan to be used in determing grid spots
-        delta_x = abs(self.max_x - self.min_x)
-        delta_y = abs(self.max_y - self.min_y)
+                # self.shift_x = np.mean(avg_x) #0
+                # self.shift_y = np.mean(avg_y) #0
+                # self.shift_z = np.mean(avg_z) #0
 
-        # self.cell_size = 0
-        # for key, value in self.files.items():
-        #     if value != None:
-        #         density = len(value.x)/(delta_x*delta_y)
-        #         print(f'{key} point density(per m2): ', density)
-        #         cell_size = np.sqrt(1/density)*1.5# + 0.005
-        #         print('Raw cell size: ', cell_size)
-        #         if cell_size > self.cell_size:
-        #             self.cell_size = round(cell_size, 2)
-        #             print('New cell size:', self.cell_size)
-        #         print(f'{key} min cell size: ', round(cell_size, 2))
+                print('check extents')
+                self.max_x = -float("INF")
+                self.min_x = float("INF")
+                self.max_y = -float("INF")
+                self.min_y = float("INF")
                 
-        self.number_of_cells_x = math.ceil(delta_x/self.cell_size)
-        self.number_of_cells_y = math.ceil(delta_y/self.cell_size)
+                for key, value in self.files.items():
+                    print(key)
+                    if value != None:
+                        # print('shifting scan: ', key)
+                        # self.files[key].shift_points(self.shift_x, self.shift_y, self.shift_z)
+                        value.max_x = np.max(value.xyz[:,0])
+                        value.min_x = np.min(value.xyz[:,0])
+                        value.max_y = np.max(value.xyz[:,1])
+                        value.min_y = np.min(value.xyz[:,1])
+                        value.max_z = np.max(value.xyz[:,2])
+                        value.min_z = np.min(value.xyz[:,2])
 
-        #################################################
-        # make grid
-        self.grid = [[Grid_Cell() for i in range(self.number_of_cells_y)] for j in range(self.number_of_cells_x)]
+                        delta_x = abs(value.max_x - value.min_x)
+                        delta_y = abs(value.max_y - value.min_y)
+                        density = len(value.x)/(delta_x*delta_y)
+                        print(f'{key} point density(per m2): ', density)
+                        # cell_size = np.sqrt(1/density * 3)
+                        # print('Raw cell size: ', cell_size)
+                        # cell_size = round(cell_size, 2)
+                        # if cell_size > self.cell_size:
+                        #     self.cell_size = cell_size
+                        #     print('New cell size:', self.cell_size)
+                        # print(f'{key} min cell size: ', round(cell_size, 2))
 
-        # add points to grid
-        for key, value in self.files.items():
-            if value != None:
-                self.add_points_to_grid(key)
+                        if value.max_x < self.min_x and self.min_x != float("INF"):
+                            print(value.max_x, self.min_x)
+                            print(f"{key} max_x < global min_x. Scans may not overlap. Check accuracy of coordinates")
+                            return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                        if value.min_x > self.max_x and self.max_x != -float("INF"):
+                            print(value.min_x, self.max_x)
+                            print(f"{key} min_x > global max_x. Scans may not overlap. Check accuracy of coordinates")
+                            return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+
+                        if value.max_x > self.max_x:
+                            self.max_x = value.max_x
+                        if value.min_x < self.min_x:
+                            self.min_x= value.min_x
+
+                        if value.max_y < self.min_y and self.min_y != float("INF"):
+                            print(value.max_y, self.min_y)
+                            print(f"{key} max_y < global min_y. Scans may not overlap. Check accuracy of coordinates")
+                            return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                        if value.min_y > self.max_y and self.max_y != -float("INF"):
+                            print(value.min_y, self.max_y)
+                            print(f"{key} min_y > global max_y. Scans may not overlap. Check accuracy of coordinates")
+                            return f"WARNING: {key} Scan does not overlap with one or all of the other scans! Please check alignment."
+                        
+                        if value.max_y > self.max_y:
+                            self.max_y = value.max_y
+                        if value.min_y < self.min_y:
+                            self.min_y= value.min_y
+
+                ################################################
+                # calculate x and y length of scan to be used in determing grid spots
+                delta_x = abs(self.max_x - self.min_x)
+                delta_y = abs(self.max_y - self.min_y)
+
+                # self.cell_size = 0
+                # for key, value in self.files.items():
+                #     if value != None:
+                #         density = len(value.x)/(delta_x*delta_y)
+                #         print(f'{key} point density(per m2): ', density)
+                #         cell_size = np.sqrt(1/density)*1.5# + 0.005
+                #         print('Raw cell size: ', cell_size)
+                #         if cell_size > self.cell_size:
+                #             self.cell_size = round(cell_size, 2)
+                #             print('New cell size:', self.cell_size)
+                #         print(f'{key} min cell size: ', round(cell_size, 2))
+                        
+                
+                self.number_of_cells_x = math.ceil(delta_x/self.cell_size)
+                self.number_of_cells_y = math.ceil(delta_y/self.cell_size)
+
+                #################################################
+                # make grid
+                self.grid = [[Grid_Cell() for i in range(self.number_of_cells_y)] for j in range(self.number_of_cells_x)]
+
+                # add points to grid
+                for key, value in self.files.items():
+                    if value != None:
+                        self.add_points_to_grid(key)
+                end_time = time.time()
+                time_elapsed = end_time - start_time
+                results_file = open("cell_size_results.txt", "a+")
+                results_file.write(str(time_elapsed)+"\n")
+                results_file.close()
 
 
         return f"Grid Complete! {self.number_of_cells_y*self.number_of_cells_x} Total Grid Cells" 
