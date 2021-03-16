@@ -34,8 +34,8 @@ class Window(QtWidgets.QMainWindow):
 
     def files_update(self):
         self.left_dock()
-        if len(self.manager.file_list) > 1:
-            self.add_match_area_button.setEnabled(True)
+        if len(self.manager.file_list) > 0:
+            self.plot_scan_button.setEnabled(True)
 
     def left_dock(self):
         self.left_dock_widget_layout = QtWidgets.QVBoxLayout()

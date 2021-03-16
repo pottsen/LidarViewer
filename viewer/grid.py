@@ -48,26 +48,9 @@ class Grid():
                 self.files[key] = Grid_File(file_dict[key])
         # print('Loaded Files')
 
-    def make_grid(self, cell_size=0.2):
+    def make_grid(self, cell_size=0.5):
         self.grid = None
 
-        # Center points about origin
-        # print('centering points')
-        # avg_x = []
-        # avg_y = []
-        # avg_z = []
-        
-        # for key in self.manager.file_dict:
-        #     if self.manager.file_dict[key] != None:
-        #         avg_x.append(np.mean(self.files[key].init_xyz[:,0]))
-        #         avg_y.append(np.mean(self.files[key].init_xyz[:,1]))
-        #         avg_z.append(np.mean(self.files[key].init_xyz[:,2]))
-
-        # self.shift_x = np.mean(avg_x) #0
-        # self.shift_y = np.mean(avg_y) #0
-        # self.shift_z = np.mean(avg_z) #0
-
-        print('check extents')
         self.max_x = -float("INF")
         self.min_x = float("INF")
         self.max_y = -float("INF")
@@ -76,8 +59,7 @@ class Grid():
         for key, value in self.files.items():
             print(key)
             if value != None:
-                # print('shifting scan: ', key)
-                # self.files[key].shift_points(self.shift_x, self.shift_y, self.shift_z)
+
                 value.max_x = np.max(value.xyz[:,0])
                 value.min_x = np.min(value.xyz[:,0])
                 value.max_y = np.max(value.xyz[:,1])
@@ -89,13 +71,7 @@ class Grid():
                 delta_y = abs(value.max_y - value.min_y)
                 density = len(value.x)/(delta_x*delta_y)
                 print(f'{key} point density(per m2): ', density)
-                # cell_size = np.sqrt(1/density * 3)
-                # print('Raw cell size: ', cell_size)
-                # cell_size = round(cell_size, 2)
-                # if cell_size > self.cell_size:
-                #     self.cell_size = cell_size
-                #     print('New cell size:', self.cell_size)
-                # print(f'{key} min cell size: ', round(cell_size, 2))
+
 
                 if value.max_x < self.min_x and self.min_x != float("INF"):
                     print(value.max_x, self.min_x)
