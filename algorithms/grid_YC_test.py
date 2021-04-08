@@ -1146,7 +1146,7 @@ start = time.time()
 # clean_base_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftDeck_test10.las")
 
 # clean_base_file = remove_duplicates("C:/Users/peter/Research/las_data/LookersRight_BC_May15.las")
-clean_base_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftDeck_1210_cliffs_right_of_fin_prebomb_smaller.las")
+clean_base_file = remove_duplicates("../viewer/LiftDeck_1210_cliffs_right_of_fin_prebomb_smaller.las")
 
 # clean_snow_file = remove_duplicates("C:/Users/peter/Research/las_data/OnSnow_LiftShack2.las")
 
@@ -1163,7 +1163,7 @@ clean_base_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftDeck_1
 # clean_snow_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftBalcony_test5_big2.las")
 
 # clean_snow_file = remove_duplicates("C:/Users/peter/Research/las_data/LookersLeft_BC_May15.las")
-clean_snow_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftDeck_1210_cliffs_right_of_fin_postbomb.las")
+clean_snow_file = remove_duplicates("../viewer/LiftDeck_1210_cliffs_right_of_fin_postbomb.las")
 
 # clean_base_file = remove_duplicates("C:/Users/peter/Research/las_data/LiftBalcony_LiftShack2.las")
 
@@ -1231,7 +1231,7 @@ grid.color_points()
 end = time.time()
 print("\nComputation Time: " + str((end - start)/60) + " minutes")
 
-# grid.tie_point_error()
+grid.tie_point_error()
 
 print("Plotting...")
 grid.plot_points()
