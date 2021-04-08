@@ -10,7 +10,7 @@ class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
     def __init__(self):
         super(Window, self).__init__()
-        # self.setWindowTitle("Lidar Snow Depth Calculator")
+        self.setWindowTitle("Lidar Snow Depth Calculator")
         self.file_manager = File_Manager()
         self.initInterface()
 
