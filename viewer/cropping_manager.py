@@ -159,22 +159,22 @@ class Manager:
             self.crop_2.select_id = '2'
             self.crop_2.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
 
-    def add_selected_points(self):
-        if self.file_dict["Crop 1"] != None:
-            # if "Crop 1" in self.files.keys():
-            selected = self.crop_1.selected
-            data = selfcrop_1.data
-            self.crop_1_selected_areas.append(data[selected])
-            self.crop_1.permanently_mark_selected()
-            print("crop 1 selected\n", self.crop_1_selected_areas)
+    # def add_selected_points(self):
+    #     if self.file_dict["Crop 1"] != None:
+    #         # if "Crop 1" in self.files.keys():
+    #         selected = self.crop_1.selected
+    #         data = selfcrop_1.data
+    #         self.crop_1_selected_areas.append(data[selected])
+    #         self.crop_1.permanently_mark_selected()
+    #         print("crop 1 selected\n", self.crop_1_selected_areas)
             
-        if self.file_dict["Crop 2"] != None:
-            # if "Crop 2" in self.files.keys():
-            selected = self.crop_2.selected
-            data = self.crop_2.data
-            self.crop_2_selected_areas.append(data[selected])
-            self.crop_2.permanently_mark_selected()
-            print("crop 2 selected\n", self.crop_2_selected_areas)
+    #     if self.file_dict["Crop 2"] != None:
+    #         # if "Crop 2" in self.files.keys():
+    #         selected = self.crop_2.selected
+    #         data = self.crop_2.data
+    #         self.crop_2_selected_areas.append(data[selected])
+    #         self.crop_2.permanently_mark_selected()
+    #         print("crop 2 selected\n", self.crop_2_selected_areas)
 
     def remove_selected_points(self):
         if self.file_dict["Crop 1"] != None:

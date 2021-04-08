@@ -166,6 +166,8 @@ class Scene(QtWidgets.QWidget):
 
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
+            print('point selected ')
+            print(self.data[i])
 
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
