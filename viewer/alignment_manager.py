@@ -15,7 +15,7 @@ from vispy.scene import visuals
 from laspy.file import File
 from grid import Grid
 
-class file_object(QWidget):
+class align_file_object(QWidget):
     ### This object is what will be displayed in the window on the left hand side when each file is loaded in
     def __init__(self, manager, file_path):
         super(QWidget, self).__init__()
@@ -116,7 +116,7 @@ class Manager:
     def add_file_object(self, file_path):
         # add file object to alignment window
         print('Adding file to list', file_path)
-        self.file_list.append(file_object(self, file_path))
+        self.file_list.append(align_file_object(self, file_path))
         self.clear_flags()
         self.window.left_dock()
         # enable functions in window

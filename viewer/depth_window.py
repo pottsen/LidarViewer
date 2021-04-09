@@ -18,7 +18,7 @@ class Window(QtWidgets.QMainWindow):
 
 
     def initInterface(self):
-        self.setWindowTitle("Lidar Snow Depth Calculator")
+        # self.setWindowTitle("Lidar Snow Depth Calculator")
         
         self.leftDock = QDockWidget('Data Options', self)
         self.leftDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)

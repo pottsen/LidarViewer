@@ -8,16 +8,14 @@ import numpy as np
 # from scene import DemoScene
 
 class Window(QtWidgets.QMainWindow):
-    # resize = pyqtSignal()
     def __init__(self, file_manager):
         super(Window, self).__init__()
-        # self.setWindowTitle("Lidar Snow Depth Calculator")
         self.manager = Manager(self, file_manager)
         self.initInterface()
 
 
     def initInterface(self):
-        self.setWindowTitle("Lidar Snow Depth Calculator")
+        # self.setWindowTitle("Lidar Snow Depth Calculator")
         
         self.leftDock = QtWidgets.QDockWidget('Data Options', self)
         self.leftDock.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)

@@ -7,7 +7,7 @@ from file_manager import File_Manager
 from scene import Scene
 
 
-class file_object(QWidget):
+class depth_file_object(QWidget):
     def __init__(self, manager, file_path):
         super(QWidget, self).__init__()
         self.manager = manager
@@ -106,7 +106,7 @@ class Manager:
 
     def add_file_object(self, file_path):
         print('Adding file to depth list', file_path)
-        self.file_list.append(file_object(self, file_path))
+        self.file_list.append(depth_file_object(self, file_path))
         self.clear_flags()
         self.window.left_dock()
         if len(self.file_list) > 0:

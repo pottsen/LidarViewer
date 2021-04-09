@@ -15,7 +15,7 @@ from laspy.file import File
 # from vispy.scene import visuals
 # from laspy.file import File
 
-class file_object(QWidget):
+class crop_file_object(QWidget):
     def __init__(self, manager, file_path):
         super(QWidget, self).__init__()
         self.manager = manager
@@ -96,7 +96,7 @@ class Manager:
 
     def add_file_object(self, file_path):
         print('Adding file to list', file_path)
-        self.file_list.append(file_object(self, file_path))
+        self.file_list.append(crop_file_object(self, file_path))
         self.clear_flags()
         self.window.left_dock()        
         if len(self.file_list) > 0:
