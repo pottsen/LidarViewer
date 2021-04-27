@@ -44,10 +44,12 @@ class File_Manager:
         # modify file points based on alignment
         self.file_dict[file_path].update_aligned_points(points)
 
-    def reset_files(self):
+    def reset_files_crop(self):
         for key in self.file_dict.keys():
             self.file_dict[key] = Las_Data(key)
             print(key, ' reset in manager')
 
+    def reset_files_alignment(self, file_path):
+        self.file_dict[file_path].reset_aligned_points()
 
 

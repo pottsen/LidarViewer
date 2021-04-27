@@ -181,7 +181,7 @@ class Window(QtWidgets.QMainWindow):
 
     def click_reset_button(self):
         # reset everything in window
-        self.manager.file_manager.reset_files()
+        self.manager.file_manager.reset_files_crop()
         self.plot_widgets.clear()
         self.plot_scan_button.setChecked(False)
         self.select_points_button.setChecked(False)
