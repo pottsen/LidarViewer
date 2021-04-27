@@ -5,6 +5,7 @@ from scipy.spatial import *
 import time
 import sys
 
+# function goes through and removes duplicate points from a las file
 def remove_duplicates(las_file):
         base_file_input = las_file
         base_file = File(base_file_input, mode = "r")
@@ -25,12 +26,13 @@ def remove_duplicates(las_file):
         points = points[unique_indices]
 
         
-
+        # down samples points if greater than 3 million
         if len(points) > 3000000:
                 step = int(np.ceil(len(points)/3000000))
                 array = np.arange(0,len(points), step)
                 points = points[array]
         
+        # saves clean file
         clean_file_name = file_name+"_clean.las"
         clean_file = File(clean_file_name, mode = "w", header = base_file.header)
         clean_file.points = points

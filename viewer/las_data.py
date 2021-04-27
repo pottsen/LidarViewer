@@ -11,25 +11,36 @@ class Las_Data:
         # cleaned_file = remove_duplicates(str(file_path))
         # self.file = File(cleaned_file, mode = "r")
 
+        # pull all pertinent data from the las file
         self.file =  File(file_path, mode = "r")
         self.file_path = file_path
         self.file_name = file_path.split('/')[-1]
         self.file_name = self.file_name.split('.')[0]
+
+        # store initial x,y,z coordinates for reference
         self.init_x = self.file.x 
         self.init_y = self.file.y 
         self.init_z = self.file.z 
         self.init_xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
+
+        # store x,y,z coordinates for manipulation
         self.x = self.file.x 
         self.y = self.file.y 
         self.z = self.file.z 
         self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
+
+        # initialize rgb variables for plotting
         self.plot_red = []
         self.plot_blue = []
         self.plot_green = []
+
+        # store intensity values
         self.intensity = self.file.intensity
+
+        # store raw points data
         self.points = self.file.points
 
-
+        # sometimes RGB is missing
         try:
             self.red = copy.deepcopy(self.file.red)
             self.green = copy.deepcopy(self.file.green)
@@ -41,12 +52,14 @@ class Las_Data:
         
         self.intensity = copy.deepcopy(self.file.intensity)
     
+    # old function probably not needed anymore
     def shift_points(self, shift_x, shift_y, shift_z):
         self.x = self.file.x - shift_x
         self.y = self.file.y - shift_y
         self.z = self.file.z - shift_z
         self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
 
+    # remove the cropped points specified from the Cropping window
     def remove_cropped_points(self, selected):
         print('selected 2', selected)
         self.init_x = self.init_x[tuple(np.invert(selected))]
@@ -63,6 +76,7 @@ class Las_Data:
         self.green = self.green[tuple(np.invert(selected))]
         self.blue = self.blue[tuple(np.invert(selected))]
 
+    # update points after aligned in Alignment window
     def update_aligned_points(self, points):
         self.init_x = points[:,0]
         self.init_y = points[:,1]

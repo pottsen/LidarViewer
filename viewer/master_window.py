@@ -6,6 +6,9 @@ from file_manager import File_Manager
 import vispy.app
 import sys
 
+"""
+Master window initializes and holds all the other windows. Creates connections to the master file manager as well
+"""
 class Window(QtWidgets.QMainWindow):
     # resize = pyqtSignal()
     def __init__(self):

@@ -15,7 +15,7 @@ from vispy import scene
 from matplotlib import path
 from laspy.file import File
 
-
+# Function for rectangular select
 def rectangle_vertice(center, height, width):
     # Borrow from _generate_vertices in vispy/visuals/rectangle.py
 
@@ -64,16 +64,18 @@ def rectangle_vertice(center, height, width):
 class Scene(QtWidgets.QWidget):
     def __init__(self, grid, points, color, scene_type, keys='interactive'):
         super(Scene, self).__init__()
-        # Layout and canvas creation
-        box = QtWidgets.QVBoxLayout(self)
-        # self.resize(500, 500)
+        # add grid to scene so that it can access data
         self.grid = grid
-        # print('grid', self.grid)
+        
+        # Layout and canvas creation - this is a VisPy thing
+        box = QtWidgets.QVBoxLayout(self)
         self.setLayout(box)
         self.canvas = scene.SceneCanvas(keys=keys)
-        self.scene_type = scene_type
         box.addWidget(self.canvas.native)
-        self.total_selected = [False for i in points]
+
+        # marks scene type for stats pulling
+        self.scene_type = scene_type
+        # self.total_selected = [False for i in points]
 
         # Connect events
         self.canvas.events.mouse_press.connect(self.on_mouse_press)
@@ -84,16 +86,16 @@ class Scene(QtWidgets.QWidget):
         # Setup some defaults
         self.mesh = None
         self.selected = []
-        self.white = (1.0, 1.0, 1.0)#, 1.0)
-        self.black = (0.0, 0.0, 0.0)#, 0.0)
+        self.white = (1.0, 1.0, 1.0)
+        self.black = (0.0, 0.0, 0.0)
 
-        # Data
+        # Data - this is the passed in points
         self.data = points
         avg_x = np.average(self.data[:,0])
         avg_y = np.average(self.data[:,1])
         avg_z = np.average(self.data[:,2])
         
-        # Camera
+        # Camera - VisPy thing. Sets the camera to view the points
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = scene.cameras.TurntableCamera(#fov=45,
         elevation=-np.arctan(avg_z/avg_x)*360,
@@ -102,7 +104,8 @@ class Scene(QtWidgets.QWidget):
         distance=np.sqrt(avg_x**2+avg_y**2+avg_z**2),
         center=(avg_x, avg_y, avg_z))
 
-        # Add Plot
+        # Add Plot, setting color and point size
+        # Scatter = scatter plot
         self.base_facecolor = copy.deepcopy(color)
         self.facecolor = copy.deepcopy(color)
         self.ptsize = 3
@@ -136,12 +139,13 @@ class Scene(QtWidgets.QWidget):
         self.line = scene.visuals.Line(color='white', method='gl',
                                        parent=self.canvas.scene)
 
-        # select
+        # selection options and flag
         self.select_flag = False
         self.select_pool = {'1': 'lasso', '2': 'rectangle'}
         self.select_id = '2'  # default as 2
         self.select_origin = (0, 0)
 
+    # defines camera/view actions
     def event_connect(self, flag):
         cam_events = self.view.camera._viewbox.events
         cam_mouse_event = self.view.camera.viewbox_mouse_event
@@ -155,32 +159,33 @@ class Scene(QtWidgets.QWidget):
             cam_events.mouse_press.connect(cam_mouse_event)
             cam_events.mouse_release.connect(cam_mouse_event)
             cam_events.mouse_wheel.connect(cam_mouse_event)
-
+    
+    # mark the selected points a different color
     def mark_selected(self):
         # Change the color of the selected point
-        # print('changing color')
+        # facecolor is the point color
         self.facecolor = copy.deepcopy(self.base_facecolor)
-        # print('equal' , self.facecolor==self.base_facecolor)
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
 
+        # change color of selected points
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
 
+        # set color in plots
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
         self.scatter.update()
 
+        # gets the stats for the selected points
         if self.scene_type in ['depth', 'intensity']:
             if len(self.data[tuple(self.selected)]) > 0 and self.grid.stats_key != None:
                 if self.scene_type in ['depth']:
-                    stats = self.grid.get_depth_stats(self.data[tuple(self.selected)])#, self.scene_type) 
+                    stats = self.grid.get_depth_stats(self.data[tuple(self.selected)])
 
                 if self.scene_type in ['intensity']:
                     stats = self.grid.get_intensity_stats(self.selected)
                 
-                # add call to get snowdepth here
-                # get average x,y,z
                 self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[0]}')
                 self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- Max {self.scene_type}: {stats[1]}')
                 self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- Min {self.scene_type}: {stats[2]}')
@@ -195,8 +200,9 @@ class Scene(QtWidgets.QWidget):
                 self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- MIN: n/a')
                 self.stats_text4.text = str(f'Min Gd/IS, Avg Snow- AVG: n/a')
                 self.stats_text5.text = str(f'Min Gd/IS, Avg Snow- MAX: n/a')
-
-    def remove_selected_points(self):#, removal_points):
+    
+    # remove selected points
+    def remove_selected_points(self):
             if len(self.selected) > 0:
                 self.data = copy.deepcopy(self.data[tuple(np.invert(self.selected))])
                 self.base_facecolor = copy.deepcopy(self.base_facecolor[tuple(np.invert(self.selected))])
@@ -204,13 +210,14 @@ class Scene(QtWidgets.QWidget):
                 self.scatter.set_data(self.data, face_color=self.facecolor,
                                     size=self.ptsize)
                 self.scatter.update()
-                print('selected 1', self.selected)
-                # self.selected = []
+                # print('selected 1', self.selected)
             return self.selected
 
+    # clear seleted array
     def reset_selected(self):
         self.selected = []
 
+    # funtion to permanently mark points and change their color
     def permanently_mark_selected(self):
         for i in self.selected:
             self.base_facecolor[i] = [1.0, 1.0, 1.0]
@@ -218,6 +225,7 @@ class Scene(QtWidgets.QWidget):
                               size=self.ptsize)
         self.scatter.update()
 
+    # set action to do if user hits a certain key
     def on_key_press(self, event):
         # Set select_flag and instruction text
 
@@ -230,13 +238,14 @@ class Scene(QtWidgets.QWidget):
                     self.select_id = '2'
                     self.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
                                  
-
+    # set actions to do if user clickes mouse
     def on_mouse_press(self, event):
         # Realize picking functionality and set origin mouse pos
         
         if event.button == 1 and self.select_flag:
             self.select_origin = event.pos
 
+    # set action to do when user releases mouse click
     def on_mouse_release(self, event):
         # Identify selected points and mark them
 
@@ -262,6 +271,7 @@ class Scene(QtWidgets.QWidget):
             if self.select_id == '2':
                 self.select_origin = None
 
+    # set action for when user clicks and moves mouse
     def on_mouse_move(self, event):
         # Draw lasso/rectangle/ellipse shape with mouse dragging
 

@@ -63,7 +63,7 @@ class align_file_object(QWidget):
         self.setLayout(self.vertical_layout)
 
     def base_check_boxes(self):
-        ### function tied to 'Base' heckboxes
+        ### function tied to 'Base' checkboxes
         if self.base_checkbox.isChecked():
             self.manager.set_base_flags(self.file_path)
             self.alignment_checkbox.setEnabled(False)
@@ -138,10 +138,10 @@ class Manager:
             if self.file_list[i].file_path == file_path:
                 pop = self.file_list.pop(i)
                 print(pop.file_path)
-                # self.window.file_layout.takeAt(i)
                 self.clear_flags()
                 self.window.files_update()
                 break
+        # reload left dock
         self.window.left_dock()
         
 
@@ -160,12 +160,14 @@ class Manager:
             file_path = self.file_dict[key]
             if key == "Base":
                 # plot 'base' file
+                self.base_grid = []
                 self.base_grid = Grid(self)
                 self.base_grid.add_data('New Snow', self.file_manager.file_dict[file_path])
                 self.base_grid.make_grid()
                 self.base_grid.flag_vegetation()
                 self.base_grid.color_points('default', 'New Snow', 0, 0)
 
+                # Check color basis and create and scale color array
                 if self.window.color_basis == 'vegetation':
                     color = np.stack((self.file_manager.file_dict[file_path].plot_red/max(self.file_manager.file_dict[file_path].plot_red),
                     self.file_manager.file_dict[file_path].plot_green/max(self.file_manager.file_dict[file_path].plot_green), 
@@ -181,6 +183,7 @@ class Manager:
 
             if key == "Alignment":
                 # plot 'alignment' file
+                self.alignment_grid = []
                 self.alignment_grid = Grid(self)
                 self.alignment_grid.add_data('New Snow', self.file_manager.file_dict[file_path])
                 self.alignment_grid.make_grid()
@@ -267,8 +270,6 @@ class Manager:
         # apply rotation to get match
         for i in range(len(self.scene_2_matched_data)):
             self.scene_2_matched_data[i] = np.matmul(rotation, self.scene_2_matched_data[i]) + translation
-
-        # tpc.tie_point_error(self.window.scene_1.data, self.window.scene_2.data, self.window.scene_2_matched_data)
 
         # plot alignment points: base, original, and match in new window
         points = [self.scene_1_selected_areas, match, scene_2_selected_area_copy]

@@ -1,15 +1,13 @@
-from button_actions import *
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import *
 import vispy.app
 import sys
 from grid import Grid
-from alignment_manager import Manager, file_object
+from alignment_manager import Manager, align_file_object
 import numpy as np
 import ICP_algorithm as ia
-# from scene import DemoScene
 
-class Window(QMainWindow):
-    # resize = pyqtSignal()
+class Window(QtWidgets.QMainWindow):
     def __init__(self, file_manager):
         super(Window, self).__init__()
         # pointer to alignment manager
@@ -24,43 +22,43 @@ class Window(QMainWindow):
 
 
     def initInterface(self):
-        # self.setWindowTitle("Lidar Snow Depth Calculator")
-        
         # initialize left dock/side of window
-        self.leftDock = QDockWidget('Data Options', self)
-        self.leftDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.leftDock = QtWidgets.QDockWidget('Data Options', self)
+        self.leftDock.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.leftDock.setAcceptDrops(False)
         self.left_dock()
 
         # initialze bottom dock/side of window
-        self.bottomDock = QDockWidget('Output', self)
+        self.bottomDock = QtWidgets.QDockWidget('Output', self)
         self.bottomDock.setAcceptDrops(False)
-        self.bottomDock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
+        self.bottomDock.setFeatures(QtWidgets.QDockWidget.DockWidgetFloatable | QtWidgets.QDockWidget.DockWidgetMovable)
         self.bottom_dock()
 
         # initialize main panel
         self.main_panel()
 
     def files_update(self):
+        # reload dock after loading file
         self.left_dock()
         if len(self.manager.file_list) > 1:
             self.add_match_area_button.setEnabled(True)
 
     def left_dock(self):
         # initialize needed layouts
-        self.left_dock_widget_layout = QVBoxLayout()
-        self.data_widget_layout = QVBoxLayout()
+        self.left_dock_widget_layout = QtWidgets.QVBoxLayout()
+        self.data_widget_layout = QtWidgets.QVBoxLayout()
 
         """
         Left data widget. Button to load in data and check boxes for files
         """
-        self.plot_widget_layout = QVBoxLayout()
-        self.load_file_button = QPushButton("Load Data")
+        # widget to contain file objects from manager
+        self.plot_widget_layout = QtWidgets.QVBoxLayout()
+        self.load_file_button = QtWidgets.QPushButton("Load Data")
         self.load_file_button.clicked.connect(self.click_load_file_button)
         self.data_widget_layout.addWidget(self.load_file_button)
 
-        self.file_box = QWidget()
-        self.file_layout = QVBoxLayout()
+        self.file_box = QtWidgets.QWidget()
+        self.file_layout = QtWidgets.QVBoxLayout()
         
         for i in range(len(self.manager.file_list)):
             self.file_layout.addWidget(self.manager.file_list[i])
@@ -68,7 +66,7 @@ class Window(QMainWindow):
         self.file_box.setLayout(self.file_layout)
         self.data_widget_layout.addWidget(self.file_box)
 
-        self.data_widget = QWidget()
+        self.data_widget = QtWidgets.QWidget()
         self.data_widget.setLayout(self.data_widget_layout)
         self.left_dock_widget_layout.addWidget(self.data_widget)
 
@@ -76,11 +74,11 @@ class Window(QMainWindow):
         Left algorithm widget. Contains actions for the window
         """
         # initialize layout
-        self.alg_widget_layout = QVBoxLayout()
+        self.alg_widget_layout = QtWidgets.QVBoxLayout()
 
         # color selection for alignment plot
-        self.color_checkbox_layout = QHBoxLayout()
-        self.color_basis_label = QLabel('Color By:')
+        self.color_checkbox_layout = QtWidgets.QHBoxLayout()
+        self.color_basis_label = QtWidgets.QLabel('Color By:')
         self.color_default_checkbox = QCheckBox('Default')
         self.color_default_checkbox.stateChanged.connect(lambda:self.set_color_basis_default())
         self.color_default_checkbox.setEnabled(False)
@@ -90,32 +88,32 @@ class Window(QMainWindow):
         self.color_checkbox_layout.addWidget(self.color_basis_label)
         self.color_checkbox_layout.addWidget(self.color_default_checkbox)
         self.color_checkbox_layout.addWidget(self.color_vegetation_checkbox)
-        self.color_checkbox_widget = QWidget()
+        self.color_checkbox_widget = QtWidgets.QWidget()
         self.color_checkbox_widget.setLayout(self.color_checkbox_layout)
         self.alg_widget_layout.addWidget(self.color_checkbox_widget)
 
         # 'Add Match Area' Button --  Plots scans to select points for alignemnt or run on cliffs and trees as default
-        self.add_match_area_button = QPushButton("Add Match Area")
+        self.add_match_area_button = QtWidgets.QPushButton("Add Match Area")
         self.add_match_area_button.clicked.connect(self.click_add_match_area_button)
         self.add_match_area_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.add_match_area_button)
 
-        # 'SelectPoints' Button -- Select points for alignment if desired
-        self.select_points_button = QPushButton("Select Points")
+        # 'Select Points' Button -- Select points for alignment if desired
+        self.select_points_button = QtWidgets.QPushButton("Select Points")
         self.select_points_button.setCheckable(True)
         self.select_points_button.clicked.connect(self.click_select_points_button)
         self.select_points_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.select_points_button)
 
         # 'Set Match Area' Button --  adds selected points to list of points to match on
-        self.set_match_area_button = QPushButton("Set Match Area")
+        self.set_match_area_button = QtWidgets.QPushButton("Set Match Area")
         self.set_match_area_button.clicked.connect(self.click_set_match_area_button)
         self.set_match_area_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.set_match_area_button)
 
         # alignment selection for alignment algorithm
-        self.alignment_checkbox_layout = QHBoxLayout()
-        self.alignment_basis_label = QLabel('Align By:')
+        self.alignment_checkbox_layout = QtWidgets.QHBoxLayout()
+        self.alignment_basis_label = QtWidgets.QLabel('Align By:')
         self.alignment_default_checkbox = QCheckBox('Cliffs/Veg')
         self.alignment_default_checkbox.stateChanged.connect(lambda:self.set_alignment_basis_default())
         self.alignment_default_checkbox.setEnabled(False)
@@ -126,42 +124,42 @@ class Window(QMainWindow):
         self.alignment_checkbox_layout.addWidget(self.alignment_default_checkbox)
         self.alignment_checkbox_layout.addWidget(self.alignment_selection_checkbox)
 
-        self.alignment_checkbox_widget = QWidget()
+        self.alignment_checkbox_widget = QtWidgets.QWidget()
         self.alignment_checkbox_widget.setLayout(self.alignment_checkbox_layout)
         self.alg_widget_layout.addWidget(self.alignment_checkbox_widget)
 
-        # 'Run Alignemnt' Button -- runs alignemnt on the selected points
-        self.run_alignment_button = QPushButton("Run Alignment")
+        # 'Run Alignment' Button -- runs alignemnt on the selected points
+        self.run_alignment_button = QtWidgets.QPushButton("Run Alignment")
         self.run_alignment_button.clicked.connect(self.click_run_alignment_button)
         self.run_alignment_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.run_alignment_button)
 
         # 'Set Alignment' Button -- accepts the determined alignment after running the match
-        self.set_alignment_button = QPushButton("Set Alignment")
+        self.set_alignment_button = QtWidgets.QPushButton("Set Alignment")
         self.set_alignment_button.clicked.connect(self.click_set_alignment_button)
         self.set_alignment_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.set_alignment_button)
 
         # 'Save Match' Button -- save newly aligned scan to a new file for later use
-        self.save_match_button = QPushButton("Save Match")
+        self.save_match_button = QtWidgets.QPushButton("Save Match")
         self.save_match_button.clicked.connect(self.click_save_match_button)
         self.save_match_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.save_match_button)
 
         # 'Reset/Clear' Button -- clear window and scans. Don't save any changes
-        self.reset_button = QPushButton("Reset/Clear")
+        self.reset_button = QtWidgets.QPushButton("Reset/Clear")
         self.reset_button.clicked.connect(self.click_reset_button)
         self.alg_widget_layout.addWidget(self.reset_button)
         
         # Add algorithms layout to widget
-        self.alg_widget = QWidget()
+        self.alg_widget = QtWidgets.QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
         self.left_dock_widget_layout.addWidget(self.alg_widget)
 
         """
         Make left dock widget.
         """
-        self.left_dock_widget = QWidget()
+        self.left_dock_widget = QtWidgets.QWidget()
         self.left_dock_widget.setLayout(self.left_dock_widget_layout)
         self.leftDock.setWidget(self.left_dock_widget)
         
@@ -176,7 +174,6 @@ class Window(QMainWindow):
         ##### MAIN PLOT WIDGET
         # Create Tab widget for plots
         self.plot_widgets = QTabWidget()
-
         self.plot_widgets.tabBar().setObjectName("mainTab")
         self.setCentralWidget(self.plot_widgets)
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.leftDock)
@@ -295,14 +292,10 @@ class Window(QMainWindow):
                 print(self.manager.scene_1_selected_areas)
                 self.manager.scene_2_selected_areas = np.concatenate(self.manager.scene_2_selected_areas)
                 print(self.manager.scene_2_selected_areas)
-                # self.manager.run_alignment()
-                # self.set_alignment_button.setEnabled(True)
-                # self.save_match_button.setEnabled(True)
             else:
                 self.message_window.append('Please select points in both scans.')
                 return
 
-        # if self.alignment_basis == 'default':
         self.manager.run_alignment()
         self.set_alignment_button.setEnabled(True)
         self.save_match_button.setEnabled(True)

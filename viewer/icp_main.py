@@ -1,3 +1,7 @@
+"""
+OLD CODE
+"""
+
 from ICP_window import Window
 import vispy.app
 from PyQt5.QtWidgets import QApplication, QMainWindow

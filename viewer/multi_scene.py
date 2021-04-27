@@ -4,6 +4,7 @@
     Controls:
     * 1 - free lasso select
     * 2 - rectangle select
+    *** Ellipse and point are commented out ***
     * 3 - ellipse select
     * 4 - point picking
     press again to switch between select and view mode
@@ -18,7 +19,7 @@ from vispy import scene
 from matplotlib import path
 from laspy.file import File
 
-
+# Function for rectangular select
 def rectangle_vertice(center, height, width):
     # Borrow from _generate_vertices in vispy/visuals/rectangle.py
 
@@ -98,10 +99,12 @@ def ellipse_vertice(center, radius, start_angle, span_angle, num_segments):
     return vertices[:-1]
 
 """
+
+# Class for displaying multiple scans at once. Used in the alignment window
 class Multi_Scene(QtWidgets.QWidget):
     def __init__(self, points, color, title, keys='interactive'):
         super(Multi_Scene, self).__init__()
-        # Layout and canvas creation
+        # Layout and canvas creation - this is a VisPy thing
         box = QtWidgets.QVBoxLayout(self)
         self.setLayout(box)
         self.canvas = scene.SceneCanvas(keys=keys)
@@ -118,16 +121,17 @@ class Multi_Scene(QtWidgets.QWidget):
         self.mesh = None
         self.selected = []
 
-        # Data
+        # Data - this is the passed in points
+        # Points will be an array of point arrays for the multi-scene
         self.data = points
         avg_x = np.average(self.data[0][:,0])
         avg_y = np.average(self.data[0][:,1])
         avg_z = np.average(self.data[0][:,2])
 
-        # Color
+        # Color - Pass in array of RGB values for each point set or a default VisPy color designation ('red', 'blue', etc)
         self.color = color
         
-        # Camera
+        # Camera - VisPy thing. Sets the camera to view the points
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = scene.cameras.TurntableCamera(#fov=45,
         elevation=-np.arctan(avg_z/avg_x)*360,
@@ -137,6 +141,7 @@ class Multi_Scene(QtWidgets.QWidget):
         center=(avg_x, avg_y, avg_z))
 
         # Add Plot
+        # Scatter = scatter plot
         self.scatter = []
         for i in range(len(self.data)):
             data = self.data[i]
@@ -169,12 +174,13 @@ class Multi_Scene(QtWidgets.QWidget):
         self.line = scene.visuals.Line(color='white', method='gl',
                                        parent=self.canvas.scene)
 
-        # select
+        # selection options and flag
         self.select_flag = False
         self.select_pool = {'1': 'lasso', '2': 'rectangle'}
         self.select_id = '2'  # default as 2
         self.select_origin = (0, 0)
 
+    # defines camera/view actions
     def event_connect(self, flag):
         cam_events = self.view.camera._viewbox.events
         cam_mouse_event = self.view.camera.viewbox_mouse_event
@@ -189,22 +195,24 @@ class Multi_Scene(QtWidgets.QWidget):
             cam_events.mouse_release.connect(cam_mouse_event)
             cam_events.mouse_wheel.connect(cam_mouse_event)
 
+    # mark the selected points a different color
     def mark_selected(self):
         # Change the color of the selected point
-        # print('changing color')
+        # facecolor is the point color
         self.facecolor = copy.deepcopy(self.base_facecolor)
-        # print('equal' , self.facecolor==self.base_facecolor)
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
 
+        # change color of selected points
         for i in self.selected:
             self.facecolor[i] = [1.0, 0.0, 1.0]
 
-
+        # set color in plots
         self.scatter.set_data(self.data, face_color=self.facecolor,
                               size=self.ptsize)
         self.scatter.update()
 
+        # Get stats if snow depth scene
         if self.scene_type == 'Depth':
             if len(self.data[tuple(self.selected)]) > 0 and self.grid.snow_depth_key != None:
                 stats = self.grid.get_stats(self.data[tuple(self.selected)]) 
@@ -222,6 +230,7 @@ class Multi_Scene(QtWidgets.QWidget):
         if self.scene_type == 'ICP':
             pass
 
+    # funtion to permanently mark points and change their color
     def permanently_mark_selected(self):
         for i in self.selected:
             self.base_facecolor[i] = [1.0, 1.0, 1.0]
@@ -229,6 +238,7 @@ class Multi_Scene(QtWidgets.QWidget):
                               size=self.ptsize)
         self.scatter.update()
 
+    # set action to do if user hits a certain key
     def on_key_press(self, event):
         # Set select_flag and instruction text
 
@@ -241,13 +251,14 @@ class Multi_Scene(QtWidgets.QWidget):
                     self.select_id = '2'
                     self.text.text = 'In rectangular select mode, press 1 to switch to lasso select'
                                  
-
+    # set actions to do if user clickes mouse
     def on_mouse_press(self, event):
         # Realize picking functionality and set origin mouse pos
         
         if event.button == 1 and self.select_flag:
             self.select_origin = event.pos
 
+    # set action to do when user releases mouse click
     def on_mouse_release(self, event):
         # Identify selected points and mark them
 
@@ -260,7 +271,6 @@ class Multi_Scene(QtWidgets.QWidget):
             select_path = path.Path(self.line_pos, closed=True)
             mask = [select_path.contains_points(data)]
 
-            # if len(self.data[tuple(mask)]) > 0:
             self.selected = mask
             self.mark_selected()
 
@@ -272,7 +282,8 @@ class Multi_Scene(QtWidgets.QWidget):
 
             if self.select_id == '2':
                 self.select_origin = None
-
+    
+    # set action for when user clicks and moves mouse
     def on_mouse_move(self, event):
         # Draw lasso/rectangle/ellipse shape with mouse dragging
 
@@ -288,9 +299,3 @@ class Multi_Scene(QtWidgets.QWidget):
                           height/2.+self.select_origin[1], 0)
                 self.line_pos = rectangle_vertice(center, height, width)
                 self.line.set_data(np.array(self.line_pos))
-
-# if __name__ == '__main__':
-#     appQt = QtWidgets.QApplication(sys.argv)
-#     view = DemoScene(keys='interactive')
-#     view.show()
-#     appQt.exec_()

@@ -1,4 +1,5 @@
 class Point_Class():
+    # store pertinent data of the point
     def __init__(self, index, x, y, z, red, green, blue, intensity):
         self.index = index
         self.x = x
