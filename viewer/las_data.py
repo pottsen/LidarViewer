@@ -60,8 +60,8 @@ class Las_Data:
         self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
 
     # remove the cropped points specified from the Cropping window
+    # init_xyz tracks cropping changes
     def remove_cropped_points(self, selected):
-        print('selected 2', selected)
         self.init_x = self.init_x[tuple(np.invert(selected))]
         self.init_y = self.init_y[tuple(np.invert(selected))]
         self.init_z = self.init_z[tuple(np.invert(selected))]
@@ -77,12 +77,20 @@ class Las_Data:
         self.blue = self.blue[tuple(np.invert(selected))]
 
     # update points after aligned in Alignment window
+    # init_xyz keeps original with cropping changes
     def update_aligned_points(self, points):
-        self.init_x = points[:,0]
-        self.init_y = points[:,1]
-        self.init_z = points[:,2]
-        self.init_xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
+        # self.init_x = points[:,0]
+        # self.init_y = points[:,1]
+        # self.init_z = points[:,2]
+        # self.init_xyz = np.transpose(np.stack((self.init_x, self.init_y, self.init_z)))
         self.x = points[:,0]
         self.y = points[:,1]
         self.z = points[:,2]
+        self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))
+
+    # reverts back to original alignent with cropped points
+    def reset_aligned_points(self):
+        self.x = copy.deepcopy(self.init_x)
+        self.y = copy.deepcopy(self.init_y)
+        self.z = copy.deepcopy(self.init_z)
         self.xyz = np.transpose(np.stack((self.x, self.y, self.z)))

@@ -219,6 +219,10 @@ class Window(QtWidgets.QMainWindow):
             self.message_window.append("Please select 2 files.")
             return
         
+        if not self.color_default_checkbox.isChecked() and not self.color_vegetation_checkbox.isChecked():
+            self.message_window.append("Please select color basis.")
+            return
+
         # initialize/reset selected areas
         self.manager.scene_1_selected_areas = []
         self.manager.scene_2_selected_areas = []
@@ -279,7 +283,7 @@ class Window(QtWidgets.QMainWindow):
             self.run_alignment_button.setEnabled(True)
             
         if not self.alignment_selection_checkbox.isChecked():
-            self.alignment_basis = 'selection'
+            self.alignment_basis = 'default'
             self.alignment_default_checkbox.setChecked(False)
             self.alignment_default_checkbox.setEnabled(True)
             self.run_alignment_button.setEnabled(False)
@@ -313,7 +317,7 @@ class Window(QtWidgets.QMainWindow):
 
     def click_reset_button(self):
         # reset everything in window
-        self.manager.file_manager.reset_files()
+        self.manager.file_manager.reset_files_alignment(self.manager.file_dict['Alignment'])
         self.plot_widgets.clear()
         self.select_points_button.setChecked(False)
         self.select_points_button.setEnabled(False)
