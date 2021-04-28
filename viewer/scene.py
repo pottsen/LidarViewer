@@ -182,8 +182,7 @@ class Scene(QtWidgets.QWidget):
             if len(self.data[tuple(self.selected)]) > 0 and self.grid.stats_key != None:
                 if self.scene_type in ['depth']:
                     stats = self.grid.get_depth_stats(self.data[tuple(self.selected)])
-                    print('Stats', stats)
-
+                    # print('Stats', stats)
                     self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[0]}')
                     self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- Max {self.scene_type}: {stats[1]}')
                     self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- Min {self.scene_type}: {stats[2]}')

@@ -133,7 +133,7 @@ class Manager:
         self.window.left_dock()
         # enable functions in window
         if len(self.file_list) > 0:
-            self.window.vegetation_button.setEnabled(True)
+            self.window.vegetation_and_depth_button.setEnabled(True)
 
     def remove_file_from_manager(self, file_path):
         # remove file from master manager
