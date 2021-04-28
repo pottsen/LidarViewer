@@ -202,7 +202,7 @@ class Manager:
             for key in average_depths:
                 self.window.message_window.append("New snow scan has a depth of " + str(round(average_depths[key]*3.28, 3)) + " feet to " + str(key) + " scan.")
         else:
-            self.window.message_window.append("Please select files.")
+            self.window.message_window.append("Please select a second file for snow depth calculation.")
 
     def color_and_plot_points(self, color_basis, scan_basis, upper_bound, lower_bound):
         # color the points in the scan by the selected basis and plot 
@@ -230,6 +230,8 @@ class Manager:
             max_bound, min_bound = self.grid.get_max_and_min_intensity(scan_basis)
 
         if color_basis == 'depth':
+            if scan_basis == 'New Snow':
+                return '-', '-'
             max_bound, min_bound = self.grid.get_max_and_min_depth(scan_basis)
         return max_bound, min_bound
 

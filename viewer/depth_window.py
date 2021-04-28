@@ -264,7 +264,7 @@ class Window(QtWidgets.QMainWindow):
             self.intSnow_basis_checkbox.setEnabled(True)
 
             self.new_snow_basis_checkbox.setChecked(False)
-            self.new_snow_basis_checkbox.setEnabled(False)
+            self.new_snow_basis_checkbox.setEnabled(True)
 
         # enable/disable check boxes for intensity color basis    
         if not self.snowdepth_basis_checkbox.isChecked():
