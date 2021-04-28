@@ -81,12 +81,6 @@ class Window(QtWidgets.QMainWindow):
         self.vegetation_and_depth_button.setEnabled(False)
         self.alg_widget_layout.addWidget(self.vegetation_and_depth_button)
 
-        # # calculate snow depth button
-        # self.calculate_snowdepth_button = QtWidgets.QPushButton("Calculate Snow Depth")
-        # self.calculate_snowdepth_button.clicked.connect(self.click_snowdepth_button)
-        # self.calculate_snowdepth_button.setEnabled(False)
-        # self.alg_widget_layout.addWidget(self.calculate_snowdepth_button)
-
         self.alg_widget = QtWidgets.QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
         self.left_dock_widget_layout.addWidget(self.alg_widget)
@@ -431,9 +425,7 @@ class Window(QtWidgets.QMainWindow):
         self.new_snow_basis_checkbox.setCheckState(False)
         self.new_snow_basis_checkbox.setEnabled(False) 
 
-        flag = self.manager.make_grid()  
-        # self.calculate_snowdepth_button.setEnabled(flag)
-        self.plot_button.setEnabled(True)   
+        flag = self.manager.make_grid()     
 
         # Calculate Depth Actions
         self.manager.calculate_snow_depth()
@@ -441,17 +433,9 @@ class Window(QtWidgets.QMainWindow):
         self.snowdepth_basis_checkbox.setEnabled(True)
         max_bound, min_bound = self.manager.reset_basis_info()
         self.max_label_value.setText(str(max_bound))
-        self.min_label_value.setText(str(min_bound))  
+        self.min_label_value.setText(str(min_bound)) 
 
-    # def click_snowdepth_button(self):
-    #     # button action to run the snow depth algorithm
-    #     self.manager.calculate_snow_depth()
-    #     self.intensity_basis_checkbox.setEnabled(True)
-    #     self.snowdepth_basis_checkbox.setEnabled(True)
-    #     max_bound, min_bound = self.manager.reset_basis_info()
-    #     self.max_label_value.setText(str(max_bound))
-    #     self.min_label_value.setText(str(min_bound))
-
+        self.plot_button.setEnabled(True) 
 
     def click_plot_button(self):
         # button action to plot the scans
