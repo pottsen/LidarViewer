@@ -118,16 +118,16 @@ class Scene(QtWidgets.QWidget):
         # Add a text instruction
         self.text = scene.visuals.Text('', pos=(self.canvas.size[0],  20),
                                        color='w', parent=self.canvas.scene)
-        self.stats_text = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33+font_size*1.33*0.5)),
+        self.stats_text = scene.visuals.Text('', pos=(self.canvas.size[0]/2.5,  int(font_size*1.33+font_size*1.33*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text2 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*2+font_size*1.33*2*0.5)),
+        self.stats_text2 = scene.visuals.Text('', pos=(self.canvas.size[0]/2.5,  int(font_size*1.33*2+font_size*1.33*2*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*3+font_size*1.33*3*0.5)),
+        self.stats_text3 = scene.visuals.Text('', pos=(self.canvas.size[0]/2.5,  int(font_size*1.33*3+font_size*1.33*3*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
 
-        self.stats_text4 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0,  int(font_size*1.33*4+font_size*1.33*5*0.5)),
+        self.stats_text4 = scene.visuals.Text('', pos=(self.canvas.size[0]/2.5,  int(font_size*1.33*4+font_size*1.33*5*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
-        self.stats_text5 = scene.visuals.Text('', pos=(self.canvas.size[0]/3.0, int(font_size*1.33*5+font_size*1.33*6*0.5)),
+        self.stats_text5 = scene.visuals.Text('', pos=(self.canvas.size[0]/2.5, int(font_size*1.33*5+font_size*1.33*6*0.5)),
                                        color='w', bold = True, font_size = font_size, parent=self.canvas.scene)
         self.tr = self.scatter.node_transform(self.view)
 
@@ -178,28 +178,34 @@ class Scene(QtWidgets.QWidget):
         self.scatter.update()
 
         # gets the stats for the selected points
-        if self.scene_type in ['depth', 'intensity']:
+        if self.scene_type in ['depth', 'intensity'] and self.grid.color_basis not in ['default']:
             if len(self.data[tuple(self.selected)]) > 0 and self.grid.stats_key != None:
                 if self.scene_type in ['depth']:
                     stats = self.grid.get_depth_stats(self.data[tuple(self.selected)])
+                    # print('Stats', stats)
+                    self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[0]}')
+                    self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- Max {self.scene_type}: {stats[1]}')
+                    self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- Min {self.scene_type}: {stats[2]}')
+                    self.stats_text4.text = str(f'Min Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[3]}')
+                    self.stats_text5.text = str(f'Min Gd/IS, Avg Snow- Max {self.scene_type}: {stats[4]}')
 
-                if self.scene_type in ['intensity']:
+                elif self.scene_type in ['intensity']:
                     stats = self.grid.get_intensity_stats(self.selected)
                 
-                self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[0]}')
-                self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- Max {self.scene_type}: {stats[1]}')
-                self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- Min {self.scene_type}: {stats[2]}')
-                self.stats_text4.text = str(f'Min Gd/IS, Avg Snow- Avg {self.scene_type}: {stats[3]}')
-                self.stats_text5.text = str(f'Min Gd/IS, Avg Snow- Max {self.scene_type}: {stats[4]}')
+                    self.stats_text.text = str(f'Average Intensity {self.scene_type}: {stats[0]}')
+                    self.stats_text2.text = str(f'Max Intensity {self.scene_type}: {stats[1]}')
+                    self.stats_text3.text = str(f'Min Intensity {self.scene_type}: {stats[2]}')
+                    self.stats_text4.text = str(f'')
+                    self.stats_text5.text = str(f'')
 
 
                 
             else:
-                self.stats_text.text = str(f'Avg Gd/IS, Avg Snow- AVG: n/a')
-                self.stats_text2.text = str(f'Avg Gd/IS, Avg Snow- MAX: n/a')
-                self.stats_text3.text = str(f'Avg Gd/IS, Avg Snow- MIN: n/a')
-                self.stats_text4.text = str(f'Min Gd/IS, Avg Snow- AVG: n/a')
-                self.stats_text5.text = str(f'Min Gd/IS, Avg Snow- MAX: n/a')
+                self.stats_text.text = str(f'No Points Selected')
+                self.stats_text2.text = str(f'')
+                self.stats_text3.text = str(f'')
+                self.stats_text4.text = str(f'')
+                self.stats_text5.text = str(f'')
     
     # remove selected points
     def remove_selected_points(self):

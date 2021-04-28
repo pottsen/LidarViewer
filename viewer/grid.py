@@ -271,6 +271,7 @@ class Grid():
 
     # calculate and assign coloring values for the points
     def color_points(self, color_basis, scan_basis, upper_bound, lower_bound):
+        self.color_basis = color_basis
         # red, green, blue
         vegetation_color = [0, 65535, 0]
         negative_color = [0, 0, 65535]
@@ -278,15 +279,16 @@ class Grid():
         missing_point_color = [0, 45500, 0]
 
         # SET DEFAULT IF COLOR BASIS NOT SPECIFIED
-        if color_basis not in ['intensity', 'depth']:
-            color_basis = 'default'
+        if self.color_basis not in ['intensity', 'depth']:
+            self.color_basis = 'default'
             scan_basis = 'default'
             self.upper_bound = 0
             self.lower_bound = 0
 
+
         # SET DEFAULT IF SCAN BASIS NOT SPECIFIED
         if scan_basis not in ['Ground', 'Int. Snow', 'New Snow']:
-            color_basis = 'default'
+            self.color_basis = 'default'
             if self.files['New Snow'] != None:
                 scan_basis = 'New Snow'
             elif self.files['Ground'] != None:
@@ -297,6 +299,16 @@ class Grid():
                 print('No file selected to plot')
                 return 'No file selected to plot'
 
+        #  CHECK TO MAKE SURE SNOW DEPTH HAS BEEN CALCULATED
+        if scan_basis in ['Ground', 'Int. Snow'] and self.color_basis in ['depth']:
+            if self.snow_depth_array_dict[scan_basis] == []:
+                    self.color_basis = 'default'
+                    self.upper_bound = 0
+                    self.lower_bound = 0
+                    # scan_basis = 'default'
+
+
+        print(self.color_basis)
         # ALWAYS RESET COLORING TO ORIGINAL
         for key in [scan_basis, 'New Snow']:
             if self.files[key] != None:
@@ -305,7 +317,7 @@ class Grid():
                 self.files[key].plot_green = copy.deepcopy(self.files[key].green)
 
         # 'default' is grey with green vegetation
-        if color_basis == 'default':
+        if self.color_basis == 'default':
             for i in range(len(self.grid)):
                     for j in range(len(self.grid[0])):
                         if self.grid[i][j].vegetation_flag_dict[scan_basis]:
@@ -317,7 +329,7 @@ class Grid():
             print("Only coloring by vegetation and using default colors.")
 
         # color based on intensity
-        if color_basis == 'intensity':
+        if self.color_basis == 'intensity':
             print(f'Coloring: intensity scan basis {scan_basis}')
             intensities = self.files[scan_basis].intensity
             intensity_stdev = np.std(np.array(intensities))
@@ -368,7 +380,7 @@ class Grid():
                         self.files[scan_basis].plot_blue[i] = positive_color[2]
         
         # color based on depth
-        if color_basis == 'depth':
+        if self.color_basis == 'depth':
             if upper_bound != '':
                 self.upper_bound = float(upper_bound)
             else:
@@ -441,26 +453,27 @@ class Grid():
                                 self.files['New Snow'].plot_green[index] = int(abs((self.grid[i][j].depth_dict[scan_basis] - self.upper_bound)/(self.upper_bound))*65535 )
 
                                 self.files['New Snow'].plot_blue[index] = int(abs((self.grid[i][j].depth_dict[scan_basis] - self.upper_bound)/(self.upper_bound))*65535 )
-        xyz, rgb = self.get_coordinates_and_scale_color(color_basis, scan_basis)
+        xyz, rgb = self.get_coordinates_and_scale_color(self.color_basis, scan_basis)
+        print('UP', self.upper_bound)
         return xyz, rgb, round(self.upper_bound), round(self.lower_bound)
 
     def get_coordinates_and_scale_color(self, color_basis, scan_basis):
         self.stats_key = scan_basis
-        if color_basis in ['default', 'intensity']:
+        if self.color_basis in ['default', 'intensity']:
             rgb = np.stack((self.files[scan_basis].plot_red/max(self.files[scan_basis].plot_red), self.files[scan_basis].plot_green/max(self.files[scan_basis].plot_green), self.files[scan_basis].plot_blue/max(self.files[scan_basis].plot_blue)))
             rgb = np.transpose(rgb)
             print(rgb)
 
-            scene = Scene(self, self.files[scan_basis].xyz, rgb, color_basis)
+            scene = Scene(self, self.files[scan_basis].xyz, rgb, self.color_basis)
             
             return self.files[scan_basis].xyz, rgb
 
-        if color_basis == 'depth':
+        if self.color_basis == 'depth':
             snow_rgb = np.stack((self.files['New Snow'].plot_red/max(self.files['New Snow'].plot_red), self.files['New Snow'].plot_green/max(self.files['New Snow'].plot_green), self.files['New Snow'].plot_blue/max(self.files['New Snow'].plot_blue)))
             snow_rgb = np.transpose(snow_rgb)
             print(snow_rgb)
 
-            scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, color_basis)
+            scene = Scene(self, self.files['New Snow'].xyz, snow_rgb, self.color_basis)
 
             return self.files['New Snow'].xyz, snow_rgb
 

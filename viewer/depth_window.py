@@ -76,16 +76,10 @@ class Window(QtWidgets.QMainWindow):
         self.alg_widget_layout = QtWidgets.QVBoxLayout()
 
         # find vegetation button
-        self.vegetation_button = QtWidgets.QPushButton("Find Vegetation and Cliffs")
-        self.vegetation_button.clicked.connect(self.click_vegetation_button)
-        self.vegetation_button.setEnabled(False)
-        self.alg_widget_layout.addWidget(self.vegetation_button)
-
-        # calculate snow depth button
-        self.calculate_snowdepth_button = QtWidgets.QPushButton("Calculate Snow Depth")
-        self.calculate_snowdepth_button.clicked.connect(self.click_snowdepth_button)
-        self.calculate_snowdepth_button.setEnabled(False)
-        self.alg_widget_layout.addWidget(self.calculate_snowdepth_button)
+        self.vegetation_and_depth_button = QtWidgets.QPushButton("Find Vegetation/Cliffs and\n Calculate Snow Depth")
+        self.vegetation_and_depth_button.clicked.connect(self.click_vegetation_and_depth_button)
+        self.vegetation_and_depth_button.setEnabled(False)
+        self.alg_widget_layout.addWidget(self.vegetation_and_depth_button)
 
         self.alg_widget = QtWidgets.QWidget()
         self.alg_widget.setLayout(self.alg_widget_layout)
@@ -264,7 +258,7 @@ class Window(QtWidgets.QMainWindow):
             self.intSnow_basis_checkbox.setEnabled(True)
 
             self.new_snow_basis_checkbox.setChecked(False)
-            self.new_snow_basis_checkbox.setEnabled(False)
+            self.new_snow_basis_checkbox.setEnabled(True)
 
         # enable/disable check boxes for intensity color basis    
         if not self.snowdepth_basis_checkbox.isChecked():
@@ -412,9 +406,9 @@ class Window(QtWidgets.QMainWindow):
             self.message_window.append(" ")
 
         if len(self.manager.file_list) > 0:
-            self.vegetation_button.setEnabled(True)
+            self.vegetation_and_depth_button.setEnabled(True)
 
-    def click_vegetation_button(self):
+    def click_vegetation_and_depth_button(self):
         # button action to run the vegetation algorithm
         self.intensity_basis_checkbox.setCheckState(False)
         self.intensity_basis_checkbox.setEnabled(True)
@@ -431,19 +425,17 @@ class Window(QtWidgets.QMainWindow):
         self.new_snow_basis_checkbox.setCheckState(False)
         self.new_snow_basis_checkbox.setEnabled(False) 
 
-        flag = self.manager.make_grid()  
-        self.calculate_snowdepth_button.setEnabled(flag)
-        self.plot_button.setEnabled(flag)     
+        flag = self.manager.make_grid()     
 
-    def click_snowdepth_button(self):
-        # button action to run the snow depth algorithm
+        # Calculate Depth Actions
         self.manager.calculate_snow_depth()
         self.intensity_basis_checkbox.setEnabled(True)
         self.snowdepth_basis_checkbox.setEnabled(True)
         max_bound, min_bound = self.manager.reset_basis_info()
         self.max_label_value.setText(str(max_bound))
-        self.min_label_value.setText(str(min_bound))
+        self.min_label_value.setText(str(min_bound)) 
 
+        self.plot_button.setEnabled(True) 
 
     def click_plot_button(self):
         # button action to plot the scans
