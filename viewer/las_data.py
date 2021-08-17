@@ -8,8 +8,8 @@ class Las_Data:
     def __init__(self, file_path):
 
         ### Remove Duplicates If Needed
-        # cleaned_file = remove_duplicates(str(file_path))
-        # self.file = File(cleaned_file, mode = "r")
+        cleaned_file = remove_duplicates(str(file_path))
+        self.file = File(cleaned_file, mode = "r")
 
         # pull all pertinent data from the las file
         self.file =  File(file_path, mode = "r")
