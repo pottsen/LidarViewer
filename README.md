@@ -10,7 +10,7 @@ https://youtu.be/JCf_W-9abqg
 # LidarViewer
 
 ## Setup (Update 10/16/2021)
-Anaconda with python 3.7.3-4 is known to work. Laspy package needs to be version<2.0 as they made some changes that break functionality. The packages_list.txt has all the packages installed in the environment used for the software.  
+Anaconda with python 3.7.3-4 is known to work. Laspy package needs to be version<2.0 as they made some changes that break functionality. The package_list.txt has all the packages installed in the environment used for the software.  
 
 ### Known Issues:
 MacOS seems to have issues with the OpenGL library within Vispy, but I am not sure if this is an M1 chip issues or a general MacOS issue. A google search indicates a general MacOS issue. 
